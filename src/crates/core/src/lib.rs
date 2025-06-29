@@ -1,14 +1,17 @@
 use std::env;
 
-use crate::{clients::{atlantic::AtlanticClient, beacon_chain::BeaconRpcClient}, utils::config::BankaiConfig, db::Database};
+use crate::{
+    clients::{atlantic::AtlanticClient, beacon_chain::BeaconRpcClient},
+    db::Database,
+    utils::config::BankaiConfig,
+};
 
-pub mod fetcher;
-pub mod conversion;
 pub mod clients;
-pub mod utils;
+pub mod conversion;
 pub mod db;
+pub mod fetcher;
+pub mod utils;
 use dotenv::from_filename;
-
 
 #[derive(Debug)]
 pub struct BankaiClient {
@@ -27,7 +30,8 @@ impl BankaiClient {
             BankaiConfig::default()
         };
 
-        let db = Database::new(&config.database_url).await
+        let db = Database::new(&config.database_url)
+            .await
             .expect("Failed to initialize database");
 
         Self {

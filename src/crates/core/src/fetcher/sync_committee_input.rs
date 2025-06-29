@@ -1,7 +1,7 @@
 use alloy_primitives::FixedBytes;
+use beacon_state_proof::state_proof_fetcher::{StateProofFetcher, SyncCommitteeProof, TreeHash};
 use bls12_381::{G1Affine, G1Projective};
 use serde::{Deserialize, Serialize};
-use beacon_state_proof::state_proof_fetcher::{StateProofFetcher, SyncCommitteeProof, TreeHash};
 use sha2::{Digest, Sha256};
 use thiserror::Error;
 
@@ -39,7 +39,7 @@ impl SyncCommitteeData {
         let proof = state_proof_fetcher
             .fetch_next_sync_committee_proof(slot)
             .await?;
-        
+
         Ok(SyncCommitteeData::from(proof))
     }
 

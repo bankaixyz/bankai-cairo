@@ -1,9 +1,17 @@
-
-use cairo_runner::{recursive_epoch::{BeaconHeaderCairo, EpochUpdateCairo, ExecutionHeaderProofCairo, ExecutionPayloadHeaderCairo, RecursiveEpochInputsCairo, RecursiveEpochUpdateCairo, RecursiveEpochOutputsCairo, SyncCommitteeDataCairo}, types::{Felt, G1PointCairo, G2PointCairo, UInt384, Uint256, Uint256Bits32}};
+use cairo_runner::{
+    recursive_epoch::{
+        BeaconHeaderCairo, EpochUpdateCairo, ExecutionHeaderProofCairo,
+        ExecutionPayloadHeaderCairo, RecursiveEpochInputsCairo, RecursiveEpochOutputsCairo,
+        RecursiveEpochUpdateCairo, SyncCommitteeDataCairo,
+    },
+    types::{Felt, G1PointCairo, G2PointCairo, UInt384, Uint256, Uint256Bits32},
+};
 use cairo_vm::Felt252;
 use num_bigint::BigUint;
 
-use crate::fetcher::recursive_epoch_input::{EpochUpdate, G1Point, G2Point, RecursiveEpochInputs, RecursiveEpochOutput, RecursiveEpochUpdate};
+use crate::fetcher::recursive_epoch_input::{
+    EpochUpdate, G1Point, G2Point, RecursiveEpochInputs, RecursiveEpochOutput, RecursiveEpochUpdate,
+};
 use crate::fetcher::sync_committee_input::SyncCommitteeData;
 
 impl From<RecursiveEpochUpdate> for RecursiveEpochUpdateCairo {
@@ -18,12 +26,8 @@ impl From<RecursiveEpochUpdate> for RecursiveEpochUpdateCairo {
 impl From<RecursiveEpochOutput> for RecursiveEpochOutputsCairo {
     fn from(val: RecursiveEpochOutput) -> Self {
         RecursiveEpochOutputsCairo {
-            beacon_header_root: Uint256(BigUint::from_bytes_be(
-                val.beacon_header_root.as_slice(),
-            )),
-            beacon_state_root: Uint256(BigUint::from_bytes_be(
-                val.beacon_state_root.as_slice(),
-            )),
+            beacon_header_root: Uint256(BigUint::from_bytes_be(val.beacon_header_root.as_slice())),
+            beacon_state_root: Uint256(BigUint::from_bytes_be(val.beacon_state_root.as_slice())),
             beacon_height: Felt(Felt252::from(val.beacon_height)),
             n_signers: Felt(Felt252::from(val.n_signers)),
             execution_header_root: Uint256(BigUint::from_bytes_be(
@@ -42,7 +46,6 @@ impl From<RecursiveEpochOutput> for RecursiveEpochOutputsCairo {
 
 impl From<RecursiveEpochInputs> for RecursiveEpochInputsCairo {
     fn from(val: RecursiveEpochInputs) -> Self {
-
         let sync_committee_update = val.sync_committee_update.map(|s| s.into());
         let output: Option<RecursiveEpochOutputsCairo> = val.stark_proof_output.map(|s| s.into());
 
@@ -82,22 +85,15 @@ impl From<EpochUpdate> for EpochUpdateCairo {
         let beacon_header = BeaconHeaderCairo {
             slot: Uint256(BigUint::from(val.header.slot)),
             proposer_index: Uint256(BigUint::from(val.header.proposer_index)),
-            parent_root: Uint256(BigUint::from_bytes_be(
-                val.header.parent_root.as_slice(),
-            )),
-            state_root: Uint256(BigUint::from_bytes_be(
-                val.header.state_root.as_slice(),
-            )),
-            body_root: Uint256(BigUint::from_bytes_be(
-                val.header.body_root.as_slice(),
-            )),
+            parent_root: Uint256(BigUint::from_bytes_be(val.header.parent_root.as_slice())),
+            state_root: Uint256(BigUint::from_bytes_be(val.header.state_root.as_slice())),
+            body_root: Uint256(BigUint::from_bytes_be(val.header.body_root.as_slice())),
         };
         let execution_header_proof: ExecutionHeaderProofCairo = ExecutionHeaderProofCairo {
             root: Uint256(BigUint::from_bytes_be(
                 val.execution_header_proof.root.as_slice(),
             )),
             path: val
-                
                 .execution_header_proof
                 .path
                 .iter()
@@ -106,13 +102,9 @@ impl From<EpochUpdate> for EpochUpdateCairo {
             leaf: Uint256(BigUint::from_bytes_be(
                 val.execution_header_proof.leaf.as_slice(),
             )),
-            index: Felt(Felt252::from(
-                val.execution_header_proof.index,
-            )),
+            index: Felt(Felt252::from(val.execution_header_proof.index)),
             execution_payload_header: ExecutionPayloadHeaderCairo(
-                val
-                    .execution_header_proof
-                    .execution_payload_header,
+                val.execution_header_proof.execution_payload_header,
             )
             .to_field_roots(),
         };
@@ -121,7 +113,6 @@ impl From<EpochUpdate> for EpochUpdateCairo {
             signature_point: val.signature_point.into(),
             aggregate_pub: val.aggregate_pub.into(),
             non_signers: val
-                
                 .non_signers
                 .iter()
                 .map(|n| n.clone().into())
@@ -159,7 +150,6 @@ impl From<EpochUpdate> for EpochUpdateCairo {
         inputs
     }
 }
-
 
 impl From<G1Point> for G1PointCairo {
     fn from(val: G1Point) -> Self {

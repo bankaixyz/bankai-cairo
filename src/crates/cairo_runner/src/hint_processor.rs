@@ -146,7 +146,7 @@ impl CustomHintProcessor {
         hints.insert(debug::PRINT_FELT.into(), debug::print_felt);
         hints.insert(debug::PRINT_STRING.into(), debug::print_string);
         hints.insert(debug::PRINT_UINT384.into(), debug::print_uint384);
-    
+
         hints.insert(
             hints::HINT_CHECK_FORK_VERSION.into(),
             hints::hint_check_fork_version,

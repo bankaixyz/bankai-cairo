@@ -4,13 +4,12 @@ use crate::{
     hint_processor::CustomHintProcessor,
     types::{Bytes32, Felt, G1PointCairo, G2PointCairo, UInt384, Uint256, Uint256Bits32},
 };
+use beacon_types::TreeHash;
 use beacon_types::{ExecutionPayloadHeader, MainnetEthSpec};
 use cairo_vm::{
     hint_processor::builtin_hint_processor::{
         builtin_hint_processor_definition::HintProcessorData,
-        hint_utils::{
-            get_ptr_from_var_name, get_relocatable_from_var_name,
-        },
+        hint_utils::{get_ptr_from_var_name, get_relocatable_from_var_name},
     },
     types::{exec_scope::ExecutionScopes, relocatable::Relocatable},
     vm::{errors::hint_errors::HintError, vm_core::VirtualMachine},
@@ -18,7 +17,6 @@ use cairo_vm::{
 };
 use garaga_zero::types::CairoType;
 use serde::Deserialize;
-use beacon_types::TreeHash;
 use serde_json::Value;
 
 #[derive(Debug, Deserialize)]
@@ -141,7 +139,6 @@ impl ExecutionPayloadHeaderCairo {
     }
 }
 
-
 #[derive(Debug, Deserialize)]
 pub struct SyncCommitteeDataCairo {
     pub beacon_slot: Felt,
@@ -195,14 +192,16 @@ impl CustomHintProcessor {
             None => 0,
         };
         vm.insert_value(is_committee_update_ptr, Felt252::from(is_committee_update))?;
-        
+
         let program_hash_ptr = get_relocatable_from_var_name(
             "program_hash",
             vm,
             &hint_data.ids_data,
             &hint_data.ap_tracking,
         )?;
-        let program_hash = Felt252::from_hex_unchecked("0x5b6ff167e72599c14a2e99cac4a6e8db3036db0f0d9acac15d5822ea315287a");
+        let program_hash = Felt252::from_hex_unchecked(
+            "0x5b6ff167e72599c14a2e99cac4a6e8db3036db0f0d9acac15d5822ea315287a",
+        );
         vm.insert_value(program_hash_ptr, program_hash)?;
 
         Ok(())
@@ -215,16 +214,20 @@ impl CustomHintProcessor {
         hint_data: &HintProcessorData,
         _constants: &HashMap<String, Felt252>,
     ) -> Result<(), HintError> {
-
         let expected_output_ptr = get_relocatable_from_var_name(
             "expected_proof_output",
             vm,
             &hint_data.ids_data,
             &hint_data.ap_tracking,
         )?;
-        
+
         // Now write the struct data to the new segment
-        let values = &self.recursive_epoch_update.inputs.stark_proof_output.as_ref().unwrap();
+        let values = &self
+            .recursive_epoch_update
+            .inputs
+            .stark_proof_output
+            .as_ref()
+            .unwrap();
 
         let mut current_ptr = expected_output_ptr;
         current_ptr = values.beacon_header_root.to_memory(vm, current_ptr)?;

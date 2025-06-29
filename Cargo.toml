@@ -4,6 +4,8 @@ members = [
     "src/crates/stone_verifier_hints",
     "src/crates/core",
     "src/crates/cli",
+    "src/crates/shikai",
+    "src/crates/api"
 ]
 exclude = ["tests"]
 resolver = "2"
@@ -36,9 +38,19 @@ stone-verifier-hints = { path = "src/crates/stone_verifier_hints" }
 cairo-runner = { path = "src/crates/cairo_runner" }
 bankai-core = { path = "src/crates/core" }
 cli = { path = "src/crates/cli" }
+decommit = { path = "src/crates/decommit" }
 
 alloy-primitives = "0.8.13"
-alloy-rpc-types-beacon = "0.7.2"
+alloy-rpc-types-beacon = "0.12.6"
+alloy-rpc-types = "0.12.6"
+alloy-provider = "0.12.6"
+alloy-network = "0.12.6"
+alloy-consensus = "0.12.6"
+alloy-rlp = "0.3.12"
+alloy-trie = "0.7.9"
+starknet-core = "0.14.0"
+url = "2.5.2"
+
 tree_hash = "0.8"
 tree_hash_derive = "0.8"
 itertools = "0.13.0"
@@ -56,3 +68,11 @@ clap = { version = "4.5.22", features = ["derive"] }
 tracing-subscriber = { version = "0.3.19", features = ["json"] }
 sqlx = { version = "0.7.0-alpha.1", features = ["runtime-tokio-rustls", "sqlite", "chrono", "migrate"] }
 uuid = { version = "1.0", features = ["v4"] }
+eth-trie-proofs = "0.1.2"
+swiftness_air = { git = "https://github.com/iosis-tech/swiftness", default-features = false, version = "1.0.0", features = ["dynamic", "stone6"] }
+swiftness_commitment = { git = "https://github.com/iosis-tech/swiftness", default-features = false, version = "1.0.0", features = ["blake2s_248_lsb"] }
+swiftness_fri = { git = "https://github.com/iosis-tech/swiftness", default-features = false, version = "1.0.0" }
+swiftness_pow = { git = "https://github.com/iosis-tech/swiftness", default-features = false, version = "1.0.0", features = ["blake2s"] }
+swiftness_stark = { git = "https://github.com/iosis-tech/swiftness", default-features = false, version = "1.0.0", features = ["dynamic"] }
+swiftness_transcript = { git = "https://github.com/iosis-tech/swiftness", default-features = false, version = "1.0.0" }
+swiftness_proof_parser = { git = "https://github.com/iosis-tech/swiftness", version = "1.0.0" }

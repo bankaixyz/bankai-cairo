@@ -66,7 +66,11 @@ pub fn run(path: &str, update: RecursiveEpochUpdateCairo) -> Result<CairoPie, Er
     Ok(pie)
 }
 
-pub fn run_stwo(path: &str, update: RecursiveEpochUpdateCairo, output_dir: &str) -> Result<(), Error> {
+pub fn run_stwo(
+    path: &str,
+    update: RecursiveEpochUpdateCairo,
+    output_dir: &str,
+) -> Result<(), Error> {
     let program = load_program(path)?;
     let cairo_run_config = cairo_run::CairoRunConfig {
         allow_missing_builtins: None, // Optional

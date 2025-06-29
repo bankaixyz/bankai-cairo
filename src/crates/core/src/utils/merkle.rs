@@ -196,7 +196,7 @@ pub(crate) mod poseidon {
 
         (root, paths)
     }
-    
+
     #[allow(dead_code)]
     pub fn hash_path(leaf: Felt, path: &[Felt], index: usize) -> Felt {
         let mut current_hash = leaf;

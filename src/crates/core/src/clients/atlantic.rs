@@ -87,18 +87,14 @@ impl AtlanticClient {
     ///
     /// # Returns
     /// * `Result<String, AtlanticError>` - The Atlantic query ID on success
-    pub async fn submit_stone(
-        &self,
-        pie: CairoPie,
-        name: String,
-    ) -> Result<String, AtlanticError> {
+    pub async fn submit_stone(&self, pie: CairoPie, name: String) -> Result<String, AtlanticError> {
         let pie_path = std::env::temp_dir().join(format!("{}.zip", name));
         pie.write_zip_file(&pie_path, true)?;
         let file = fs::File::open(pie_path.clone()).await?;
 
         // Get file metadata to determine total size
         let stream = ReaderStream::new(file);
-        let progress_stream = stream.map(|chunk| chunk);  // Simply pass through the chunks
+        let progress_stream = stream.map(|chunk| chunk); // Simply pass through the chunks
 
         let file_part = Part::stream(Body::wrap_stream(progress_stream))
             .file_name(

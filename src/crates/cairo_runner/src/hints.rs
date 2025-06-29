@@ -137,7 +137,8 @@ pub fn print_felt_hex(
     hint_data: &HintProcessorData,
     _constants: &HashMap<String, Felt252>,
 ) -> Result<(), HintError> {
-    let value = get_integer_from_var_name("value", vm, &hint_data.ids_data, &hint_data.ap_tracking)?;
+    let value =
+        get_integer_from_var_name("value", vm, &hint_data.ids_data, &hint_data.ap_tracking)?;
     println!("Value: {}", value.to_hex_string());
     Ok(())
 }
@@ -150,7 +151,8 @@ pub fn print_felt(
     hint_data: &HintProcessorData,
     _constants: &HashMap<String, Felt252>,
 ) -> Result<(), HintError> {
-    let value = get_integer_from_var_name("value", vm, &hint_data.ids_data, &hint_data.ap_tracking)?;
+    let value =
+        get_integer_from_var_name("value", vm, &hint_data.ids_data, &hint_data.ap_tracking)?;
     println!("Value: {}", value);
     Ok(())
 }
@@ -163,14 +165,16 @@ pub fn print_string(
     hint_data: &HintProcessorData,
     _constants: &HashMap<String, Felt252>,
 ) -> Result<(), HintError> {
-    let value = get_integer_from_var_name("value", vm, &hint_data.ids_data, &hint_data.ap_tracking)?;
+    let value =
+        get_integer_from_var_name("value", vm, &hint_data.ids_data, &hint_data.ap_tracking)?;
     let bytes = value.to_bytes_be();
     let ascii = String::from_utf8_lossy(&bytes);
     println!("String: {}", ascii);
     Ok(())
 }
 
-pub const PRINT_UINT256: &str = "print(f\"Uint256: {hex(ids.value.low + 128**2 * ids.value.high)}\")";
+pub const PRINT_UINT256: &str =
+    "print(f\"Uint256: {hex(ids.value.low + 128**2 * ids.value.high)}\")";
 
 pub fn print_uint256(
     vm: &mut VirtualMachine,
@@ -178,7 +182,10 @@ pub fn print_uint256(
     hint_data: &HintProcessorData,
     _constants: &HashMap<String, Felt252>,
 ) -> Result<(), HintError> {
-    let value = Uint256::from_memory(vm, get_relocatable_from_var_name("value", vm, &hint_data.ids_data, &hint_data.ap_tracking)?)?;
+    let value = Uint256::from_memory(
+        vm,
+        get_relocatable_from_var_name("value", vm, &hint_data.ids_data, &hint_data.ap_tracking)?,
+    )?;
     println!("Uint256: {}", value.0.to_str_radix(16));
     Ok(())
 }

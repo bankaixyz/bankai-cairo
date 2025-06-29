@@ -10,7 +10,10 @@ use tracing::warn;
 
 use beacon_types::{eth_spec::MainnetEthSpec, BeaconBlockBody, FullPayload};
 
-use crate::{fetcher::sync_committee_input::SyncCommitteeValidatorPubs, utils::{config::BankaiConfig, constants}};
+use crate::{
+    fetcher::sync_committee_input::SyncCommitteeValidatorPubs,
+    utils::{config::BankaiConfig, constants},
+};
 
 #[derive(Debug, Error)]
 pub enum BeaconError {
