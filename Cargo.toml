@@ -1,8 +1,6 @@
 [workspace]
 members = [
-    "crates/cairo_runner",
-    "crates/stone_verifier_hints",
-    "crates/core"
+    "crates/bankai_hints",
 ]
 exclude = ["tests"]
 resolver = "2"
@@ -13,7 +11,6 @@ serde = { version = "1.0.215", features = ["derive"] }
 serde_json = "1.0.133"
 
 # Cairo VM and Blockchain
-cairo-vm = { git = "https://github.com/lambdaclass/cairo-vm", tag = "v2.1.0", features = ["extensive_hints", "clap", "cairo-1-hints", "mod_builtin"] }
 beacon_types = { git = "https://github.com/petscheit/lighthouse.git", package = "types", rev = "2ef065a16"}
 beacon-state-proof = { git = "https://github.com/petscheit/beacon-state-proof", rev = "9dddb71f2b037d68097bf50c0a7b02229bf4c3e2" }
 
@@ -32,10 +29,6 @@ tracing = "0.1.41"
 # Local Deps
 garaga_zero_hints = { path = "cairo/packages/garaga-zero/hints/rust-vm" }
 stone-verifier-hints = { path = "src/crates/stone_verifier_hints" }
-cairo-runner = { path = "src/crates/cairo_runner" }
-bankai-core = { path = "src/crates/core" }
-cli = { path = "src/crates/cli" }
-decommit = { path = "src/crates/decommit" }
 
 alloy-primitives = "0.8.13"
 alloy-rpc-types-beacon = "0.12.6"

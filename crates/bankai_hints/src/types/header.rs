@@ -1,7 +1,7 @@
 use beacon_types::TreeHash;
 use beacon_types::{ExecutionPayloadHeader, MainnetEthSpec};
 use cairo_vm_base::types::{felt::Felt, uint256::Uint256, uint384::UInt384};
-
+use cairo_vm_base::cairo_type::BaseCairoType;
 
 pub struct ExecutionPayloadHeaderCairo(pub ExecutionPayloadHeader<MainnetEthSpec>);
 
