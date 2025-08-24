@@ -1,11 +1,8 @@
 [workspace]
 members = [
-    "src/crates/cairo_runner",
-    "src/crates/stone_verifier_hints",
-    "src/crates/core",
-    "src/crates/cli",
-    "src/crates/shikai",
-    "src/crates/api"
+    "crates/cairo_runner",
+    "crates/stone_verifier_hints",
+    "crates/core"
 ]
 exclude = ["tests"]
 resolver = "2"
