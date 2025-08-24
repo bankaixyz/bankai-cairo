@@ -1,7 +1,7 @@
 %builtins output pedersen range_check bitwise poseidon range_check96 add_mod mul_mod
 
 from starkware.cairo.common.cairo_builtins import PoseidonBuiltin, ModBuiltin, BitwiseBuiltin, HashBuiltin
-from cairo.src.verify_stone import verify_cairo_proof
+from starkware.cairo.stark_verifier.core.stark import StarkProof
 from starkware.cairo.common.uint256 import Uint256
 from starkware.cairo.common.memcpy import memcpy
 from starkware.cairo.common.registers import get_fp_and_pc
@@ -9,14 +9,14 @@ from starkware.cairo.common.builtin_poseidon.poseidon import poseidon_hash_many
 from starkware.cairo.common.alloc import alloc
 from definitions import UInt384
 
-from cairo.src.utils import pow2alloc128
+from cairo.src.recursion.stone import verify_stone_proof
+
 from sha import SHA256
 from debug import print_felt_hex, print_string
 from cairo.src.types import EpochUpdate, EpochUpdateOutput, CircuitOutput
-from cairo.src.verify_epoch import run_epoch_update
-from starkware.cairo.stark_verifier.core.stark import StarkProof
-from cairo.src.committee_update import run_committee_update
-from cairo.src.utils import felt_divmod
+from cairo.src.bls.verify_epoch import run_epoch_update
+from cairo.src.bls.committee_update import run_committee_update
+from cairo.src.utils.utils import felt_divmod, pow2alloc128
 
 const BOOTLOADER_PROGRAM_HASH = 0x5AB580B04E3532B6B18F81CFA654A05E29DD8E2352D88DF1E765A84072DB07;
 const SYNC_COMMITTEE_PERIOD = 8192;
@@ -202,7 +202,7 @@ func handle_recursive_case{
 
 
     %{ write_stark_proof_inputs() %}
-    let (proof_program_hash, output_hash) = verify_cairo_proof();
+    let (proof_program_hash, output_hash) = verify_stone_proof();
 
     print_string('output hash');
     print_felt_hex(output_hash);
