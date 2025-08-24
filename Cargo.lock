@@ -1087,7 +1087,7 @@ dependencies = [
 [[package]]
 name = "cairo-vm-base"
 version = "0.1.0"
-source = "git+https://github.com/bankaixyz/cairo-vm-base#9c1f1ce0a9010ad4e1239dd646bbb4caaac9812b"
+source = "git+https://github.com/bankaixyz/cairo-vm-base#c1163805d614d32c28d07018e215be9d52d84eb8"
 dependencies = [
  "alloy-primitives",
  "bincode",

@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-cairo-vm-base = { git = "https://github.com/bankaixyz/cairo-vm-base", features = ["serde"] }
+cairo-vm-base = { git = "https://github.com/bankaixyz/cairo-vm-base" }
 beacon_types.workspace = true
 thiserror.workspace = true
 serde.workspace = true

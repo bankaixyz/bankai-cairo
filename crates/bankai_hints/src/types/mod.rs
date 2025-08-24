@@ -1,10 +1,7 @@
 mod bls;
 mod header;
 
-use std::collections::HashMap;
-
 use cairo_vm_base::cairo_type::{CairoType, CairoWritable};
-use cairo_vm_base::types::serde_utils::{deserialize_from_any, deserialize_vec_from_string};
 use cairo_vm_base::types::{felt::Felt, uint256::Uint256, uint384::UInt384, uint256_32::Uint256Bits32};
 use cairo_vm_base::vm::cairo_vm::hint_processor::builtin_hint_processor::builtin_hint_processor_definition::HintProcessorData;
 use cairo_vm_base::vm::cairo_vm::hint_processor::builtin_hint_processor::hint_utils::{get_ptr_from_var_name, get_relocatable_from_var_name};
@@ -27,15 +24,10 @@ pub struct EpochUpdateCairo {
 
 #[derive(Debug, Deserialize)]
 pub struct BeaconHeaderCairo {
-    #[serde(deserialize_with = "deserialize_from_any")]
     pub slot: Uint256,
-    #[serde(deserialize_with = "deserialize_from_any")]
     pub proposer_index: Uint256,
-    #[serde(deserialize_with = "deserialize_from_any")]
     pub parent_root: Uint256,
-    #[serde(deserialize_with = "deserialize_from_any")]
     pub state_root: Uint256,
-    #[serde(deserialize_with = "deserialize_from_any")]
     pub body_root: Uint256,
 }
 
@@ -43,20 +35,22 @@ pub struct BeaconHeaderCairo {
 pub struct SignerDataCairo {
     pub aggregate_pub: G1PointCairo,
     pub non_signers: Vec<G1PointCairo>,
-    #[serde(deserialize_with = "deserialize_from_any")]
     pub n_non_signers: Felt,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct ExecutionHeaderProofCairo {
-    #[serde(deserialize_with = "deserialize_from_any")]
     pub root: Uint256,
-    #[serde(deserialize_with = "deserialize_vec_from_string")]
     pub path: Vec<Uint256Bits32>,
-    #[serde(deserialize_with = "deserialize_from_any")]
     pub leaf: Uint256,
-    #[serde(deserialize_with = "deserialize_from_any")]
     pub index: Felt,
-    #[serde(deserialize_with = "deserialize_vec_from_string")]
     pub execution_payload_header: Vec<Uint256>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct SyncCommitteeDataCairo {
+    pub beacon_slot: Felt,
+    pub next_sync_committee_branch: Vec<Uint256Bits32>,
+    pub next_aggregate_sync_committee: UInt384,
+    pub committee_keys_root: Uint256Bits32,
 }
