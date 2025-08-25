@@ -26,6 +26,43 @@ pub struct RecursiveEpochOutputsCairo {
     pub next_committee_hash: Uint256,
 }
 
+impl CairoWritable for RecursiveEpochOutputsCairo {
+    fn to_memory(
+        &self,
+        vm: &mut cairo_vm_base::vm::cairo_vm::vm::vm_core::VirtualMachine,
+        address: cairo_vm_base::vm::cairo_vm::types::relocatable::Relocatable,
+    ) -> Result<
+        cairo_vm_base::vm::cairo_vm::types::relocatable::Relocatable,
+        cairo_vm_base::vm::cairo_vm::vm::errors::hint_errors::HintError,
+    > {
+        let mut current_ptr = address;
+
+        current_ptr = self.beacon_header_root.to_memory(vm, current_ptr)?;
+        current_ptr = self.beacon_state_root.to_memory(vm, current_ptr)?;
+        current_ptr = self.beacon_height.to_memory(vm, current_ptr)?;
+        current_ptr = self.n_signers.to_memory(vm, current_ptr)?;
+        current_ptr = self.execution_header_root.to_memory(vm, current_ptr)?;
+        current_ptr = self.execution_header_height.to_memory(vm, current_ptr)?;
+        current_ptr = self.current_committee_hash.to_memory(vm, current_ptr)?;
+        current_ptr = self.next_committee_hash.to_memory(vm, current_ptr)?;
+
+        // Check that the memory layout is correct
+        let expected_ptr = (address + RecursiveEpochOutputsCairo::n_fields())?;
+        if current_ptr != expected_ptr {
+            return Err(cairo_vm_base::vm::cairo_vm::vm::errors::hint_errors::HintError::CustomHint(
+                format!("Memory layout mismatch for RecursiveEpochOutputsCairo: expected pointer at {expected_ptr}, but got {current_ptr}").into()
+            ));
+        }
+
+        Ok(current_ptr)
+    }
+
+    fn n_fields() -> usize {
+        Uint256::n_fields() * 5 + Felt::n_fields() * 3
+    }
+
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct RecursiveEpochInputsCairo {
     pub epoch_update: EpochUpdateCairo,
