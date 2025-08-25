@@ -1,5 +1,4 @@
-mod cairo_structs;
-mod types;
-mod vars;
-pub mod verifier_hints;
-mod verifier_utils;
+pub mod hints;
+pub mod types;
+pub mod verifier_utils;
+pub mod vars;

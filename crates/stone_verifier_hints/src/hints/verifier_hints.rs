@@ -1,22 +1,19 @@
-use cairo_vm::hint_processor::builtin_hint_processor::builtin_hint_processor_definition::HintProcessorData;
-use cairo_vm::hint_processor::builtin_hint_processor::hint_utils::{
+use cairo_vm_base::vm::cairo_vm::hint_processor::builtin_hint_processor::builtin_hint_processor_definition::HintProcessorData;
+use cairo_vm_base::vm::cairo_vm::hint_processor::builtin_hint_processor::hint_utils::{
     get_relocatable_from_var_name, insert_value_from_var_name,
 };
-use cairo_vm::types::relocatable::MaybeRelocatable;
-use cairo_vm::vm::vm_core::VirtualMachine;
-use cairo_vm::Felt252;
-use cairo_vm::{types::exec_scope::ExecutionScopes, vm::errors::hint_errors::HintError};
+use cairo_vm_base::vm::cairo_vm::types::relocatable::MaybeRelocatable;
+use cairo_vm_base::vm::cairo_vm::vm::vm_core::VirtualMachine;
+use cairo_vm_base::vm::cairo_vm::Felt252;
+use cairo_vm_base::vm::cairo_vm::{types::exec_scope::ExecutionScopes, vm::errors::hint_errors::HintError};
 use num_bigint::BigUint;
 use serde_json::from_value;
 use std::collections::HashMap;
 
-use super::verifier_utils::{extract_from_ids_and_public_input, gen_arg, get_program_identifies};
-use crate::cairo_structs::ToVec;
-use crate::types::{ExtractedProofValues, OwnedPublicInput};
-use crate::verifier_utils::{extract_proof_values, get_stark_proof_cairo_struct};
-
-use super::types::CairoVerifierInput;
-use super::vars::{PROGRAM_INPUT, PROGRAM_OBJECT};
+use crate::types::cairo_structs::ToVec;
+use crate::types::{CairoVerifierInput, ExtractedProofValues, OwnedPublicInput};
+use crate::vars::{PROGRAM_INPUT, PROGRAM_OBJECT};
+use crate::verifier_utils::{extract_from_ids_and_public_input, extract_proof_values, gen_arg, get_program_identifies, get_stark_proof_cairo_struct};
 
 /// Implements
 ///

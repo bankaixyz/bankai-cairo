@@ -1,8 +1,10 @@
+pub mod cairo_structs;
+
 use std::collections::HashMap;
 
-use cairo_vm::air_public_input::{MemorySegmentAddresses, PublicMemoryEntry};
-use cairo_vm::serde::deserialize_program::Identifier;
-use cairo_vm::Felt252;
+use cairo_vm_base::vm::cairo_vm::air_public_input::{MemorySegmentAddresses, PublicMemoryEntry};
+use cairo_vm_base::vm::cairo_vm::serde::deserialize_program::Identifier;
+use cairo_vm_base::vm::cairo_vm::Felt252;
 use serde::{Deserialize, Serialize};
 
 pub(crate) type ProgramIdentifiers = HashMap<String, Identifier>;

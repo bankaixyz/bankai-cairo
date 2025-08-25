@@ -1,4 +1,4 @@
-use cairo_vm::{
+use cairo_vm_base::vm::cairo_vm::{
     air_public_input::{MemorySegmentAddresses, PublicMemoryEntry},
     serde::deserialize_program::Identifier,
     types::{
@@ -16,10 +16,9 @@ use cairo_vm::{
 use serde_json::Value as JsonValue;
 use std::{any::Any, collections::HashMap};
 
-use crate::types::ProgramIdentifiers;
+use crate::types::{cairo_structs::*, ProgramIdentifiers};
 
 use super::{
-    cairo_structs::*,
     types::{ExtractedIDsAndInputValues, ExtractedProofValues, OwnedPublicInput},
     vars::COMPONENT_HEIGHT,
 };
