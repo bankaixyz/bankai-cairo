@@ -2,7 +2,9 @@ mod bls;
 mod header;
 
 use cairo_vm_base::cairo_type::{CairoType, CairoWritable};
-use cairo_vm_base::types::{felt::Felt, uint256::Uint256, uint384::UInt384, uint256_32::Uint256Bits32};
+use cairo_vm_base::types::{
+    felt::Felt, uint256::Uint256, uint256_32::Uint256Bits32, uint384::UInt384,
+};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -60,14 +62,13 @@ impl CairoWritable for RecursiveEpochOutputsCairo {
     fn n_fields() -> usize {
         Uint256::n_fields() * 5 + Felt::n_fields() * 3
     }
-
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct RecursiveEpochInputsCairo {
     pub epoch_update: EpochUpdateCairo,
     pub sync_committee_update: Option<SyncCommitteeDataCairo>,
-    pub stark_proof: Option<Value>, // this is the stark proof of the previous epoch update
+    pub stone_proof: Option<Value>, // this is the stark proof of the previous epoch update
     pub stark_proof_output: Option<RecursiveEpochOutputsCairo>,
 }
 

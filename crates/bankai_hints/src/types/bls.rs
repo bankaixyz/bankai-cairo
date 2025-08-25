@@ -1,7 +1,7 @@
+use cairo_vm_base::cairo_type::CairoType;
 use cairo_vm_base::cairo_type::CairoWritable;
 use cairo_vm_base::types::uint384::UInt384;
 use serde::{Deserialize, Serialize};
-use cairo_vm_base::cairo_type::CairoType;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct G1PointCairo {

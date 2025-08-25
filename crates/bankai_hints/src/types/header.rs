@@ -13,7 +13,7 @@ impl ExecutionPayloadHeaderCairo {
             let bytes = bytes.as_ref();
             // Copy bytes to the end of the padded array (left padding with zeros)
             padded[32 - bytes.len()..].copy_from_slice(bytes);
-            
+
             Uint256::from_bytes_be(&padded)
         }
 
