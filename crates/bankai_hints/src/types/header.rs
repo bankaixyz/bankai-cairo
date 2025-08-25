@@ -1,7 +1,7 @@
 use beacon_types::TreeHash;
 use beacon_types::{ExecutionPayloadHeader, MainnetEthSpec};
-use cairo_vm_base::types::{felt::Felt, uint256::Uint256, uint384::UInt384};
 use cairo_vm_base::cairo_type::BaseCairoType;
+use cairo_vm_base::types::uint256::Uint256;
 
 pub struct ExecutionPayloadHeaderCairo(pub ExecutionPayloadHeader<MainnetEthSpec>);
 
@@ -13,8 +13,8 @@ impl ExecutionPayloadHeaderCairo {
             let bytes = bytes.as_ref();
             // Copy bytes to the end of the padded array (left padding with zeros)
             padded[32 - bytes.len()..].copy_from_slice(bytes);
-            let value = Uint256::from_bytes_be(&padded);
-            value
+            
+            Uint256::from_bytes_be(&padded)
         }
 
         pub fn u64_to_uint256(value: u64) -> Uint256 {

@@ -3,12 +3,10 @@ mod header;
 
 use cairo_vm_base::cairo_type::{CairoType, CairoWritable};
 use cairo_vm_base::types::{felt::Felt, uint256::Uint256, uint384::UInt384, uint256_32::Uint256Bits32};
-use cairo_vm_base::vm::cairo_vm::hint_processor::builtin_hint_processor::builtin_hint_processor_definition::HintProcessorData;
-use cairo_vm_base::vm::cairo_vm::hint_processor::builtin_hint_processor::hint_utils::{get_ptr_from_var_name, get_relocatable_from_var_name};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-use crate::types::{bls::{G1PointCairo, G2PointCairo}};
+use crate::types::bls::{G1PointCairo, G2PointCairo};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct RecursiveEpochUpdateCairo {
@@ -75,7 +73,7 @@ impl CairoWritable for SignerDataCairo {
         let expected_ptr = (address + Self::n_fields())?;
         if current_ptr != expected_ptr {
             return Err(cairo_vm_base::vm::cairo_vm::vm::errors::hint_errors::HintError::CustomHint(
-                format!("Memory layout mismatch for SignerDataCairo: expected pointer at {}, but got {}", expected_ptr, current_ptr).into()
+                format!("Memory layout mismatch for SignerDataCairo: expected pointer at {expected_ptr}, but got {current_ptr}").into()
             ));
         }
 
@@ -138,7 +136,7 @@ impl CairoWritable for ExecutionHeaderProofCairo {
         let expected_ptr = (address + Self::n_fields())?;
         if current_ptr != expected_ptr {
             return Err(cairo_vm_base::vm::cairo_vm::vm::errors::hint_errors::HintError::CustomHint(
-                format!("Memory layout mismatch for ExecutionHeaderProofCairo: expected pointer at {}, but got {}", expected_ptr, current_ptr).into()
+                format!("Memory layout mismatch for ExecutionHeaderProofCairo: expected pointer at {expected_ptr}, but got {current_ptr}").into()
             ));
         }
 
@@ -180,7 +178,7 @@ impl CairoWritable for BeaconHeaderCairo {
         let expected_ptr = (address + Self::n_fields())?;
         if current_ptr != expected_ptr {
             return Err(cairo_vm_base::vm::cairo_vm::vm::errors::hint_errors::HintError::CustomHint(
-                format!("Memory layout mismatch for BeaconHeaderCairo: expected pointer at {}, but got {}", expected_ptr, current_ptr).into()
+                format!("Memory layout mismatch for BeaconHeaderCairo: expected pointer at {expected_ptr}, but got {current_ptr}").into()
             ));
         }
 
@@ -220,7 +218,10 @@ impl CairoWritable for EpochUpdateCairo {
     }
 
     fn n_fields() -> usize {
-        G2PointCairo::n_fields() + BeaconHeaderCairo::n_fields() + SignerDataCairo::n_fields() + ExecutionHeaderProofCairo::n_fields()
+        G2PointCairo::n_fields()
+            + BeaconHeaderCairo::n_fields()
+            + SignerDataCairo::n_fields()
+            + ExecutionHeaderProofCairo::n_fields()
     }
 }
 
@@ -256,14 +257,16 @@ impl CairoWritable for SyncCommitteeDataCairo {
             segment_ptr = branch.to_memory(vm, segment_ptr)?;
         }
 
-        current_ptr = self.next_aggregate_sync_committee.to_memory(vm, current_ptr)?;
+        current_ptr = self
+            .next_aggregate_sync_committee
+            .to_memory(vm, current_ptr)?;
         current_ptr = self.committee_keys_root.to_memory(vm, current_ptr)?;
 
         // Check that the memory layout is correct
         let expected_ptr = (address + Self::n_fields())?;
         if current_ptr != expected_ptr {
             return Err(cairo_vm_base::vm::cairo_vm::vm::errors::hint_errors::HintError::CustomHint(
-                format!("Memory layout mismatch for SyncCommitteeDataCairo: expected pointer at {}, but got {}", expected_ptr, current_ptr).into()
+                format!("Memory layout mismatch for SyncCommitteeDataCairo: expected pointer at {expected_ptr}, but got {current_ptr}").into()
             ));
         }
 
