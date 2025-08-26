@@ -1,2 +1,2 @@
-mod hints;
-mod types;
+pub mod hints;
+pub mod types;

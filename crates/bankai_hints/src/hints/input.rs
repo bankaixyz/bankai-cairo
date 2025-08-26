@@ -12,6 +12,11 @@ use cairo_vm_base::cairo_type::CairoType;
 
 use crate::types::RecursiveEpochInputsCairo;
 
+pub const HINT_WRITE_EPOCH_UPDATE_INPUTS: &str = r#"write_epoch_update_inputs()"#;
+pub const HINT_WRITE_STONE_PROOF_INPUTS: &str = r#"write_stone_proof_inputs()"#;
+pub const HINT_WRITE_COMMITTEE_UPDATE_INPUTS: &str = r#"write_committee_update_inputs()"#;
+pub const HINT_WRITE_EXPECTED_PROOF_OUTPUT: &str = r#"load_expected_proof_output()"#;
+
 pub fn write_epoch_update_inputs(
     vm: &mut VirtualMachine,
     exec_scopes: &mut ExecutionScopes,
