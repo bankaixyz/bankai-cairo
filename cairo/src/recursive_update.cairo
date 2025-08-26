@@ -201,7 +201,7 @@ func handle_recursive_case{
 
 
 
-    %{ write_stark_proof_inputs() %}
+    %{ write_stone_proof_inputs() %}
     let (proof_program_hash, output_hash) = verify_stone_proof();
 
     print_string('output hash');

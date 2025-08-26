@@ -1,6 +1,8 @@
 [workspace]
 members = [
     "crates/bankai_hints",
+    "crates/stone_verifier_hints",
+    "crates/cairo_runner",
 ]
 exclude = ["tests"]
 resolver = "2"
@@ -29,7 +31,7 @@ tracing = "0.1.41"
 # Local Deps
 garaga_zero_hints = { path = "cairo/packages/garaga-zero/hints/rust-vm" }
 stone-verifier-hints = { path = "src/crates/stone_verifier_hints" }
-
+cairo-vm-base = { git = "https://github.com/bankaixyz/cairo-vm-base" }
 alloy-primitives = "0.8.13"
 alloy-rpc-types-beacon = "0.12.6"
 alloy-rpc-types = "0.12.6"
