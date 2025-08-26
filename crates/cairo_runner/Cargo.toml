@@ -4,8 +4,10 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-garaga-zero = { path = "../../../cairo/packages/garaga-zero" }
-cairo-vm.workspace = true
+garaga-zero = { path = "../../cairo/packages/garaga-zero" }
+bankai-hints = { path = "../bankai_hints" }
+stone-verifier-hints = { path = "../stone_verifier_hints" }
+cairo-vm-base.workspace = true
 thiserror.workspace = true
 serde.workspace = true
 serde_json.workspace = true
@@ -14,4 +16,4 @@ hex.workspace = true
 beacon_types.workspace = true
 tracing.workspace = true
 bincode.workspace = true
-stone-verifier-hints = { path = "../stone_verifier_hints" }
+clap.workspace = true

@@ -1,4 +1,4 @@
-use cairo_vm::{
+use cairo_vm_base::vm::cairo_vm::{
     air_public_input::PublicInputError,
     cairo_run::EncodeTraceError,
     types::errors::program_errors::ProgramError,
