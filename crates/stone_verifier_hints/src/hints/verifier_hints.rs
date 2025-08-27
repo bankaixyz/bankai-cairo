@@ -13,7 +13,10 @@ use std::collections::HashMap;
 use crate::types::cairo_structs::ToVec;
 use crate::types::{CairoVerifierInput, ExtractedProofValues, OwnedPublicInput};
 use crate::vars::{PROGRAM_INPUT, PROGRAM_OBJECT};
-use crate::verifier_utils::{extract_from_ids_and_public_input, extract_proof_values, gen_arg, get_program_identifies, get_stark_proof_cairo_struct};
+use crate::verifier_utils::{
+    extract_from_ids_and_public_input, extract_proof_values, gen_arg, get_program_identifies,
+    get_stark_proof_cairo_struct,
+};
 
 /// Implements
 ///

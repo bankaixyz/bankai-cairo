@@ -40,6 +40,7 @@ pub fn write_epoch_update_inputs(
         &hint_data.ids_data,
         &hint_data.ap_tracking,
     )?;
+    
     let is_genesis = match &inputs.stone_proof {
         Some(_) => 0,
         None => 1,
@@ -64,9 +65,15 @@ pub fn write_epoch_update_inputs(
         &hint_data.ids_data,
         &hint_data.ap_tracking,
     )?;
+    // let program_hash = Felt252::from_hex_unchecked(
+    //     "0x5b6ff167e72599c14a2e99cac4a6e8db3036db0f0d9acac15d5822ea315287a",
+    // );
     let program_hash = Felt252::from_hex_unchecked(
-        "0x5b6ff167e72599c14a2e99cac4a6e8db3036db0f0d9acac15d5822ea315287a",
+        "0x6305ea579daa2cd35f92ce5c41fa3467a7b44c4d69f9849844aff9d552620e",
     );
+    // let program_hash = Felt252::from_hex_unchecked(
+    //     "0x5ab580b04e3532b6b18f81cfa654a05e29dd8e2352d88df1e765a84072db07",
+    // );
     vm.insert_value(program_hash_ptr, program_hash)?;
 
     Ok(())
@@ -107,7 +114,7 @@ pub fn write_stone_proof_inputs(
         .to_string();
         exec_scopes.insert_value("program_input", proof_string);
     } else {
-        panic!("Stark proof not found");
+        panic!("Stone proof not found");
     }
 
     Ok(())

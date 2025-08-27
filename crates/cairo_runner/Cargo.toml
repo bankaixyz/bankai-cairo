@@ -17,3 +17,7 @@ beacon_types.workspace = true
 tracing.workspace = true
 bincode.workspace = true
 clap.workspace = true
+alloy-primitives = "0.8.13"
+bls12_381 = "0.8.0"
+tree_hash = "0.8"
+tree_hash_derive = "0.8"

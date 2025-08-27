@@ -24,11 +24,17 @@ impl ExecutionPayloadHeaderCairo {
             Uint256::from_bytes_be(&bytes)
         }
 
-        macro_rules! extract_common_fields {
+        fn address_to_uint256(address: &[u8]) -> Uint256 {
+            let mut bytes = [0u8; 32];
+            bytes[0..20].copy_from_slice(address);
+            Uint256::from_bytes_be(&bytes)
+        }
+
+         macro_rules! extract_common_fields {
             ($h:expr) => {
                 vec![
                     to_uint256($h.parent_hash.0.as_slice()),
-                    to_uint256($h.fee_recipient.0.to_vec()),
+                    address_to_uint256($h.fee_recipient.as_slice()),
                     to_uint256($h.state_root.0.to_vec()),
                     to_uint256($h.receipts_root.0.to_vec()),
                     to_uint256($h.logs_bloom.tree_hash_root().as_slice()),

@@ -1,7 +1,15 @@
+use bankai_hints::hints::get_hints as get_bankai_hints;
+use bankai_hints::hints::input::{
+    write_committee_update_inputs, write_epoch_update_inputs, write_expected_proof_output,
+    write_stone_proof_inputs, HINT_WRITE_COMMITTEE_UPDATE_INPUTS, HINT_WRITE_EPOCH_UPDATE_INPUTS,
+    HINT_WRITE_EXPECTED_PROOF_OUTPUT, HINT_WRITE_STONE_PROOF_INPUTS,
+};
 use cairo_vm_base::default_hints::{default_hint_mapping, HintImpl};
 use cairo_vm_base::vm::cairo_vm::{
     hint_processor::{
-        builtin_hint_processor::builtin_hint_processor_definition::{BuiltinHintProcessor, HintProcessorData},
+        builtin_hint_processor::builtin_hint_processor_definition::{
+            BuiltinHintProcessor, HintProcessorData,
+        },
         hint_processor_definition::{HintExtension, HintProcessorLogic},
     },
     types::exec_scope::ExecutionScopes,
@@ -11,21 +19,15 @@ use cairo_vm_base::vm::cairo_vm::{
     },
     Felt252,
 };
-use stone_verifier_hints::hints::get_hints as get_stone_verifier_hints;
 use garaga_zero::hints::get_hints as get_garaga_zero_hints;
-use bankai_hints::hints::get_hints as get_bankai_hints;
-use bankai_hints::hints::input::{
-    write_epoch_update_inputs, write_stone_proof_inputs, write_committee_update_inputs, write_expected_proof_output,
-    HINT_WRITE_EPOCH_UPDATE_INPUTS, HINT_WRITE_STONE_PROOF_INPUTS, HINT_WRITE_COMMITTEE_UPDATE_INPUTS, HINT_WRITE_EXPECTED_PROOF_OUTPUT,
-};
 use std::any::Any;
 use std::collections::HashMap;
+use stone_verifier_hints::hints::get_hints as get_stone_verifier_hints;
 
 pub struct CustomHintProcessor {
     hints: HashMap<String, HintImpl>,
     builtin_hint_proc: BuiltinHintProcessor,
 }
-
 
 impl Default for CustomHintProcessor {
     fn default() -> Self {

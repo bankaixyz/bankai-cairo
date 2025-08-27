@@ -1,5 +1,5 @@
-mod bls;
-mod header;
+pub mod bls;
+pub mod header;
 
 use cairo_vm_base::cairo_type::{CairoType, CairoWritable};
 use cairo_vm_base::types::{
@@ -141,6 +141,7 @@ impl CairoWritable for ExecutionHeaderProofCairo {
         cairo_vm_base::vm::cairo_vm::types::relocatable::Relocatable,
         cairo_vm_base::vm::cairo_vm::vm::errors::hint_errors::HintError,
     > {
+        println!("ExecutionHeaderProofCairo: {:?}", self);
         let mut current_ptr = address;
 
         current_ptr = self.root.to_memory(vm, current_ptr)?;
@@ -158,7 +159,7 @@ impl CairoWritable for ExecutionHeaderProofCairo {
 
         current_ptr = self.leaf.to_memory(vm, current_ptr)?;
         current_ptr = self.index.to_memory(vm, current_ptr)?;
-
+        println!("writing payload fields");
         // Create segment for payload fields and store its pointer
         let payload_fields_segment = vm.add_memory_segment();
         vm.insert_value(current_ptr, payload_fields_segment)?;
@@ -169,6 +170,7 @@ impl CairoWritable for ExecutionHeaderProofCairo {
         for field in &self.execution_payload_header {
             payload_fields_ptr = field.to_memory(vm, payload_fields_ptr)?;
         }
+        println!("payload fields written");
 
         // Check that the memory layout is correct
         let expected_ptr = (address + Self::n_fields())?;

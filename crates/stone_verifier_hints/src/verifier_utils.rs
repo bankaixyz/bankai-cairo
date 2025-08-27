@@ -46,7 +46,7 @@ pub fn safe_log2(x: u128) -> Result<u32, HintError> {
         Ok(x.trailing_zeros())
     } else {
         Err(HintError::CustomHint(
-            format!("safe_log2: Input {} is not a power of two.", x).into(),
+            format!("safe_log2: Input {x} is not a power of two.").into(),
         ))
     }
 }
@@ -74,12 +74,11 @@ pub fn extract_annotations(
     let mut res = Vec::new();
 
     let pattern = format!(
-        r"P->V\[(\d+):(\d+)\]: /cpu air/{}: .*?{}\((.+)\)",
-        prefix, kind
+        r"P->V\[(\d+):(\d+)\]: /cpu air/{prefix}: .*?{kind}\((.+)\)"
     );
 
     let re = Regex::new(&pattern)
-        .map_err(|e| HintError::CustomHint(format!("Regex error: {}", e).into()))?;
+        .map_err(|e| HintError::CustomHint(format!("Regex error: {e}").into()))?;
 
     for line in annotations {
         if let Some(captures) = re.captures(line) {
@@ -96,7 +95,7 @@ pub fn extract_annotations(
                 let value_str = value_str.trim();
                 let value = Felt252::from_hex(value_str).map_err(|_| {
                     HintError::CustomHint(
-                        format!("Failed to parse value_str '{}'", value_str).into(),
+                        format!("Failed to parse value_str '{value_str}'").into(),
                     )
                 })?;
                 res.push(value);
@@ -134,7 +133,7 @@ fn extract_z_and_alpha(annotations: &[String]) -> Result<(Felt252, Felt252), Hin
     let re = Regex::new(
         r"V->P: /cpu air/STARK/Interaction: Interaction element #\d+: Field Element\(0x([0-9a-f]+)\)",
     )
-    .map_err(|e| HintError::CustomHint(format!("Regex error: {}", e).into()))?;
+    .map_err(|e| HintError::CustomHint(format!("Regex error: {e}").into()))?;
 
     let mut interaction_elements = Vec::new();
 
@@ -148,7 +147,7 @@ fn extract_z_and_alpha(annotations: &[String]) -> Result<(Felt252, Felt252), Hin
             })?
             .as_str();
         let value = Felt252::from_hex(hex_str).map_err(|_| {
-            HintError::CustomHint(format!("Failed to parse hex_str '{}'", hex_str).into())
+            HintError::CustomHint(format!("Failed to parse hex_str '{hex_str}'").into())
         })?;
         interaction_elements.push(value);
     }
@@ -318,7 +317,7 @@ pub fn extract_proof_values(
     let mut fri_witnesses_authentications: Vec<Vec<Felt252>> = Vec::new();
 
     for i in 1..n_fri_layers {
-        let prefix = &format!("STARK/FRI/Decommitment/Layer {}", i);
+        let prefix = &format!("STARK/FRI/Decommitment/Layer {i}");
         let leaves = annotations(prefix, "Field Element")?;
         let authentications = annotations(prefix, "Hash")?;
         fri_witnesses_leaves.push(leaves);
@@ -394,14 +393,14 @@ fn get_dynamic_or_const_value(
         }
     }
 
-    let full_name = format!("{}.{}", module_name, name);
+    let full_name = format!("{module_name}.{name}");
 
     if let Some(identifier) = identifiers.get(&full_name) {
         // Check if the identifier is a constant
         if let Some(type_) = &identifier.type_ {
             if type_ != "const" {
                 return Err(HintError::CustomHint(
-                    format!("Identifier '{}' is not a constant.", full_name).into(),
+                    format!("Identifier '{full_name}' is not a constant.").into(),
                 ));
             }
         }
@@ -411,7 +410,7 @@ fn get_dynamic_or_const_value(
         } else {
             // If the identifier exists but has no value, return an error
             return Err(HintError::CustomHint(
-                format!("Identifier '{}' has no value.", full_name).into(),
+                format!("Identifier '{full_name}' has no value.").into(),
             ));
         }
     }
@@ -419,8 +418,7 @@ fn get_dynamic_or_const_value(
     // If the identifier wasn't found in `dynamic_params` or `identifiers`
     Err(HintError::CustomHint(
         format!(
-            "Identifier '{}' not found in dynamic_params or identifiers.",
-            name
+            "Identifier '{name}' not found in dynamic_params or identifiers."
         )
         .into(),
     ))
@@ -890,8 +888,7 @@ pub fn get_pages_and_products(
         let val = cell.value.ok_or_else(|| {
             HintError::CustomHint(
                 format!(
-                    "Value is missing in public memory entry at address {}.",
-                    addr
+                    "Value is missing in public memory entry at address {addr}."
                 )
                 .into(),
             )
@@ -957,8 +954,7 @@ pub fn compute_continuous_page_headers(
         if address != expected_address {
             return Err(HintError::CustomHint(
                 format!(
-                    "Address mismatch for page {}: expected {}, got {}",
-                    page_id, expected_address, address
+                    "Address mismatch for page {page_id}: expected {expected_address}, got {address}"
                 )
                 .into(),
             ));
@@ -967,8 +963,7 @@ pub fn compute_continuous_page_headers(
         page_data.push(value.ok_or_else(|| {
             HintError::CustomHint(
                 format!(
-                    "Value is missing for address {} on page {}.",
-                    address, page_id
+                    "Value is missing for address {address} on page {page_id}."
                 )
                 .into(),
             )
@@ -1000,15 +995,14 @@ pub fn compute_continuous_page_headers(
         if page_index as u32 != *page_id {
             return Err(HintError::CustomHint(
                 format!(
-                    "Page IDs are not consecutive: expected {}, got {}",
-                    page_index, page_id
+                    "Page IDs are not consecutive: expected {page_index}, got {page_id}"
                 )
                 .into(),
             ));
         }
 
         let page_data = data.get(page_id).ok_or_else(|| {
-            HintError::CustomHint(format!("Data for page {} not found.", page_id).into())
+            HintError::CustomHint(format!("Data for page {page_id} not found.").into())
         })?;
 
         let hash_value = Pedersen::hash_array(page_data);
@@ -1098,7 +1092,7 @@ pub fn sort_segments(
         BuiltinName::mul_mod,
     ];
     segment_names.extend(builtin_ordered_list.iter().filter_map(|builtin| {
-        let name = format!("{:?}", builtin);
+        let name = format!("{builtin:?}");
         if memory_segments.contains_key(&name) {
             Some(name)
         } else {

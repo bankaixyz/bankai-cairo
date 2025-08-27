@@ -1,21 +1,13 @@
 #![allow(clippy::result_large_err)]
-use cairo_vm_base::stwo_utils::FileWriter;
+use bankai_hints::types::{RecursiveEpochInputsCairo, RecursiveEpochUpdateCairo};
+use cairo_runner::{backend_types::RecursiveEpochUpdate, error::Error, hint_processor::CustomHintProcessor};
 use cairo_vm_base::vm::cairo_vm::{
-    cairo_run::{
-        self, cairo_run_program_with_initial_scope, write_encoded_memory, write_encoded_trace,
-    },
+    cairo_run::{self, cairo_run_program_with_initial_scope},
     types::{exec_scope::ExecutionScopes, layout_name::LayoutName, program::Program},
-    vm::{
-        errors::trace_errors::TraceError, runners::cairo_pie::CairoPie,
-        runners::cairo_runner::CairoRunner,
-    },
+    vm::runners::cairo_pie::CairoPie,
 };
-use bankai_hints::types::RecursiveEpochInputsCairo;
-use cairo_runner::{
-    error::Error, hint_processor::CustomHintProcessor,
-};
-use std::{io, path::Path, path::PathBuf};
 use clap::Parser;
+use std::{path::Path, path::PathBuf};
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -29,10 +21,7 @@ fn load_program(path: &str) -> Result<Program, Error> {
     let final_path = if path.starts_with('/') && !std::path::Path::new(path).exists() {
         // Try converting absolute path to relative
         let relative_path = path.strip_prefix('/').unwrap_or(path);
-        println!(
-            "Absolute path not found, trying relative: {}",
-            relative_path
-        );
+        println!("Absolute path not found, trying relative: {relative_path}");
         relative_path
     } else {
         path
@@ -78,7 +67,7 @@ fn load_program(path: &str) -> Result<Program, Error> {
 //     Ok(())
 // }
 
-pub fn run(path: &str, input: RecursiveEpochInputsCairo) -> Result<CairoPie, Error> {
+pub fn run(path: &str, input: RecursiveEpochUpdateCairo) -> Result<CairoPie, Error> {
     let program = load_program(path)?;
     let cairo_run_config = cairo_run::CairoRunConfig {
         allow_missing_builtins: Some(true),
@@ -87,7 +76,10 @@ pub fn run(path: &str, input: RecursiveEpochInputsCairo) -> Result<CairoPie, Err
     };
     let mut hint_processor = CustomHintProcessor::new();
     let mut exec_scopes = ExecutionScopes::new();
-    exec_scopes.insert_value("mmr_input", input);
+    exec_scopes.insert_value("inputs", input.inputs);
+    exec_scopes.insert_value("outputs", input.outputs);
+    exec_scopes.insert_value("program_object", program.clone());
+
 
     let cairo_runner = cairo_run_program_with_initial_scope(
         &program,
@@ -147,13 +139,14 @@ pub fn run(path: &str, input: RecursiveEpochInputsCairo) -> Result<CairoPie, Err
 fn main() {
     let args = Args::parse();
     let input_str = std::fs::read_to_string(args.input_path).unwrap();
-    let input: RecursiveEpochInputsCairo = serde_json::from_str(&input_str).unwrap();
+    let input: RecursiveEpochUpdate = serde_json::from_str(&input_str).unwrap();
+    let input_cairo: RecursiveEpochUpdateCairo = input.into();
 
     println!("got input");
 
     let output_dir: &'static str = "../output/";
-    let program_path = "../build/main.json";
-    let pie = run(program_path, input).unwrap();
+    let program_path = "../../cairo/build/bankai_stone.json";
+    let pie = run(program_path, input_cairo).unwrap();
 
     pie.write_zip_file(&Path::new(output_dir).join("pie.zip"), true)
         .unwrap();
