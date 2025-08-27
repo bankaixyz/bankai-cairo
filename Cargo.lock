@@ -493,6 +493,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "bls12_381"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d7bc6d6292be3a19e6379786dac800f551e5865a5bb51ebbe3064ab80433f403"
+dependencies = [
+ "ff",
+ "group",
+ "pairing",
+ "rand_core 0.6.4",
+ "subtle",
+]
+
+[[package]]
 name = "blst"
 version = "0.3.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1073,8 +1086,10 @@ dependencies = [
 name = "cairo-runner"
 version = "0.1.0"
 dependencies = [
+ "alloy-primitives",
  "bankai-hints",
  "bincode",
+ "bls12_381",
  "cairo-vm-base",
  "clap",
  "garaga-zero",
@@ -1085,6 +1100,8 @@ dependencies = [
  "stone-verifier-hints",
  "thiserror 2.0.12",
  "tracing",
+ "tree_hash",
+ "tree_hash_derive",
  "types",
 ]
 
@@ -1160,7 +1177,7 @@ dependencies = [
 [[package]]
 name = "cairo-vm-base"
 version = "0.1.0"
-source = "git+https://github.com/bankaixyz/cairo-vm-base#8d844bfa830045ac7920bf52218a0bc8206353a8"
+source = "git+https://github.com/bankaixyz/cairo-vm-base#11110fc70322c40a2d217d9ad5befc76139b7716"
 dependencies = [
  "alloy-primitives",
  "bincode",

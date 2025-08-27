@@ -6,9 +6,9 @@ activate:
 	@echo "  source scripts/activate.sh"
 
 build-cairo:
-	./scripts/cairo_compile.sh cairo/src/recursive_update.cairo
+	./scripts/cairo_compile.sh cairo/src/bankai_stone.cairo
 
 get-program-hash:
 	# @make build
-	@echo "RecursiveUpdateProgramHash:"
-	@cairo-hash-program --program cairo/build/recursive_update.json
+	@echo "BankaiStoneProgramHash:"
+	@cairo-hash-program --program cairo/build/bankai_stone.json

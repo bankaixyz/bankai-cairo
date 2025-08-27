@@ -33,6 +33,8 @@ func main{
 }() {
     alloc_locals;
 
+    print_string('main');
+
     let (sha256_ptr, sha256_ptr_start) = SHA256.init();
     let (pow2_array) = pow2alloc128();
 
@@ -41,6 +43,15 @@ func main{
     local is_committee_update: felt; // do we add a new committee? 1 if yes, 0 if no
     local program_hash: felt;
     %{ write_epoch_update_inputs() %}
+
+    print_string('wrote epoch');
+
+    print_string('is_genesis');
+    print_felt_hex(is_genesis);
+    print_string('is_committee_update');
+    print_felt_hex(is_committee_update);
+    print_string('program_hash');
+    print_felt_hex(program_hash);
 
     if (is_genesis == 1) {
         with pow2_array, sha256_ptr {
@@ -124,6 +135,8 @@ func handle_recursive_case{
     pow2_array: felt*,
 }(epoch_update: EpochUpdate, program_hash: felt, is_committee_transition: felt) -> (EpochUpdateOutput, Uint256) {
     alloc_locals;
+
+    print_string('handle_recursive_case');
 
     let (epoch_update_output) = run_epoch_update(epoch_update);
     print_string('epoch update output');
