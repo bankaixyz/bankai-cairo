@@ -1,6 +1,8 @@
 #![allow(clippy::result_large_err)]
-use bankai_hints::types::{RecursiveEpochInputsCairo, RecursiveEpochUpdateCairo};
-use cairo_runner::{backend_types::RecursiveEpochUpdate, error::Error, hint_processor::CustomHintProcessor};
+use bankai_hints::types::RecursiveEpochUpdateCairo;
+use cairo_runner::{
+    backend_types::RecursiveEpochUpdate, error::Error, hint_processor::CustomHintProcessor,
+};
 use cairo_vm_base::vm::cairo_vm::{
     cairo_run::{self, cairo_run_program_with_initial_scope},
     types::{exec_scope::ExecutionScopes, layout_name::LayoutName, program::Program},
@@ -79,7 +81,6 @@ pub fn run(path: &str, input: RecursiveEpochUpdateCairo) -> Result<CairoPie, Err
     exec_scopes.insert_value("inputs", input.inputs);
     exec_scopes.insert_value("outputs", input.outputs);
     exec_scopes.insert_value("program_object", program.clone());
-
 
     let cairo_runner = cairo_run_program_with_initial_scope(
         &program,

@@ -1,18 +1,11 @@
 use alloy_primitives::FixedBytes;
-use bankai_hints::types::{header::*, bls::*, *};
 use beacon_types::{ExecutionPayloadHeader, MainnetEthSpec};
 use bls12_381::{G1Affine, G2Affine};
-use cairo_vm_base::{
-    types::{felt::Felt, uint256::Uint256, uint256_32::Uint256Bits32, uint384::UInt384},
-    vm::cairo_vm::Felt252,
-};
-use num_bigint::BigUint;
 use serde::{Deserialize, Serialize};
 use tree_hash::TreeHash;
 use tree_hash_derive::TreeHash;
 
 pub mod convert;
-
 
 /// Represents a single epoch update with its inputs and expected outputs
 #[derive(Debug, Serialize, Deserialize)]
@@ -33,7 +26,7 @@ pub struct RecursiveEpochInputs {
     /// Optional stark proof from previous epoch update
     pub stone_proof: Option<serde_json::Value>,
     /// The output of the previous epoch proof. Required to decommit the output hash of the proof
-    pub stark_proof_output: Option<RecursiveEpochOutput>
+    pub stark_proof_output: Option<RecursiveEpochOutput>,
 }
 
 /// Contains all necessary inputs for generating and verifying a single epoch proof (native types)
@@ -190,9 +183,9 @@ impl<'de> Deserialize<'de> for G1Point {
         let y_hex = y_str.strip_prefix("0x").unwrap_or(y_str);
 
         let x_bytes = hex::decode(x_hex)
-            .map_err(|e| serde::de::Error::custom(format!("invalid x hex: {}", e)))?;
+            .map_err(|e| serde::de::Error::custom(format!("invalid x hex: {e}")))?;
         let y_bytes = hex::decode(y_hex)
-            .map_err(|e| serde::de::Error::custom(format!("invalid y hex: {}", e)))?;
+            .map_err(|e| serde::de::Error::custom(format!("invalid y hex: {e}")))?;
 
         // Combine into uncompressed format
         let mut uncompressed = [0u8; 96];
@@ -239,13 +232,13 @@ impl<'de> Deserialize<'de> for G2Point {
 
         // Decode hex strings to bytes
         let x0_bytes = hex::decode(x0_hex)
-            .map_err(|e| serde::de::Error::custom(format!("invalid x0 hex: {}", e)))?;
+            .map_err(|e| serde::de::Error::custom(format!("invalid x0 hex: {e}")))?;
         let x1_bytes = hex::decode(x1_hex)
-            .map_err(|e| serde::de::Error::custom(format!("invalid x1 hex: {}", e)))?;
+            .map_err(|e| serde::de::Error::custom(format!("invalid x1 hex: {e}")))?;
         let y0_bytes = hex::decode(y0_hex)
-            .map_err(|e| serde::de::Error::custom(format!("invalid y0 hex: {}", e)))?;
+            .map_err(|e| serde::de::Error::custom(format!("invalid y0 hex: {e}")))?;
         let y1_bytes = hex::decode(y1_hex)
-            .map_err(|e| serde::de::Error::custom(format!("invalid y1 hex: {}", e)))?;
+            .map_err(|e| serde::de::Error::custom(format!("invalid y1 hex: {e}")))?;
 
         // Combine into uncompressed format
         let mut uncompressed = [0u8; 192];
