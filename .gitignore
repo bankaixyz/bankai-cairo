@@ -5,3 +5,4 @@ venv/
 build
 .DS_Store
 sqlite_state/sqlite_state/*.db
+output

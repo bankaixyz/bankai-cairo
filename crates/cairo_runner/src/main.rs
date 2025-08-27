@@ -143,10 +143,8 @@ fn main() {
     let input: RecursiveEpochUpdate = serde_json::from_str(&input_str).unwrap();
     let input_cairo: RecursiveEpochUpdateCairo = input.into();
 
-    println!("got input");
-
-    let output_dir: &'static str = "../output/";
-    let program_path = "../../cairo/build/bankai_stone.json";
+    let output_dir: &'static str = "output/";
+    let program_path = "cairo/build/bankai_stone.json";
     let pie = run(program_path, input_cairo).unwrap();
 
     pie.write_zip_file(&Path::new(output_dir).join("pie.zip"), true)
