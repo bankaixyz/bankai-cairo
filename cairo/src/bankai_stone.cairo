@@ -43,7 +43,7 @@ func main{
     local is_genesis: felt;
     local is_committee_update: felt; // do we add a new committee? 1 if yes, 0 if no
     local program_hash: felt;
-    %{ write_epoch_update_inputs() %}
+    %{ write_consensus_inputs() %}
 
     print_string('wrote epoch');
 
@@ -206,8 +206,6 @@ func handle_recursive_case{
     let (expected_output_hash: felt) = poseidon_hash_many(n=16, elements=expected_verifier_output);
     print_string('expected output hash');
     print_felt_hex(expected_output_hash);
-
-
 
     %{ write_stone_proof_inputs() %}
     let (proof_program_hash, output_hash) = verify_stone_proof();
