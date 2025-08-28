@@ -11,9 +11,7 @@ from hash_to_curve import hash_to_curve
 from cairo.src.utils.ssz import SSZ, MerkleTree, MerkleUtils
 from cairo.src.utils.constants import g1_negative
 from cairo.src.utils.domain import Domain, Network
-from cairo.src.bls.signer import (
-    aggregate_signer_pubs,
-)
+from cairo.src.bls.signer import aggregate_signer_pubs
 from cairo.src.utils.utils import pow2alloc128
 from cairo.src.io import ExecutionHeaderProof, BeaconHeader, ConsensusInputs
 from cairo.src.types import EpochUpdateOutput
@@ -35,20 +33,26 @@ func run_epoch_update{
     let (header_root, body_root, state_root) = hash_header(consensus_inputs.beacon_header);
 
     // 2. Compute signing root (this is what validators sign)
-    let signing_root = Domain.compute_signing_root(Network.SEPOLIA, header_root, consensus_inputs.beacon_header.slot.low);
+    let signing_root = Domain.compute_signing_root(
+        Network.SEPOLIA, header_root, consensus_inputs.beacon_header.slot.low
+    );
 
     // 3. Hash to curve to get message point
     let (msg_point) = hash_to_curve(1, signing_root);
 
     // 4. Aggregate signer to get aggregate key that was used to sign the message
-    let (committee_hash, agg_key, n_non_signers) = aggregate_signer_pubs(consensus_inputs.signature);
+    let (committee_hash, agg_key, n_non_signers) = aggregate_signer_pubs(
+        consensus_inputs.signature
+    );
     let n_signers = 512 - n_non_signers;
 
     // 5. Verify signature
     verify_signature(agg_key, msg_point, consensus_inputs.signature.signature_point);
 
     // 6. Hash execution payload root (SSZ encoded execution payload) which is stored in the beacon state
-    let (execution_root, execution_hash, execution_height) = SSZ.hash_execution_payload_header_root(consensus_inputs.execution_header_proof.payload_fields);
+    let (execution_root, execution_hash, execution_height) = SSZ.hash_execution_payload_header_root(
+        consensus_inputs.execution_header_proof.payload_fields
+    );
 
     // 7. Verify ssz inclusion proof
     let root_felts = MerkleUtils.chunk_uint256(execution_root);

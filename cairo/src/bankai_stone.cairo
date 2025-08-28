@@ -1,6 +1,11 @@
 %builtins output pedersen range_check bitwise poseidon range_check96 add_mod mul_mod
 
-from starkware.cairo.common.cairo_builtins import PoseidonBuiltin, ModBuiltin, BitwiseBuiltin, HashBuiltin
+from starkware.cairo.common.cairo_builtins import (
+    PoseidonBuiltin,
+    ModBuiltin,
+    BitwiseBuiltin,
+    HashBuiltin,
+)
 from starkware.cairo.stark_verifier.core.stark import StarkProof
 from starkware.cairo.common.uint256 import Uint256
 from starkware.cairo.common.memcpy import memcpy
@@ -41,7 +46,7 @@ func main{
 
     local consensus_inputs: ConsensusInputs;
     local is_genesis: felt;
-    local is_committee_update: felt; // do we add a new committee? 1 if yes, 0 if no
+    local is_committee_update: felt;  // do we add a new committee? 1 if yes, 0 if no
     local program_hash: felt;
     %{ write_consensus_inputs() %}
 
@@ -60,7 +65,11 @@ func main{
         }
         let next_committee_hash = Uint256(low=0x0, high=0x0);
         assert is_committee_update = 0;
-        write_circuit_output(epoch_output=epoch_update_output, next_committee_hash=next_committee_hash, is_committee_transition=0);
+        write_circuit_output(
+            epoch_output=epoch_update_output,
+            next_committee_hash=next_committee_hash,
+            is_committee_transition=0,
+        );
 
         SHA256.finalize(sha256_start_ptr=sha256_ptr_start, sha256_end_ptr=sha256_ptr);
 
@@ -68,7 +77,9 @@ func main{
     } else {
         print_string('recursive case');
 
-        let (_, remainder) = felt_divmod(consensus_inputs.beacon_header.slot.low + 1, SYNC_COMMITTEE_PERIOD);
+        let (_, remainder) = felt_divmod(
+            consensus_inputs.beacon_header.slot.low + 1, SYNC_COMMITTEE_PERIOD
+        );
         local is_committee_transition: felt;
         if (remainder == 0) {
             is_committee_transition = 1;
@@ -79,7 +90,9 @@ func main{
         print_felt_hex(is_committee_transition);
 
         with pow2_array, sha256_ptr {
-            let (epoch_update_output, next_committee_hash) = handle_recursive_case(consensus_inputs, program_hash, is_committee_transition);
+            let (epoch_update_output, next_committee_hash) = handle_recursive_case(
+                consensus_inputs, program_hash, is_committee_transition
+            );
         }
         print_string('confirmed epoch');
 
@@ -90,12 +103,11 @@ func main{
             assert next_committee_hash.high = 0x0;
 
             local committee_input: SyncCommitteeUpdateInputs;
-            
+
             %{ write_committee_update_inputs() %}
             with pow2_array, sha256_ptr {
                 let (state_root, new_next_committee_hash) = run_committee_update(
-                    committee_input=committee_input,
-                    slot=epoch_update_output.beacon_height
+                    committee_input=committee_input, slot=epoch_update_output.beacon_height
                 );
             }
             print_string('committee update done');
@@ -103,14 +115,22 @@ func main{
             // Ensure a valid state root is used to decommit new next_committee_hash
             assert epoch_update_output.beacon_state_root.low = state_root.low;
             assert epoch_update_output.beacon_state_root.high = state_root.high;
-            write_circuit_output(epoch_output=epoch_update_output, next_committee_hash=new_next_committee_hash, is_committee_transition=is_committee_transition);
+            write_circuit_output(
+                epoch_output=epoch_update_output,
+                next_committee_hash=new_next_committee_hash,
+                is_committee_transition=is_committee_transition,
+            );
 
             SHA256.finalize(sha256_start_ptr=sha256_ptr_start, sha256_end_ptr=sha256_ptr);
             return ();
         } else {
             print_string('no committee update');
-            write_circuit_output(epoch_output=epoch_update_output, next_committee_hash=next_committee_hash, is_committee_transition=is_committee_transition);
-            
+            write_circuit_output(
+                epoch_output=epoch_update_output,
+                next_committee_hash=next_committee_hash,
+                is_committee_transition=is_committee_transition,
+            );
+
             SHA256.finalize(sha256_start_ptr=sha256_ptr_start, sha256_end_ptr=sha256_ptr);
             return ();
         }
@@ -128,7 +148,9 @@ func handle_recursive_case{
     mul_mod_ptr: ModBuiltin*,
     sha256_ptr: felt*,
     pow2_array: felt*,
-}(consensus_inputs: ConsensusInputs, program_hash: felt, is_committee_transition: felt) -> (EpochUpdateOutput, Uint256) {
+}(consensus_inputs: ConsensusInputs, program_hash: felt, is_committee_transition: felt) -> (
+    EpochUpdateOutput, Uint256
+) {
     alloc_locals;
 
     print_string('handle_recursive_case');
@@ -138,7 +160,6 @@ func handle_recursive_case{
 
     local expected_proof_output: CircuitOutput;
     %{ load_expected_proof_output() %}
-
 
     // Check that expected matches the committee hash that was used to sign
 
@@ -186,7 +207,9 @@ func handle_recursive_case{
     // Construct the expected verifier output
     tempvar expected_verifier_output = cast(
         new (
-            1, 15, program_hash,
+            1,
+            15,
+            program_hash,
             expected_proof_output.beacon_header_root.low,
             expected_proof_output.beacon_header_root.high,
             expected_proof_output.beacon_state_root.low,
@@ -199,8 +222,9 @@ func handle_recursive_case{
             expected_proof_output.current_committee_hash.low,
             expected_proof_output.current_committee_hash.high,
             expected_proof_output.next_committee_hash.low,
-            expected_proof_output.next_committee_hash.high
-        ), felt*
+            expected_proof_output.next_committee_hash.high,
+        ),
+        felt*,
     );
 
     let (expected_output_hash: felt) = poseidon_hash_many(n=16, elements=expected_verifier_output);
@@ -217,7 +241,7 @@ func handle_recursive_case{
     print_felt_hex(proof_program_hash);
 
     // Ensure the proof contains the expected values
-    assert output_hash = expected_output_hash;    
+    assert output_hash = expected_output_hash;
     assert proof_program_hash = BOOTLOADER_PROGRAM_HASH;
 
     return (epoch_update_output, expected_proof_output.next_committee_hash);
@@ -239,17 +263,18 @@ func handle_genesis_case{
 
     let (epoch_update_output) = run_epoch_update(consensus_inputs);
 
-    tempvar expected_genesis_committee = Uint256(low=0xe5fec5cd2304cab6086b1eea025ccd74, high=0xf32b83714599ab70193ba4597159560c);
+    tempvar expected_genesis_committee = Uint256(
+        low=0xe5fec5cd2304cab6086b1eea025ccd74, high=0xf32b83714599ab70193ba4597159560c
+    );
     assert expected_genesis_committee.low = epoch_update_output.current_committee_hash.low;
     assert expected_genesis_committee.high = epoch_update_output.current_committee_hash.high;
 
     return (epoch_update_output=epoch_update_output);
 }
 
-func write_circuit_output{
-    output_ptr: felt*,
-    range_check_ptr,
-}(epoch_output: EpochUpdateOutput, next_committee_hash: Uint256, is_committee_transition: felt) {
+func write_circuit_output{output_ptr: felt*, range_check_ptr}(
+    epoch_output: EpochUpdateOutput, next_committee_hash: Uint256, is_committee_transition: felt
+) {
     assert [output_ptr] = epoch_output.beacon_header_root.low;
     assert [output_ptr + 1] = epoch_output.beacon_header_root.high;
     assert [output_ptr + 2] = epoch_output.beacon_state_root.low;

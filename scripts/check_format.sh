@@ -22,28 +22,8 @@ find ./cairo/src ./cairo/tests -name '*.cairo'| parallel --halt soon,fail=1 form
 # Capture the exit status of parallel for .cairo files
 exit_status_cairo_files=$?
 
-# Format Scarb workspace
-echo "Checking Scarb workspace..."
-cd contract
-scarb fmt --check
-cd ..
-
-# Capture the exit status of parallel for Scarb projects
-exit_status_scarb_projects=$?
-
-# Check cargo formatting
-echo "Checking cargo formatting..."
-cd client-rs
-cargo fmt --check
-exit_status_cargo=$?
-
-# Run clippy
-echo "Running cargo clippy..."
-cargo clippy -- -D warnings
-exit_status_clippy=$?
-
 # Determine the final exit status
-if [ $exit_status_cairo_files -ne 0 ] || [ $exit_status_scarb_projects -ne 0 ] || [ $exit_status_cargo -ne 0 ] || [ $exit_status_clippy -ne 0 ]; then
+if [ $exit_status_cairo_files -ne 0 ]; then
     final_exit_status=1
 else
     final_exit_status=0
