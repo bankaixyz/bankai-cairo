@@ -13,7 +13,7 @@ serde = { version = "1.0.215", features = ["derive"] }
 serde_json = "1.0.133"
 
 # Cairo VM and Blockchain
-beacon_types = { git = "https://github.com/petscheit/lighthouse.git", package = "types", rev = "2ef065a16"}
+beacon_types = { git = "https://github.com/bankaixyz/lighthouse.git", package = "types", rev = "9759655"}
 beacon-state-proof = { git = "https://github.com/petscheit/beacon-state-proof", rev = "9dddb71f2b037d68097bf50c0a7b02229bf4c3e2" }
 
 # Numeric
@@ -43,8 +43,8 @@ alloy-trie = "0.7.9"
 starknet-core = "0.14.0"
 url = "2.5.2"
 
-tree_hash = "0.8"
-tree_hash_derive = "0.8"
+tree_hash = "0.9"
+tree_hash_derive = "0.9"
 itertools = "0.13.0"
 reqwest = { version = "0.12.9", features = ["json", "multipart", "stream"] }
 

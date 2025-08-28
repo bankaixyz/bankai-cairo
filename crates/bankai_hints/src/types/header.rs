@@ -1,4 +1,4 @@
-use beacon_types::TreeHash;
+use tree_hash::TreeHash;
 use beacon_types::{ExecutionPayloadHeader, MainnetEthSpec};
 use cairo_vm_base::cairo_type::BaseCairoType;
 use cairo_vm_base::types::uint256::Uint256;
