@@ -48,3 +48,20 @@ jobs:
         # Source the activate script and then run format check
         source scripts/activate.sh
         ./scripts/check_format.sh
+    - name: Install toolchain from rust-toolchain.toml
+      uses: dsherret/rust-toolchain-file@v1
+
+    - name: Cache dependencies
+      uses: Swatinem/rust-cache@v2
+      
+    - name: Check formatting
+      run: cargo fmt --all -- --check
+    
+    - name: Run clippy
+      run: cargo clippy --all-targets --all-features -- -D warnings
+    
+    - name: Run tests
+      run: cargo test --all-features
+    
+    - name: Run tests (no features)
+      run: cargo test
