@@ -1,0 +1,50 @@
+name: Cairo Format Check
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  format-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+    
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Cache Python virtual environment
+      uses: actions/cache@v3
+      with:
+        path: venv
+        key: ${{ runner.os }}-python-3.10-venv-${{ hashFiles('cairo/packages/garaga-zero/pyproject.toml', 'cairo-lang-0.13.5.zip') }}
+        restore-keys: |
+          ${{ runner.os }}-python-3.10-venv-
+    
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y python3.10-venv parallel
+    
+    - name: Run setup script
+      run: |
+        chmod +x scripts/setup.sh
+        ./scripts/setup.sh
+    
+    - name: Activate virtual environment and run format check
+      run: |
+        # Make scripts executable
+        chmod +x scripts/activate.sh
+        chmod +x scripts/check_format.sh
+        
+        # Source the activate script and then run format check
+        source scripts/activate.sh
+        ./scripts/check_format.sh
