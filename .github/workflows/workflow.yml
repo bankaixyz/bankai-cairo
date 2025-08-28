@@ -1,4 +1,4 @@
-name: Cairo Format Check
+name: Bankai Cairo Format Check
 
 on:
   push:
@@ -31,7 +31,6 @@ jobs:
     
     - name: Install system dependencies
       run: |
-        sudo apt-get update
         sudo apt-get install -y parallel
     
     - name: Run setup script
