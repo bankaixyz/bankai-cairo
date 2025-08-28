@@ -1,7 +1,7 @@
-use beacon_types::TreeHash;
 use beacon_types::{ExecutionPayloadHeader, MainnetEthSpec};
 use cairo_vm_base::cairo_type::BaseCairoType;
 use cairo_vm_base::types::uint256::Uint256;
+use tree_hash::TreeHash;
 
 pub struct ExecutionPayloadHeaderCairo(pub ExecutionPayloadHeader<MainnetEthSpec>);
 
@@ -30,7 +30,7 @@ impl ExecutionPayloadHeaderCairo {
             Uint256::from_bytes_be(&bytes)
         }
 
-         macro_rules! extract_common_fields {
+        macro_rules! extract_common_fields {
             ($h:expr) => {
                 vec![
                     to_uint256($h.parent_hash.0.as_slice()),

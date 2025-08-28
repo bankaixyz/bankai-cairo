@@ -1,7 +1,7 @@
 use bankai_hints::hints::get_hints as get_bankai_hints;
 use bankai_hints::hints::input::{
-    write_committee_update_inputs, write_epoch_update_inputs, write_expected_proof_output,
-    write_stone_proof_inputs, HINT_WRITE_COMMITTEE_UPDATE_INPUTS, HINT_WRITE_EPOCH_UPDATE_INPUTS,
+    write_committee_update_inputs, write_consensus_inputs, write_expected_proof_output,
+    write_stone_proof_inputs, HINT_WRITE_COMMITTEE_UPDATE_INPUTS, HINT_WRITE_CONSENSUS_INPUTS,
     HINT_WRITE_EXPECTED_PROOF_OUTPUT, HINT_WRITE_STONE_PROOF_INPUTS,
 };
 use cairo_vm_base::default_hints::{default_hint_mapping, HintImpl};
@@ -75,8 +75,8 @@ impl HintProcessorLogic for CustomHintProcessor {
             let hint_code = hpd.code.as_str();
 
             let res = match hint_code {
-                HINT_WRITE_EPOCH_UPDATE_INPUTS => {
-                    write_epoch_update_inputs(vm, exec_scopes, hpd, constants)
+                HINT_WRITE_CONSENSUS_INPUTS => {
+                    write_consensus_inputs(vm, exec_scopes, hpd, constants)
                 }
                 HINT_WRITE_STONE_PROOF_INPUTS => {
                     write_stone_proof_inputs(vm, exec_scopes, hpd, constants)

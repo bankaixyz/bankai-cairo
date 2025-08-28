@@ -10,29 +10,29 @@ use cairo_vm_base::vm::cairo_vm::Felt252;
 use cairo_vm_base::cairo_type::CairoWritable;
 use cairo_vm_base::cairo_type::CairoType;
 
-use crate::types::RecursiveEpochInputsCairo;
+use crate::types::StoneInputsCairo;
 
-pub const HINT_WRITE_EPOCH_UPDATE_INPUTS: &str = r#"write_epoch_update_inputs()"#;
+pub const HINT_WRITE_CONSENSUS_INPUTS: &str = r#"write_consensus_inputs()"#;
 pub const HINT_WRITE_STONE_PROOF_INPUTS: &str = r#"write_stone_proof_inputs()"#;
 pub const HINT_WRITE_COMMITTEE_UPDATE_INPUTS: &str = r#"write_committee_update_inputs()"#;
 pub const HINT_WRITE_EXPECTED_PROOF_OUTPUT: &str = r#"load_expected_proof_output()"#;
 
-pub fn write_epoch_update_inputs(
+pub fn write_consensus_inputs(
     vm: &mut VirtualMachine,
     exec_scopes: &mut ExecutionScopes,
     hint_data: &HintProcessorData,
     _constants: &HashMap<String, Felt252>,
 ) -> Result<(), HintError> {
-    let inputs = exec_scopes.get_ref::<RecursiveEpochInputsCairo>("inputs")?;
-    let epoch_update = &inputs.epoch_update;
-    let epoch_update_ptr = get_relocatable_from_var_name(
-        "epoch_update",
+    let inputs = exec_scopes.get_ref::<StoneInputsCairo>("inputs")?;
+    let consensus_data = &inputs.consensus_data;
+    let consensus_data_ptr = get_relocatable_from_var_name(
+        "consensus_inputs",
         vm,
         &hint_data.ids_data,
         &hint_data.ap_tracking,
     )?;
 
-    epoch_update.to_memory(vm, epoch_update_ptr)?;
+    consensus_data.to_memory(vm, consensus_data_ptr)?;
 
     let is_genesis_ptr = get_relocatable_from_var_name(
         "is_genesis",
@@ -40,8 +40,8 @@ pub fn write_epoch_update_inputs(
         &hint_data.ids_data,
         &hint_data.ap_tracking,
     )?;
-    
-    let is_genesis = match &inputs.stone_proof {
+
+    let is_genesis = match &inputs.proof_data.proof {
         Some(_) => 0,
         None => 1,
     };
@@ -85,8 +85,8 @@ pub fn write_expected_proof_output(
     hint_data: &HintProcessorData,
     _constants: &HashMap<String, Felt252>,
 ) -> Result<(), HintError> {
-    let inputs = exec_scopes.get_ref::<RecursiveEpochInputsCairo>("inputs")?;
-    if let Some(stark_proof_output) = &inputs.stark_proof_output {
+    let inputs = exec_scopes.get_ref::<StoneInputsCairo>("inputs")?;
+    if let Some(stark_proof_output) = &inputs.proof_data.proof_output {
         let expected_output_ptr = get_relocatable_from_var_name(
             "expected_proof_output",
             vm,
@@ -106,8 +106,8 @@ pub fn write_stone_proof_inputs(
     _hint_data: &HintProcessorData,
     _constants: &HashMap<String, Felt252>,
 ) -> Result<(), HintError> {
-    let inputs = exec_scopes.get_ref::<RecursiveEpochInputsCairo>("inputs")?;
-    if let Some(stone_proof) = &inputs.stone_proof {
+    let inputs = exec_scopes.get_ref::<StoneInputsCairo>("inputs")?;
+    if let Some(stone_proof) = &inputs.proof_data.proof {
         let proof_string = serde_json::json!({
             "proof": stone_proof
         })
@@ -126,7 +126,7 @@ pub fn write_committee_update_inputs(
     hint_data: &HintProcessorData,
     _constants: &HashMap<String, Felt252>,
 ) -> Result<(), HintError> {
-    let inputs = exec_scopes.get_ref::<RecursiveEpochInputsCairo>("inputs")?;
+    let inputs = exec_scopes.get_ref::<StoneInputsCairo>("inputs")?;
     if let Some(sync_committee_update) = &inputs.sync_committee_update {
         let aggregate_committee_key_ptr = get_relocatable_from_var_name(
             "aggregate_committee_key",

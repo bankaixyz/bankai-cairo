@@ -73,9 +73,7 @@ pub fn extract_annotations(
 ) -> Result<Vec<Felt252>, HintError> {
     let mut res = Vec::new();
 
-    let pattern = format!(
-        r"P->V\[(\d+):(\d+)\]: /cpu air/{prefix}: .*?{kind}\((.+)\)"
-    );
+    let pattern = format!(r"P->V\[(\d+):(\d+)\]: /cpu air/{prefix}: .*?{kind}\((.+)\)");
 
     let re = Regex::new(&pattern)
         .map_err(|e| HintError::CustomHint(format!("Regex error: {e}").into()))?;
@@ -94,9 +92,7 @@ pub fn extract_annotations(
             let mut parse_and_push = |value_str: &str| -> Result<(), HintError> {
                 let value_str = value_str.trim();
                 let value = Felt252::from_hex(value_str).map_err(|_| {
-                    HintError::CustomHint(
-                        format!("Failed to parse value_str '{value_str}'").into(),
-                    )
+                    HintError::CustomHint(format!("Failed to parse value_str '{value_str}'").into())
                 })?;
                 res.push(value);
                 Ok(())
@@ -417,10 +413,7 @@ fn get_dynamic_or_const_value(
 
     // If the identifier wasn't found in `dynamic_params` or `identifiers`
     Err(HintError::CustomHint(
-        format!(
-            "Identifier '{name}' not found in dynamic_params or identifiers."
-        )
-        .into(),
+        format!("Identifier '{name}' not found in dynamic_params or identifiers.").into(),
     ))
 }
 
@@ -887,10 +880,7 @@ pub fn get_pages_and_products(
         let addr = cell.address;
         let val = cell.value.ok_or_else(|| {
             HintError::CustomHint(
-                format!(
-                    "Value is missing in public memory entry at address {addr}."
-                )
-                .into(),
+                format!("Value is missing in public memory entry at address {addr}.").into(),
             )
         })?;
 
@@ -962,10 +952,7 @@ pub fn compute_continuous_page_headers(
 
         page_data.push(value.ok_or_else(|| {
             HintError::CustomHint(
-                format!(
-                    "Value is missing for address {address} on page {page_id}."
-                )
-                .into(),
+                format!("Value is missing for address {address} on page {page_id}.").into(),
             )
         })?);
 
@@ -994,10 +981,8 @@ pub fn compute_continuous_page_headers(
         let page_index = i + 1;
         if page_index as u32 != *page_id {
             return Err(HintError::CustomHint(
-                format!(
-                    "Page IDs are not consecutive: expected {page_index}, got {page_id}"
-                )
-                .into(),
+                format!("Page IDs are not consecutive: expected {page_index}, got {page_id}")
+                    .into(),
             ));
         }
 

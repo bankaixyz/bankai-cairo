@@ -8,15 +8,12 @@ from starkware.cairo.common.builtin_keccak.keccak import keccak_uint256s_bigend
 from starkware.cairo.common.memcpy import memcpy
 from starkware.cairo.common.memset import memset
 from starkware.cairo.common.alloc import alloc
-from starkware.cairo.common.builtin_poseidon.poseidon import (
-    poseidon_hash,
-    poseidon_hash_many,
-)
+from starkware.cairo.common.builtin_poseidon.poseidon import poseidon_hash, poseidon_hash_many
 from sha import SHA256
 from debug import print_string, print_felt, print_felt_hex
 
 from cairo.src.utils.utils import pow2alloc128, felt_divmod
-from cairo.src.types import ExecutionHeaderProof
+from cairo.src.io import ExecutionHeaderProof
 
 namespace SSZ {
     func hash_pair_container{
@@ -64,7 +61,9 @@ namespace SSZ {
 
     func hash_execution_payload_header_root{
         range_check_ptr, bitwise_ptr: BitwiseBuiltin*, pow2_array: felt*, sha256_ptr: felt*
-    }(payload_fields: Uint256*) -> (header_root: Uint256, header_hash: Uint256, header_height: felt) {
+    }(payload_fields: Uint256*) -> (
+        header_root: Uint256, header_hash: Uint256, header_height: felt
+    ) {
         let leaf_segments = cast(payload_fields, felt*);
         memset(dst=leaf_segments + 34, value=0, n=30);
 
@@ -76,8 +75,6 @@ namespace SSZ {
         return (root, leafs[12], header_height.low);
     }
 }
-
-
 
 namespace MerkleTree {
     func compute_root{
@@ -248,7 +245,6 @@ namespace MerkleUtils {
     }
 }
 
-
 // func main{
 //     output_ptr: felt*,
 //     range_check_ptr,
@@ -260,14 +256,14 @@ namespace MerkleUtils {
 // }() {
 //     alloc_locals;
 
-//     let (pow2_array) = pow2alloc128();
+// let (pow2_array) = pow2alloc128();
 //     let (sha256_ptr, sha256_ptr_start) = SHA256.init();
 
-//     with pow2_array, sha256_ptr {
+// with pow2_array, sha256_ptr {
 //         SSZ.hash_execution_payload_header_root();
 //     }
 
-//     SHA256.finalize(sha256_ptr_start, sha256_ptr);
+// SHA256.finalize(sha256_ptr_start, sha256_ptr);
 
-//     return ();
+// return ();
 // }

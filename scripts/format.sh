@@ -24,17 +24,8 @@ find ./cairo/src ./cairo/tests -name '*.cairo' | parallel --halt soon,fail=1 for
 # Capture the exit status of parallel for .cairo files
 exit_status_cairo_files=$?
 
-# Format Scarb workspace
-echo "Formatting Scarb workspace..."
-cd contract
-scarb fmt
-cd ..
-
-# Capture the exit status of parallel for Scarb projects
-exit_status_scarb_projects=$?
-
 # Determine the final exit status
-if [ $exit_status_cairo_files -ne 0 ] || [ $exit_status_scarb_projects -ne 0 ]; then
+if [ $exit_status_cairo_files -ne 0 ]; then
     final_exit_status=1
 else
     final_exit_status=0

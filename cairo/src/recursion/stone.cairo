@@ -58,7 +58,7 @@ func verify_stone_proof{
             identifiers=ids._context.identifiers,
             proof_json=program_input["proof"]))
     %}
-    
+
     verify_proof(proof=proof, security_bits=SECURITY_BITS);
     return _verify_public_input(public_input=cast(proof.public_input, PublicInput*));
 }

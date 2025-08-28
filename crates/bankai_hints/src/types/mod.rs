@@ -5,19 +5,32 @@ use cairo_vm_base::cairo_type::{CairoType, CairoWritable};
 use cairo_vm_base::types::{
     felt::Felt, uint256::Uint256, uint256_32::Uint256Bits32, uint384::UInt384,
 };
+use cairo_vm_base::vm::cairo_vm::Felt252;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 
 use crate::types::bls::{G1PointCairo, G2PointCairo};
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct RecursiveEpochUpdateCairo {
-    pub inputs: RecursiveEpochInputsCairo,
-    pub outputs: RecursiveEpochOutputsCairo,
+pub struct StoneCircuitLayoutCairo {
+    pub input: StoneInputsCairo,
+    pub output: CircuitOutputCairo,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct RecursiveEpochOutputsCairo {
+pub struct StoneInputsCairo {
+    pub consensus_data: ConsensusInputsCairo,
+    pub sync_committee_update: Option<SyncCommitteeUpdateProofCairo>,
+    pub proof_data: ProofDataCairo,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ProofDataCairo {
+    pub proof: Option<serde_json::Value>,
+    pub proof_output: Option<CircuitOutputCairo>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct CircuitOutputCairo {
     pub beacon_header_root: Uint256,
     pub beacon_state_root: Uint256,
     pub beacon_height: Felt,
@@ -28,7 +41,7 @@ pub struct RecursiveEpochOutputsCairo {
     pub next_committee_hash: Uint256,
 }
 
-impl CairoWritable for RecursiveEpochOutputsCairo {
+impl CairoWritable for CircuitOutputCairo {
     fn to_memory(
         &self,
         vm: &mut cairo_vm_base::vm::cairo_vm::vm::vm_core::VirtualMachine,
@@ -49,10 +62,10 @@ impl CairoWritable for RecursiveEpochOutputsCairo {
         current_ptr = self.next_committee_hash.to_memory(vm, current_ptr)?;
 
         // Check that the memory layout is correct
-        let expected_ptr = (address + RecursiveEpochOutputsCairo::n_fields())?;
+        let expected_ptr = (address + CircuitOutputCairo::n_fields())?;
         if current_ptr != expected_ptr {
             return Err(cairo_vm_base::vm::cairo_vm::vm::errors::hint_errors::HintError::CustomHint(
-                format!("Memory layout mismatch for RecursiveEpochOutputsCairo: expected pointer at {expected_ptr}, but got {current_ptr}").into()
+                format!("Memory layout mismatch for CircuitOutputCairo: expected pointer at {expected_ptr}, but got {current_ptr}").into()
             ));
         }
 
@@ -65,21 +78,13 @@ impl CairoWritable for RecursiveEpochOutputsCairo {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct RecursiveEpochInputsCairo {
-    pub epoch_update: EpochUpdateCairo,
-    pub sync_committee_update: Option<SyncCommitteeDataCairo>,
-    pub stone_proof: Option<Value>, // this is the stark proof of the previous epoch update
-    pub stark_proof_output: Option<RecursiveEpochOutputsCairo>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct SignerDataCairo {
+pub struct SyncCommitteeSignerInputCairo {
+    pub signature_point: G2PointCairo,
     pub aggregate_pub: G1PointCairo,
     pub non_signers: Vec<G1PointCairo>,
-    pub n_non_signers: Felt,
 }
 
-impl CairoWritable for SignerDataCairo {
+impl CairoWritable for SyncCommitteeSignerInputCairo {
     fn to_memory(
         &self,
         vm: &mut cairo_vm_base::vm::cairo_vm::vm::vm_core::VirtualMachine,
@@ -90,6 +95,7 @@ impl CairoWritable for SignerDataCairo {
     > {
         let mut current_ptr = address;
 
+        current_ptr = self.signature_point.to_memory(vm, current_ptr)?;
         current_ptr = self.aggregate_pub.to_memory(vm, current_ptr)?;
 
         // Create segment for non-signers and store its pointer
@@ -104,7 +110,7 @@ impl CairoWritable for SignerDataCairo {
         }
 
         // Store the length of non-signers
-        vm.insert_value(current_ptr, self.n_non_signers.0)?;
+        vm.insert_value(current_ptr, Felt252::from(self.non_signers.len() as u64))?;
         current_ptr = (current_ptr + 1)?;
 
         // Check that the memory layout is correct
@@ -119,7 +125,7 @@ impl CairoWritable for SignerDataCairo {
     }
 
     fn n_fields() -> usize {
-        G1PointCairo::n_fields() + 1 + 1
+        G1PointCairo::n_fields() + G2PointCairo::n_fields() + 2
     }
 }
 
@@ -141,7 +147,7 @@ impl CairoWritable for ExecutionHeaderProofCairo {
         cairo_vm_base::vm::cairo_vm::types::relocatable::Relocatable,
         cairo_vm_base::vm::cairo_vm::vm::errors::hint_errors::HintError,
     > {
-        println!("ExecutionHeaderProofCairo: {:?}", self);
+        println!("ExecutionHeaderProofCairo: {self:?}");
         let mut current_ptr = address;
 
         current_ptr = self.root.to_memory(vm, current_ptr)?;
@@ -231,14 +237,13 @@ impl CairoWritable for BeaconHeaderCairo {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct EpochUpdateCairo {
-    pub signature_point: G2PointCairo,
-    pub header: BeaconHeaderCairo,
-    pub signer_data: SignerDataCairo,
+pub struct ConsensusInputsCairo {
+    pub beacon_header: BeaconHeaderCairo,
+    pub signature: SyncCommitteeSignerInputCairo,
     pub execution_header_proof: ExecutionHeaderProofCairo,
 }
 
-impl CairoWritable for EpochUpdateCairo {
+impl CairoWritable for ConsensusInputsCairo {
     fn to_memory(
         &self,
         vm: &mut cairo_vm_base::vm::cairo_vm::vm::vm_core::VirtualMachine,
@@ -249,31 +254,29 @@ impl CairoWritable for EpochUpdateCairo {
     > {
         let mut current_ptr = address;
 
-        current_ptr = self.signature_point.to_memory(vm, current_ptr)?;
-        current_ptr = self.header.to_memory(vm, current_ptr)?;
-        current_ptr = self.signer_data.to_memory(vm, current_ptr)?;
+        current_ptr = self.beacon_header.to_memory(vm, current_ptr)?;
+        current_ptr = self.signature.to_memory(vm, current_ptr)?;
         current_ptr = self.execution_header_proof.to_memory(vm, current_ptr)?;
 
         Ok(current_ptr)
     }
 
     fn n_fields() -> usize {
-        G2PointCairo::n_fields()
-            + BeaconHeaderCairo::n_fields()
-            + SignerDataCairo::n_fields()
+        BeaconHeaderCairo::n_fields()
+            + SyncCommitteeSignerInputCairo::n_fields()
             + ExecutionHeaderProofCairo::n_fields()
     }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct SyncCommitteeDataCairo {
+pub struct SyncCommitteeUpdateProofCairo {
     pub beacon_slot: Felt,
     pub next_sync_committee_branch: Vec<Uint256Bits32>,
     pub next_aggregate_sync_committee: UInt384,
     pub committee_keys_root: Uint256Bits32,
 }
 
-impl CairoWritable for SyncCommitteeDataCairo {
+impl CairoWritable for SyncCommitteeUpdateProofCairo {
     fn to_memory(
         &self,
         vm: &mut cairo_vm_base::vm::cairo_vm::vm::vm_core::VirtualMachine,

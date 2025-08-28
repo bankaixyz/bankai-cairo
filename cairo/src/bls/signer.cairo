@@ -6,7 +6,7 @@ from starkware.cairo.common.alloc import alloc
 from definitions import G1Point
 from ec_ops import add_ec_points, is_on_curve_g1, sub_ec_points
 from sha import HashUtils, SHA256
-from cairo.src.types import SignerData
+from cairo.src.io import SyncCommitteeSignatureInput
 
 // This file contains functions for aggregating public keys of signers in a BLS signature scheme.
 
@@ -17,24 +17,24 @@ func aggregate_signer_pubs{
     add_mod_ptr: ModBuiltin*,
     mul_mod_ptr: ModBuiltin*,
     sha256_ptr: felt*,
-}(signer_data: SignerData) -> (committee_hash: Uint256, agg_pub: G1Point, n_non_signers: felt) {
+}(signer_data: SyncCommitteeSignatureInput) -> (
+    committee_hash: Uint256, agg_pub: G1Point, n_non_signers: felt
+) {
     alloc_locals;
 
     let non_signers = signer_data.non_signers;
     let n_non_signers = signer_data.n_non_signers;
-    let committee_pub = signer_data.committee_pub;
+    let aggregate_pub = signer_data.aggregate_pub;
 
     // Call the recursive function to aggregate public keys
     if (n_non_signers != 0) {
-        let (agg_non_signer_pub) = aggregate_signer_pubs_inner(
-            non_signers, n_non_signers
-        );
-        let (signer_key) = sub_ec_points(1, committee_pub, agg_non_signer_pub);
-        let committee_hash = commit_committee_key(point=committee_pub);
+        let (agg_non_signer_pub) = aggregate_signer_pubs_inner(non_signers, n_non_signers);
+        let (signer_key) = sub_ec_points(1, aggregate_pub, agg_non_signer_pub);
+        let committee_hash = commit_committee_key(point=aggregate_pub);
         return (committee_hash=committee_hash, agg_pub=signer_key, n_non_signers=n_non_signers);
     } else {
-        let committee_hash = commit_committee_key(point=committee_pub);
-        return (committee_hash=committee_hash, agg_pub=committee_pub, n_non_signers=n_non_signers);
+        let committee_hash = commit_committee_key(point=aggregate_pub);
+        return (committee_hash=committee_hash, agg_pub=aggregate_pub, n_non_signers=n_non_signers);
     }
 }
 
@@ -56,9 +56,7 @@ func aggregate_signer_pubs_inner{
     assert on_curve = 1;
 
     // Recursively process the remaining non-signer keys
-    let (res) = aggregate_signer_pubs_inner(
-        non_signers + G1Point.SIZE, n_non_signers - 1
-    );
+    let (res) = aggregate_signer_pubs_inner(non_signers + G1Point.SIZE, n_non_signers - 1);
     // Subtract the current non-signer's public key from the aggregated result
     return add_ec_points(1, res, non_signers[0]);  // try adding non signers and the subbing result
 }

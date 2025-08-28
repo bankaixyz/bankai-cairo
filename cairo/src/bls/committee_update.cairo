@@ -1,4 +1,9 @@
-from starkware.cairo.common.cairo_builtins import PoseidonBuiltin, ModBuiltin, BitwiseBuiltin, HashBuiltin
+from starkware.cairo.common.cairo_builtins import (
+    PoseidonBuiltin,
+    ModBuiltin,
+    BitwiseBuiltin,
+    HashBuiltin,
+)
 from starkware.cairo.common.bitwise import bitwise_and
 from starkware.cairo.common.registers import get_fp_and_pc
 from starkware.cairo.common.alloc import alloc
@@ -14,6 +19,7 @@ from cairo.src.utils.domain import Network
 from cairo.src.utils.utils import pow2alloc128, felt_divmod
 from cairo.src.bls.signer import commit_committee_key
 from cairo.src.utils.ssz import MerkleTree
+from cairo.src.io import SyncCommitteeUpdateInputs
 
 // Compute the leaf hash for the Merkle tree
 func compute_leaf_hash{range_check_ptr, pow2_array: felt*, sha256_ptr: felt*}(
@@ -95,13 +101,9 @@ func run_committee_update{
     mul_mod_ptr: ModBuiltin*,
     pow2_array: felt*,
     sha256_ptr: felt*,
-}(
-    committee_keys_root: felt*,
-    path: felt**,
-    path_len: felt,
-    aggregate_committee_key: UInt384,
-    slot: felt
-) -> (state_root: Uint256, committee_hash: Uint256) {
+}(committee_input: SyncCommitteeUpdateInputs, slot: felt) -> (
+    state_root: Uint256, committee_hash: Uint256
+) {
     alloc_locals;
 
     let fork = Network.get_fork_version(Network.SEPOLIA, slot);
@@ -112,12 +114,17 @@ func run_committee_update{
         next_committee_index = 55;
     }
 
-    let leaf_hash = compute_leaf_hash(committee_keys_root, aggregate_committee_key);
-    
-    let state_root = MerkleTree.hash_merkle_path(
-        path=path, path_len=path_len, leaf=leaf_hash, index=next_committee_index
+    let leaf_hash = compute_leaf_hash(
+        committee_input.committee_keys_root, committee_input.next_committee_key
     );
-    let committee_hash = compute_committee_hash(aggregate_committee_key);
+
+    let state_root = MerkleTree.hash_merkle_path(
+        path=committee_input.path,
+        path_len=committee_input.path_len,
+        leaf=leaf_hash,
+        index=next_committee_index,
+    );
+    let committee_hash = compute_committee_hash(committee_input.next_committee_key);
 
     return (state_root, committee_hash);
 }
