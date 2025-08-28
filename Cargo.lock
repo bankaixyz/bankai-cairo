@@ -389,7 +389,7 @@ dependencies = [
  "serde_json",
  "thiserror 2.0.12",
  "tracing",
- "tree_hash 0.9.1",
+ "tree_hash",
  "types",
 ]
 
@@ -489,7 +489,7 @@ dependencies = [
  "rand 0.8.5",
  "safe_arith",
  "serde",
- "tree_hash 0.9.1",
+ "tree_hash",
  "zeroize",
 ]
 
@@ -1101,8 +1101,7 @@ dependencies = [
  "stone-verifier-hints",
  "thiserror 2.0.12",
  "tracing",
- "tree_hash 0.8.0",
- "tree_hash_derive 0.8.0",
+ "tree_hash",
  "types",
 ]
 
@@ -2312,7 +2311,7 @@ dependencies = [
  "rust_eth_kzg",
  "serde",
  "serde_json",
- "tree_hash 0.9.1",
+ "tree_hash",
 ]
 
 [[package]]
@@ -2524,7 +2523,7 @@ dependencies = [
  "rayon",
  "serde",
  "smallvec",
- "tree_hash 0.9.1",
+ "tree_hash",
  "triomphe",
  "typenum",
  "vec_map",
@@ -3626,7 +3625,7 @@ dependencies = [
  "serde",
  "serde_derive",
  "smallvec",
- "tree_hash 0.9.1",
+ "tree_hash",
  "typenum",
 ]
 
@@ -3977,17 +3976,6 @@ dependencies = [
 
 [[package]]
 name = "tree_hash"
-version = "0.8.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "373495c23db675a5192de8b610395e1bec324d596f9e6111192ce903dc11403a"
-dependencies = [
- "alloy-primitives",
- "ethereum_hashing",
- "smallvec",
-]
-
-[[package]]
-name = "tree_hash"
 version = "0.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6c58eb0f518840670270d90d97ffee702d8662d9c5494870c9e1e9e0fa00f668"
@@ -3997,18 +3985,6 @@ dependencies = [
  "ethereum_ssz",
  "smallvec",
  "typenum",
-]
-
-[[package]]
-name = "tree_hash_derive"
-version = "0.8.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b0857056ca4eb5de8c417309be42bcff6017b47e86fbaddde609b4633f66061e"
-dependencies = [
- "darling 0.20.11",
- "proc-macro2",
- "quote",
- "syn 2.0.101",
 ]
 
 [[package]]
@@ -4091,8 +4067,8 @@ dependencies = [
  "tempfile",
  "test_random_derive",
  "tracing",
- "tree_hash 0.9.1",
- "tree_hash_derive 0.9.1",
+ "tree_hash",
+ "tree_hash_derive",
 ]
 
 [[package]]
