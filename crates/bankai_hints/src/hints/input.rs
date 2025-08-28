@@ -24,15 +24,15 @@ pub fn write_consensus_inputs(
     _constants: &HashMap<String, Felt252>,
 ) -> Result<(), HintError> {
     let inputs = exec_scopes.get_ref::<StoneInputsCairo>("inputs")?;
-    let epoch_update = &inputs.consensus_inputs;
-    let epoch_update_ptr = get_relocatable_from_var_name(
+    let consensus_data = &inputs.consensus_data;
+    let consensus_data_ptr = get_relocatable_from_var_name(
         "consensus_inputs",
         vm,
         &hint_data.ids_data,
         &hint_data.ap_tracking,
     )?;
 
-    epoch_update.to_memory(vm, epoch_update_ptr)?;
+    consensus_data.to_memory(vm, consensus_data_ptr)?;
 
     let is_genesis_ptr = get_relocatable_from_var_name(
         "is_genesis",

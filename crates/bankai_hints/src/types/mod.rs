@@ -18,7 +18,7 @@ pub struct StoneCircuitLayoutCairo {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct StoneInputsCairo {
-    pub consensus_inputs: ConsensusInputsCairo,
+    pub consensus_data: ConsensusInputsCairo,
     pub sync_committee_update: Option<SyncCommitteeUpdateProofCairo>,
     pub proof_data: ProofDataCairo,
 }
@@ -96,6 +96,7 @@ impl CairoWritable for SyncCommitteeSignerInputCairo {
     > {
         let mut current_ptr = address;
 
+        current_ptr = self.signature_point.to_memory(vm, current_ptr)?;
         current_ptr = self.aggregate_pub.to_memory(vm, current_ptr)?;
 
         // Create segment for non-signers and store its pointer
@@ -125,7 +126,7 @@ impl CairoWritable for SyncCommitteeSignerInputCairo {
     }
 
     fn n_fields() -> usize {
-        G1PointCairo::n_fields() + 1 + 1
+        G1PointCairo::n_fields() + G2PointCairo::n_fields() + 2
     }
 }
 
