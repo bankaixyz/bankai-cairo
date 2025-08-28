@@ -13,7 +13,8 @@ from cairo.src.recursion.stone import verify_stone_proof
 
 from sha import SHA256
 from debug import print_felt_hex, print_string
-from cairo.src.types import EpochUpdate, EpochUpdateOutput, CircuitOutput
+from cairo.src.io import ConsensusInputs, CircuitOutput, SyncCommitteeUpdateInputs
+from cairo.src.types import EpochUpdateOutput
 from cairo.src.bls.verify_epoch import run_epoch_update
 from cairo.src.bls.committee_update import run_committee_update
 from cairo.src.utils.utils import felt_divmod, pow2alloc128
@@ -38,7 +39,7 @@ func main{
     let (sha256_ptr, sha256_ptr_start) = SHA256.init();
     let (pow2_array) = pow2alloc128();
 
-    local epoch_update: EpochUpdate;
+    local consensus_inputs: ConsensusInputs;
     local is_genesis: felt;
     local is_committee_update: felt; // do we add a new committee? 1 if yes, 0 if no
     local program_hash: felt;
@@ -55,7 +56,7 @@ func main{
 
     if (is_genesis == 1) {
         with pow2_array, sha256_ptr {
-            let (epoch_update_output) = handle_genesis_case(epoch_update);
+            let (epoch_update_output) = handle_genesis_case(consensus_inputs);
         }
         let next_committee_hash = Uint256(low=0x0, high=0x0);
         assert is_committee_update = 0;
@@ -67,7 +68,7 @@ func main{
     } else {
         print_string('recursive case');
 
-        let (_, remainder) = felt_divmod(epoch_update.header.slot.low + 1, SYNC_COMMITTEE_PERIOD);
+        let (_, remainder) = felt_divmod(consensus_inputs.beacon_header.slot.low + 1, SYNC_COMMITTEE_PERIOD);
         local is_committee_transition: felt;
         if (remainder == 0) {
             is_committee_transition = 1;
@@ -78,7 +79,7 @@ func main{
         print_felt_hex(is_committee_transition);
 
         with pow2_array, sha256_ptr {
-            let (epoch_update_output, next_committee_hash) = handle_recursive_case(epoch_update, program_hash, is_committee_transition);
+            let (epoch_update_output, next_committee_hash) = handle_recursive_case(consensus_inputs, program_hash, is_committee_transition);
         }
         print_string('confirmed epoch');
 
@@ -88,18 +89,12 @@ func main{
             assert next_committee_hash.low = 0x0;
             assert next_committee_hash.high = 0x0;
 
-            let (committee_keys_root: felt*) = alloc();
-            let (path: felt**) = alloc();
-            local path_len: felt;
-            local aggregate_committee_key: UInt384;
+            local committee_input: SyncCommitteeUpdateInputs;
             
             %{ write_committee_update_inputs() %}
             with pow2_array, sha256_ptr {
                 let (state_root, new_next_committee_hash) = run_committee_update(
-                    committee_keys_root=committee_keys_root,
-                    path=path,
-                    path_len=path_len,
-                    aggregate_committee_key=aggregate_committee_key,
+                    committee_input=committee_input,
                     slot=epoch_update_output.beacon_height
                 );
             }
@@ -133,12 +128,12 @@ func handle_recursive_case{
     mul_mod_ptr: ModBuiltin*,
     sha256_ptr: felt*,
     pow2_array: felt*,
-}(epoch_update: EpochUpdate, program_hash: felt, is_committee_transition: felt) -> (EpochUpdateOutput, Uint256) {
+}(consensus_inputs: ConsensusInputs, program_hash: felt, is_committee_transition: felt) -> (EpochUpdateOutput, Uint256) {
     alloc_locals;
 
     print_string('handle_recursive_case');
 
-    let (epoch_update_output) = run_epoch_update(epoch_update);
+    let (epoch_update_output) = run_epoch_update(consensus_inputs);
     print_string('epoch update output');
 
     local expected_proof_output: CircuitOutput;
@@ -241,10 +236,10 @@ func handle_genesis_case{
     mul_mod_ptr: ModBuiltin*,
     sha256_ptr: felt*,
     pow2_array: felt*,
-}(epoch_update: EpochUpdate) -> (epoch_update_output: EpochUpdateOutput) {
+}(consensus_inputs: ConsensusInputs) -> (epoch_update_output: EpochUpdateOutput) {
     alloc_locals;
 
-    let (epoch_update_output) = run_epoch_update(epoch_update);
+    let (epoch_update_output) = run_epoch_update(consensus_inputs);
 
     tempvar expected_genesis_committee = Uint256(low=0xe5fec5cd2304cab6086b1eea025ccd74, high=0xf32b83714599ab70193ba4597159560c);
     assert expected_genesis_committee.low = epoch_update_output.current_committee_hash.low;

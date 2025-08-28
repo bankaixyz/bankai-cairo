@@ -6,7 +6,7 @@ from cairo.src.verify_stone import verify_cairo_proof
 from starkware.cairo.common.registers import get_fp_and_pc
 from cairo.src.utils import pow2alloc128
 from sha import SHA256
-from cairo.src.types import EpochUpdate
+from cairo.src.io import EpochUpdate
 from cairo.src.verify_epoch import run_epoch_update
 
 func main{

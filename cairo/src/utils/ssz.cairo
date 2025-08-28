@@ -16,7 +16,7 @@ from sha import SHA256
 from debug import print_string, print_felt, print_felt_hex
 
 from cairo.src.utils.utils import pow2alloc128, felt_divmod
-from cairo.src.types import ExecutionHeaderProof
+from cairo.src.io import ExecutionHeaderProof
 
 namespace SSZ {
     func hash_pair_container{
