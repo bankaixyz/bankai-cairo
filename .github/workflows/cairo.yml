@@ -32,7 +32,7 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y python3.10-venv parallel
+        sudo apt-get install -y parallel
     
     - name: Run setup script
       run: |
