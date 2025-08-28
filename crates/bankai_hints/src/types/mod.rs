@@ -29,7 +29,6 @@ pub struct ProofDataCairo {
     pub proof_output: Option<CircuitOutputCairo>,
 }
 
-
 #[derive(Debug, Serialize, Deserialize)]
 pub struct CircuitOutputCairo {
     pub beacon_header_root: Uint256,
@@ -148,7 +147,7 @@ impl CairoWritable for ExecutionHeaderProofCairo {
         cairo_vm_base::vm::cairo_vm::types::relocatable::Relocatable,
         cairo_vm_base::vm::cairo_vm::vm::errors::hint_errors::HintError,
     > {
-        println!("ExecutionHeaderProofCairo: {:?}", self);
+        println!("ExecutionHeaderProofCairo: {self:?}");
         let mut current_ptr = address;
 
         current_ptr = self.root.to_memory(vm, current_ptr)?;
@@ -236,7 +235,6 @@ impl CairoWritable for BeaconHeaderCairo {
         Uint256::n_fields() * 5
     }
 }
-
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ConsensusInputsCairo {

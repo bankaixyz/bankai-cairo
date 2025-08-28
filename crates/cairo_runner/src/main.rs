@@ -1,8 +1,6 @@
 #![allow(clippy::result_large_err)]
 use bankai_hints::types::StoneCircuitLayoutCairo;
-use cairo_runner::{
-    error::Error, hint_processor::CustomHintProcessor,
-};
+use cairo_runner::{error::Error, hint_processor::CustomHintProcessor};
 use cairo_vm_base::vm::cairo_vm::{
     cairo_run::{self, cairo_run_program_with_initial_scope},
     types::{exec_scope::ExecutionScopes, layout_name::LayoutName, program::Program},

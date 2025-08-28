@@ -40,7 +40,7 @@ pub fn write_consensus_inputs(
         &hint_data.ids_data,
         &hint_data.ap_tracking,
     )?;
-    
+
     let is_genesis = match &inputs.proof_data.proof {
         Some(_) => 0,
         None => 1,
