@@ -1,7 +1,7 @@
 #![allow(clippy::result_large_err)]
-use bankai_hints::types::RecursiveEpochUpdateCairo;
+use bankai_hints::types::StoneCircuitLayoutCairo;
 use cairo_runner::{
-    backend_types::RecursiveEpochUpdate, error::Error, hint_processor::CustomHintProcessor,
+    error::Error, hint_processor::CustomHintProcessor,
 };
 use cairo_vm_base::vm::cairo_vm::{
     cairo_run::{self, cairo_run_program_with_initial_scope},
@@ -69,7 +69,7 @@ fn load_program(path: &str) -> Result<Program, Error> {
 //     Ok(())
 // }
 
-pub fn run(path: &str, input: RecursiveEpochUpdateCairo) -> Result<CairoPie, Error> {
+pub fn run(path: &str, input: StoneCircuitLayoutCairo) -> Result<CairoPie, Error> {
     let program = load_program(path)?;
     let cairo_run_config = cairo_run::CairoRunConfig {
         allow_missing_builtins: Some(true),
@@ -78,8 +78,8 @@ pub fn run(path: &str, input: RecursiveEpochUpdateCairo) -> Result<CairoPie, Err
     };
     let mut hint_processor = CustomHintProcessor::new();
     let mut exec_scopes = ExecutionScopes::new();
-    exec_scopes.insert_value("inputs", input.inputs);
-    exec_scopes.insert_value("outputs", input.outputs);
+    exec_scopes.insert_value("inputs", input.input);
+    exec_scopes.insert_value("outputs", input.output);
     exec_scopes.insert_value("program_object", program.clone());
 
     let cairo_runner = cairo_run_program_with_initial_scope(
@@ -140,12 +140,11 @@ pub fn run(path: &str, input: RecursiveEpochUpdateCairo) -> Result<CairoPie, Err
 fn main() {
     let args = Args::parse();
     let input_str = std::fs::read_to_string(args.input_path).unwrap();
-    let input: RecursiveEpochUpdate = serde_json::from_str(&input_str).unwrap();
-    let input_cairo: RecursiveEpochUpdateCairo = input.into();
+    let input: StoneCircuitLayoutCairo = serde_json::from_str(&input_str).unwrap();
 
     let output_dir: &'static str = "output/";
     let program_path = "cairo/build/bankai_stone.json";
-    let pie = run(program_path, input_cairo).unwrap();
+    let pie = run(program_path, input).unwrap();
 
     pie.write_zip_file(&Path::new(output_dir).join("pie.zip"), true)
         .unwrap();
