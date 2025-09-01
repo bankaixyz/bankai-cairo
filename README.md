@@ -25,6 +25,17 @@ The project includes several Rust crates located in the `crates/` directory to s
 
 A dedicated Cairo runner in `crates/cairo_runner/` is used to execute the compiled Cairo programs. It loads the program and its inputs, runs the Cairo VM, and produces a Cairo PIE (Proof-Integrated Execution) file as output, which can be sent to a prover.
 
+##### API Runner
+The `cairo_runner` crate also includes a web server that exposes an API for generating PIEs. The API is implemented in `crates/cairo_runner/bin/api.rs` and provides a `/generate-pie` endpoint. This allows for remote generation of proofs without needing to run the cairo runner locally.
+
+###### Docker Commands
+To build and push the Docker image for the API runner, use the following commands:
+
+```sh
+docker build -f Dockerfile.api -t petscheit/bankai-runner .
+docker push petscheit/bankai-runner:latest
+```
+
 #### Bankai Hints
 
 The `crates/bankai_hints/` crate provides the custom hints required by the Cairo programs to be executed by the Rust Cairo VM. These hints are used to inject inputs and handle complex computations that are not efficiently expressed in Cairo. The crate also contains Rust type definitions that mirror the Cairo structs, facilitating seamless interaction between the two languages.

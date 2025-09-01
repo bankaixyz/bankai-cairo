@@ -25,7 +25,7 @@ fn generate_pie(input: StoneCircuitLayoutCairo) {
     let output_dir: &'static str = "output/";
 
     let pie = run(program_path, input).unwrap();
-    
+
     pie.write_zip_file(&Path::new(output_dir).join("pie.zip"), true)
         .unwrap();
 }

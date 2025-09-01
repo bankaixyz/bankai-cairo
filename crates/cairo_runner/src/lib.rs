@@ -2,8 +2,8 @@
 pub mod error;
 pub mod hint_processor;
 
-use bankai_hints::types::StoneCircuitLayoutCairo;
 use crate::{error::Error, hint_processor::CustomHintProcessor};
+use bankai_hints::types::StoneCircuitLayoutCairo;
 use cairo_vm_base::vm::cairo_vm::{
     cairo_run::{self, cairo_run_program_with_initial_scope},
     types::{exec_scope::ExecutionScopes, layout_name::LayoutName, program::Program},
