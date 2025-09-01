@@ -1,0 +1,113 @@
+# Declare the Python version build argument globally.
+ARG PYTHON_VERSION=3.10-slim
+
+# Stage 1: Build the daemon binary with Rust
+FROM python:${PYTHON_VERSION} AS builder
+
+# Install required dependencies for building
+RUN apt-get update && apt-get install -y \
+    pkg-config \
+    libssl3 \
+    libssl-dev \
+    curl \
+    build-essential \
+    && ln -s /usr/bin/python3 /usr/bin/python
+
+# Install Rust
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+ENV PATH="/root/.cargo/bin:${PATH}"
+
+# Install cargo-chef
+RUN cargo install cargo-chef --locked
+
+# Optionally set the environment variable so that pyo3 uses python3.
+ENV PYO3_PYTHON=python3
+
+WORKDIR /app
+
+# --- Start Cargo Chef Integration ---
+
+# Layer 1: Prepare recipe.
+# This layer caches based on manifest files and minimal local crate structure.
+COPY Cargo.toml Cargo.lock rust-toolchain.toml ./
+
+# Copy Cargo.toml for workspace members and create stub src files/dirs.
+# Paths are relative to the Docker build context.
+COPY crates/bankai_hints/Cargo.toml ./crates/bankai_hints/Cargo.toml
+COPY crates/stone_verifier_hints/Cargo.toml ./crates/stone_verifier_hints/Cargo.toml
+COPY crates/cairo_runner/Cargo.toml ./crates/cairo_runner/Cargo.toml
+RUN mkdir -p crates/bankai_hints/src && touch crates/bankai_hints/src/lib.rs && \
+    mkdir -p crates/stone_verifier_hints/src && touch crates/stone_verifier_hints/src/lib.rs && \
+    mkdir -p crates/cairo_runner/src && touch crates/cairo_runner/src/lib.rs && \
+    mkdir -p crates/cairo_runner/bin && touch crates/cairo_runner/bin/api.rs
+
+# Copy Cargo.toml for the path dependency and create stub src file/dir.
+# Path from Cargo.toml: "../cairo/packages/garaga-zero/hints/rust-vm"
+# Resolved from project root: "cairo/packages/garaga-zero/hints/rust-vm"
+COPY cairo/packages/garaga-zero/Cargo.toml ./cairo/packages/garaga-zero/Cargo.toml
+RUN mkdir -p cairo/packages/garaga-zero/hints/rust-vm/src && touch cairo/packages/garaga-zero/hints/rust-vm/src/lib.rs
+
+RUN cargo chef prepare --recipe-path recipe.json
+
+# Layer 2: Cook recipe (compile dependencies).
+# This layer caches based on the recipe.json.
+RUN cargo chef cook --release --recipe-path recipe.json -p cairo-runner
+
+# Layer 3: Build the application.
+# This layer caches based on application source code changes.
+# Copy the full source code. This overwrites the stub files and Cargo.toml files
+# (which is fine as they are identical or the new ones are what we want for the build).
+COPY . .
+RUN cargo build --release --bin api
+
+# --- End Cargo Chef Integration ---
+
+# Stage 2: Final image with Python installed
+FROM python:${PYTHON_VERSION}
+WORKDIR /app
+
+# Install the required runtime libraries, git, build tools, and uv
+RUN apt-get update && apt-get install -y \
+    pkg-config \
+    libssl3 \
+    libssl-dev \
+    git \
+    build-essential \
+    gcc \
+    libgmp-dev \
+    && ln -s /usr/bin/python3 /usr/bin/python \
+    && pip install --no-cache-dir --force-reinstall uv
+
+# Copy only the pyproject.toml file first to leverage caching for dependencies
+COPY cairo/packages/garaga-zero/pyproject.toml ./cairo/packages/garaga-zero/pyproject.toml
+
+# Install Python dependencies based on pyproject.toml
+# These layers will be cached if pyproject.toml hasn't changed
+RUN uv pip compile cairo/packages/garaga-zero/pyproject.toml --output-file requirements.txt -q
+RUN uv pip install --no-cache-dir --force-reinstall --system -r requirements.txt
+RUN pip install --no-cache-dir --force-reinstall py_ecc
+
+# Copy only the necessary source code and configuration files
+COPY crates/ ./crates/
+COPY cairo/src/ ./cairo/src/
+COPY cairo/build/ ./cairo/build/
+COPY cairo/packages/garaga-zero/ ./cairo/packages/garaga-zero/
+
+# Set the environment variable for pyo3
+ENV PYO3_PYTHON=python3
+ENV PYTHONPATH=/usr/local/lib/python3.10:/app/cairo/packages/garaga-zero:/usr/local/lib/python3.10/site-packages
+
+# Copy the compiled API binary from the builder stage
+COPY --from=builder /app/target/release/api /app/bin/api
+
+# Copy the compiled cairo files into the image. Adjust source/destination as needed.
+COPY --from=builder /app/cairo/build/ /app/cairo/build/
+
+# Create output directory
+RUN mkdir -p /app/output
+
+# Expose the API port
+EXPOSE 3030
+
+# Define the entrypoint for the container.
+ENTRYPOINT ["/app/bin/api", "--docker"] 
