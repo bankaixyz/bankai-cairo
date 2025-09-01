@@ -264,8 +264,9 @@ func handle_genesis_case{
     let (epoch_update_output) = run_epoch_update(consensus_inputs);
 
     tempvar expected_genesis_committee = Uint256(
-        low=0xe5fec5cd2304cab6086b1eea025ccd74, high=0xf32b83714599ab70193ba4597159560c
+        low=0x36c253a239c2878d1a6aa8d46dfe4be8, high=0xdfb8eb2acda46f413d93538c7d6b3610
     );
+
     assert expected_genesis_committee.low = epoch_update_output.current_committee_hash.low;
     assert expected_genesis_committee.high = epoch_update_output.current_committee_hash.high;
 
