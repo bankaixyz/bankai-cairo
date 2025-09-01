@@ -183,6 +183,7 @@
     },
     "sync_committee_update": null,
     "proof_data": {
+      "block_number": 1,
       "proof": {
         "annotations": [
           "title cpu air Proof Protocol",

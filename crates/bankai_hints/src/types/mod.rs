@@ -20,13 +20,14 @@ pub struct StoneCircuitLayoutCairo {
 pub struct StoneInputsCairo {
     pub consensus_data: ConsensusInputsCairo,
     pub sync_committee_update: Option<SyncCommitteeUpdateProofCairo>,
-    pub proof_data: ProofDataCairo,
+    pub proof_data: Option<ProofDataCairo>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ProofDataCairo {
-    pub proof: Option<serde_json::Value>,
-    pub proof_output: Option<CircuitOutputCairo>,
+    pub block_number: u64,
+    pub proof: serde_json::Value,
+    pub proof_output: CircuitOutputCairo,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

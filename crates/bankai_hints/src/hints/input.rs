@@ -41,7 +41,7 @@ pub fn write_consensus_inputs(
         &hint_data.ap_tracking,
     )?;
 
-    let is_genesis = match &inputs.proof_data.proof {
+    let is_genesis = match &inputs.proof_data {
         Some(_) => 0,
         None => 1,
     };
@@ -86,7 +86,7 @@ pub fn write_expected_proof_output(
     _constants: &HashMap<String, Felt252>,
 ) -> Result<(), HintError> {
     let inputs = exec_scopes.get_ref::<StoneInputsCairo>("inputs")?;
-    if let Some(stark_proof_output) = &inputs.proof_data.proof_output {
+    if let Some(proof_data) = &inputs.proof_data {
         let expected_output_ptr = get_relocatable_from_var_name(
             "expected_proof_output",
             vm,
@@ -94,7 +94,7 @@ pub fn write_expected_proof_output(
             &hint_data.ap_tracking,
         )?;
 
-        stark_proof_output.to_memory(vm, expected_output_ptr)?;
+        proof_data.proof_output.to_memory(vm, expected_output_ptr)?;
     }
 
     Ok(())
@@ -107,9 +107,9 @@ pub fn write_stone_proof_inputs(
     _constants: &HashMap<String, Felt252>,
 ) -> Result<(), HintError> {
     let inputs = exec_scopes.get_ref::<StoneInputsCairo>("inputs")?;
-    if let Some(stone_proof) = &inputs.proof_data.proof {
+    if let Some(proof_data) = &inputs.proof_data {
         let proof_string = serde_json::json!({
-            "proof": stone_proof
+            "proof": proof_data.proof
         })
         .to_string();
         exec_scopes.insert_value("program_input", proof_string);
