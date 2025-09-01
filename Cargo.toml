@@ -20,6 +20,7 @@ bincode = { version = "2.0.1" }
 hex = { version = "0.4.3" }
 thiserror = { version = "2.0.9" }
 tracing = { version = "0.1.41" }
+tracing-subscriber = { version = "0.3.20" }
 tree_hash = { version = "0.9" }
 clap = { version = "4.5.22", features = ["derive"] }
 warp = { version = "0.4", features = ["server"] }

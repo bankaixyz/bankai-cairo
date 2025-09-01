@@ -1,33 +1,73 @@
+use clap::Parser;
 use warp::{Filter, Reply, Rejection, http::StatusCode};
 use std::path::Path;
+use std::sync::Arc;
 use std::time::Duration;
 use bankai_hints::types::StoneCircuitLayoutCairo;
 use cairo_runner::run;
+use tracing::{info, instrument, Level};
+use tracing_subscriber::FmtSubscriber;
+
+#[derive(Parser, Debug)]
+#[command(author, version, about, long_about = None)]
+struct Args {
+    /// Run in Docker mode
+    #[arg(long, default_value_t = false)]
+    docker: bool,
+}
 
 #[tokio::main]
 async fn main() {
+    let args = Args::parse();
+    
+    // Initialize tracing
+    let subscriber = FmtSubscriber::builder()
+        .with_max_level(Level::INFO)
+        .finish();
+    tracing::subscriber::set_global_default(subscriber)
+        .expect("setting default subscriber failed");
+    
+    info!("Running in {} mode", if args.docker { "Docker" } else { "local" });
+    
+    let docker_flag = Arc::new(args.docker);
+    let docker_flag_filter = warp::any().map(move || docker_flag.clone());
+    
     let generate_pie = warp::path("generate-pie")
         .and(warp::post())
         .and(warp::body::json())
+        .and(docker_flag_filter)
         .and_then(handle_generate_pie);
 
     let routes = generate_pie
-        .with(warp::cors().allow_any_origin());
+        .with(warp::cors().allow_any_origin())
+        .with(warp::trace::request());
 
-    println!("Starting server on http://localhost:3030");
-    println!("Request timeout: 5 minutes");
+    info!("Starting server on http://localhost:3030");
+    info!("Request timeout: 5 minutes");
+    
+    let bind_addr = if args.docker {
+        ([0, 0, 0, 0], 3030)  // Bind to all interfaces in Docker
+    } else {
+        ([127, 0, 0, 1], 3030)  // Bind to localhost only when running locally
+    };
     
     warp::serve(routes)
-        .run(([127, 0, 0, 1], 3030))
+        .run(bind_addr)
         .await;
 }
 
-async fn handle_generate_pie(input: StoneCircuitLayoutCairo) -> Result<Box<dyn Reply>, Rejection> {
+#[instrument]
+async fn handle_generate_pie(
+    input: StoneCircuitLayoutCairo,
+    is_docker: Arc<bool>,
+) -> Result<Box<dyn Reply>, Rejection> {
     // Set a 5-minute timeout for the operation
+    info!("Generating PIE...");
     let timeout_duration = Duration::from_secs(300); // 5 minutes
-    
-    match tokio::time::timeout(timeout_duration, generate_pie_internal(input)).await {
+    info!("Timeout duration: {:?}", timeout_duration);
+    match tokio::time::timeout(timeout_duration, generate_pie_internal(input, *is_docker)).await {
         Ok(Ok(zip_data)) => {
+            info!("PIE generated successfully");
             let timestamp = chrono::Utc::now().timestamp();
             let filename = format!("pie_{timestamp}.zip");
             
@@ -43,6 +83,7 @@ async fn handle_generate_pie(input: StoneCircuitLayoutCairo) -> Result<Box<dyn R
             Ok(Box::new(reply))
         }
         Ok(Err(e)) => {
+            info!("Failed to generate PIE: {e}");
             let response = serde_json::json!({
                 "status": "error",
                 "message": format!("Failed to generate PIE: {}", e)
@@ -54,6 +95,7 @@ async fn handle_generate_pie(input: StoneCircuitLayoutCairo) -> Result<Box<dyn R
             Ok(Box::new(reply))
         }
         Err(_) => {
+            info!("PIE generation timed out after 5 minutes");
             let response = serde_json::json!({
                 "status": "error",
                 "message": "PIE generation timed out after 5 minutes"
@@ -67,10 +109,17 @@ async fn handle_generate_pie(input: StoneCircuitLayoutCairo) -> Result<Box<dyn R
     }
 }
 
-async fn generate_pie_internal(input: StoneCircuitLayoutCairo) -> Result<Vec<u8>, Box<dyn std::error::Error + Send + Sync>> {
-    let program_path = "cairo/build/bankai_stone.json";
-    let output_dir = "output/";
-    
+#[instrument]
+async fn generate_pie_internal(
+    input: StoneCircuitLayoutCairo,
+    is_docker: bool,
+) -> Result<Vec<u8>, Box<dyn std::error::Error + Send + Sync>> {
+    let (program_path, output_dir) = if is_docker {
+        ("/app/cairo/build/bankai_stone.json", "/app/output/")
+    } else {
+        ("cairo/build/bankai_stone.json", "output/")
+    };
+
     // Generate timestamp for unique filename
     let timestamp = chrono::Utc::now().timestamp();
     let filename = format!("pie_{timestamp}.zip");

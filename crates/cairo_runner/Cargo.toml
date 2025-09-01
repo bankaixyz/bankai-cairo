@@ -27,5 +27,4 @@ tree_hash.workspace = true
 warp.workspace = true
 tokio.workspace = true
 chrono.workspace = true
-bytes = "1"
-tempfile = "3"
+tracing-subscriber.workspace = true
