@@ -13,11 +13,10 @@ from cairo.src.utils.constants import g1_negative
 from cairo.src.utils.domain import Domain, Network
 from cairo.src.bls.signer import aggregate_signer_pubs
 from cairo.src.utils.utils import pow2alloc128
-from cairo.src.io import ExecutionHeaderProof, BeaconHeader, ConsensusInputs
+from cairo.src.io import ExecutionHeaderProof, BeaconHeader, ConsensusInputs, BeaconClientOutput, ExecutionClientOutput, CircuitOutput2
 from cairo.src.types import EpochUpdateOutput
 
-func run_epoch_update{
-    output_ptr: felt*,
+func run_beacon_update{
     range_check_ptr,
     bitwise_ptr: BitwiseBuiltin*,
     poseidon_ptr: PoseidonBuiltin*,
@@ -26,7 +25,10 @@ func run_epoch_update{
     mul_mod_ptr: ModBuiltin*,
     pow2_array: felt*,
     sha256_ptr: felt*,
-}(consensus_inputs: ConsensusInputs) -> (output: EpochUpdateOutput) {
+}(consensus_inputs: ConsensusInputs, is_committee_transition: felt, previous_output: CircuitOutput2) -> (
+    output: BeaconClientOutput,
+    body_root: Uint256,
+) {
     alloc_locals;
 
     // 1. Hash beacon header
@@ -49,33 +51,148 @@ func run_epoch_update{
     // 5. Verify signature
     verify_signature(agg_key, msg_point, consensus_inputs.signature.signature_point);
 
-    // 6. Hash execution payload root (SSZ encoded execution payload) which is stored in the beacon state
-    let (execution_root, execution_hash, execution_height) = SSZ.hash_execution_payload_header_root(
-        consensus_inputs.execution_header_proof.payload_fields
+    local current_committee_hash: Uint256;
+    local next_committee_hash: Uint256;
+
+    // Assert the correct committee hash is used, in case of committee transition
+    if (is_committee_transition == 1) {
+        assert previous_output.beacon.next_committee_hash.low = committee_hash.low;
+        assert previous_output.beacon.next_committee_hash.high = committee_hash.high;
+
+        // In transition, move the keys from the previous committee to the next committee
+        assert current_committee_hash.low = previous_output.beacon.next_committee_hash.low;
+        assert current_committee_hash.high = previous_output.beacon.next_committee_hash.high;
+        assert next_committee_hash.low = 0x0;
+        assert next_committee_hash.high = 0x0;
+    } else {
+        assert previous_output.beacon.current_committee_hash.low = committee_hash.low;
+        assert previous_output.beacon.current_committee_hash.high = committee_hash.high;
+
+        // In non-transition, use the current committee hash
+        assert current_committee_hash.low = previous_output.beacon.current_committee_hash.low;
+        assert current_committee_hash.high = previous_output.beacon.current_committee_hash.high;
+        assert next_committee_hash.low = previous_output.beacon.next_committee_hash.low;
+        assert next_committee_hash.high = previous_output.beacon.next_committee_hash.high;
+    }
+
+    let output = BeaconClientOutput(
+        slot_number=consensus_inputs.beacon_header.slot.low,
+        header_root=header_root,
+        state_root=state_root,
+        justified_height=previous_output.beacon.slot_number,
+        finalized_height=previous_output.beacon.justified_height,
+        num_signers=n_signers,
+        mmr_root_sha=previous_output.beacon.mmr_root_sha, // ToDo: integrate
+        mmr_root_poseidon=previous_output.beacon.mmr_root_poseidon, // ToDo: integrate
+        current_committee_hash=current_committee_hash,
+        next_committee_hash=next_committee_hash,
     );
 
-    // 7. Verify ssz inclusion proof
+    return (
+        output=output,
+        body_root=body_root, 
+    );
+}
+
+func run_execution_update{
+    range_check_ptr,
+    bitwise_ptr: BitwiseBuiltin*,
+    poseidon_ptr: PoseidonBuiltin*,
+    range_check96_ptr: felt*,
+    add_mod_ptr: ModBuiltin*,
+    mul_mod_ptr: ModBuiltin*,
+    pow2_array: felt*,
+    sha256_ptr: felt*,
+}(body_root: Uint256, execution_header_proof: ExecutionHeaderProof, previous_output: CircuitOutput2) -> (output: ExecutionClientOutput) {
+    alloc_locals;
+    
+    // 1. Hash execution payload root (SSZ encoded execution payload) which is stored in the beacon state
+    let (execution_root, header_hash, block_number) = SSZ.hash_execution_payload_header_root(
+        execution_header_proof.payload_fields
+    );
+
+    // 2. Verify ssz inclusion proof
     let root_felts = MerkleUtils.chunk_uint256(execution_root);
     let computed_body_root = MerkleTree.hash_merkle_path(
-        path=consensus_inputs.execution_header_proof.path, path_len=4, leaf=root_felts, index=9
+        path=execution_header_proof.path, path_len=4, leaf=root_felts, index=9
     );
 
-    // 8. Assert that the computed body root matches the body root of the verified header
+    // 3. Assert that the computed body root matches the body root of the verified header
     assert computed_body_root.low = body_root.low;
     assert computed_body_root.high = body_root.high;
 
-    let output = EpochUpdateOutput(
-        beacon_header_root=header_root,
-        beacon_state_root=state_root,
-        beacon_height=consensus_inputs.beacon_header.slot.low,
-        n_signers=n_signers,
-        execution_header_root=execution_hash,
-        execution_header_height=execution_height,
-        current_committee_hash=committee_hash,
+    let output = ExecutionClientOutput(
+        block_number=block_number,
+        header_hash=header_hash,
+        justified_height=previous_output.execution.block_number,
+        finalized_height=previous_output.execution.justified_height,
+        mmr_root_sha=previous_output.beacon.mmr_root_sha, // ToDo: integrate
+        mmr_root_poseidon=previous_output.beacon.mmr_root_poseidon, // ToDo: integrate
     );
-
+    
     return (output=output);
 }
+
+// func run_epoch_update{
+//     output_ptr: felt*,
+//     range_check_ptr,
+//     bitwise_ptr: BitwiseBuiltin*,
+//     poseidon_ptr: PoseidonBuiltin*,
+//     range_check96_ptr: felt*,
+//     add_mod_ptr: ModBuiltin*,
+//     mul_mod_ptr: ModBuiltin*,
+//     pow2_array: felt*,
+//     sha256_ptr: felt*,
+// }(consensus_inputs: ConsensusInputs) -> (output: EpochUpdateOutput) {
+//     alloc_locals;
+
+//     // 1. Hash beacon header
+//     let (header_root, body_root, state_root) = hash_header(consensus_inputs.beacon_header);
+
+//     // 2. Compute signing root (this is what validators sign)
+//     let signing_root = Domain.compute_signing_root(
+//         Network.SEPOLIA, header_root, consensus_inputs.beacon_header.slot.low
+//     );
+
+//     // 3. Hash to curve to get message point
+//     let (msg_point) = hash_to_curve(1, signing_root);
+
+//     // 4. Aggregate signer to get aggregate key that was used to sign the message
+//     let (committee_hash, agg_key, n_non_signers) = aggregate_signer_pubs(
+//         consensus_inputs.signature
+//     );
+//     let n_signers = 512 - n_non_signers;
+
+//     // 5. Verify signature
+//     verify_signature(agg_key, msg_point, consensus_inputs.signature.signature_point);
+
+//     // 6. Hash execution payload root (SSZ encoded execution payload) which is stored in the beacon state
+//     let (execution_root, execution_hash, execution_height) = SSZ.hash_execution_payload_header_root(
+//         consensus_inputs.execution_header_proof.payload_fields
+//     );
+
+//     // 7. Verify ssz inclusion proof
+//     let root_felts = MerkleUtils.chunk_uint256(execution_root);
+//     let computed_body_root = MerkleTree.hash_merkle_path(
+//         path=consensus_inputs.execution_header_proof.path, path_len=4, leaf=root_felts, index=9
+//     );
+
+//     // 8. Assert that the computed body root matches the body root of the verified header
+//     assert computed_body_root.low = body_root.low;
+//     assert computed_body_root.high = body_root.high;
+
+//     let output = EpochUpdateOutput(
+//         beacon_header_root=header_root,
+//         beacon_state_root=state_root,
+//         beacon_height=consensus_inputs.beacon_header.slot.low,
+//         n_signers=n_signers,
+//         execution_header_root=execution_hash,
+//         execution_header_height=execution_height,
+//         current_committee_hash=committee_hash,
+//     );
+
+//     return (output=output);
+// }
 
 func hash_header{
     range_check_ptr, bitwise_ptr: BitwiseBuiltin*, pow2_array: felt*, sha256_ptr: felt*
