@@ -88,9 +88,7 @@ impl HintProcessorLogic for CustomHintProcessor {
                 HINT_WRITE_EXPECTED_PROOF_OUTPUT => {
                     write_expected_proof_output(vm, exec_scopes, hpd, constants)
                 }
-                HINT_ASSERT_OUTPUT => {
-                    assert_output(vm, exec_scopes, hpd, constants)
-                }
+                HINT_ASSERT_OUTPUT => assert_output(vm, exec_scopes, hpd, constants),
                 _ => Err(HintError::UnknownHint(
                     hint_code.to_string().into_boxed_str(),
                 )),

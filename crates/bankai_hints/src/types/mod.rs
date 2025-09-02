@@ -55,10 +55,15 @@ impl CairoType for CircuitOutputCairo2 {
     }
 
     fn n_fields() -> usize {
-        Felt::n_fields() + BeaconClientOutputCairo::n_fields() + ExecutionClientOutputCairo::n_fields()
+        Felt::n_fields()
+            + BeaconClientOutputCairo::n_fields()
+            + ExecutionClientOutputCairo::n_fields()
     }
-    
-    fn from_memory(vm: &cairo_vm_base::vm::cairo_vm::vm::vm_core::VirtualMachine, address: cairo_vm_base::vm::cairo_vm::types::relocatable::Relocatable) -> Result<Self, cairo_vm_base::vm::cairo_vm::vm::errors::hint_errors::HintError> {
+
+    fn from_memory(
+        vm: &cairo_vm_base::vm::cairo_vm::vm::vm_core::VirtualMachine,
+        address: cairo_vm_base::vm::cairo_vm::types::relocatable::Relocatable,
+    ) -> Result<Self, cairo_vm_base::vm::cairo_vm::vm::errors::hint_errors::HintError> {
         let execution_offset = ((address + BeaconClientOutputCairo::n_fields())? + 1)?;
         Ok(Self {
             block_number: Felt::from_memory(vm, address)?,
@@ -106,7 +111,10 @@ impl CairoType for BeaconClientOutputCairo {
         Ok(current_ptr)
     }
 
-    fn from_memory(vm: &cairo_vm_base::vm::cairo_vm::vm::vm_core::VirtualMachine, address: cairo_vm_base::vm::cairo_vm::types::relocatable::Relocatable) -> Result<Self, cairo_vm_base::vm::cairo_vm::vm::errors::hint_errors::HintError> {
+    fn from_memory(
+        vm: &cairo_vm_base::vm::cairo_vm::vm::vm_core::VirtualMachine,
+        address: cairo_vm_base::vm::cairo_vm::types::relocatable::Relocatable,
+    ) -> Result<Self, cairo_vm_base::vm::cairo_vm::vm::errors::hint_errors::HintError> {
         Ok(Self {
             slot_number: Felt::from_memory(vm, address)?,
             header_root: Uint256::from_memory(vm, (address + 1)?)?,
@@ -156,7 +164,10 @@ impl CairoType for ExecutionClientOutputCairo {
         Ok(current_ptr)
     }
 
-    fn from_memory(vm: &cairo_vm_base::vm::cairo_vm::vm::vm_core::VirtualMachine, address: cairo_vm_base::vm::cairo_vm::types::relocatable::Relocatable) -> Result<Self, cairo_vm_base::vm::cairo_vm::vm::errors::hint_errors::HintError> {
+    fn from_memory(
+        vm: &cairo_vm_base::vm::cairo_vm::vm::vm_core::VirtualMachine,
+        address: cairo_vm_base::vm::cairo_vm::types::relocatable::Relocatable,
+    ) -> Result<Self, cairo_vm_base::vm::cairo_vm::vm::errors::hint_errors::HintError> {
         Ok(Self {
             block_number: Felt::from_memory(vm, address)?,
             header_hash: Uint256::from_memory(vm, (address + 1)?)?,

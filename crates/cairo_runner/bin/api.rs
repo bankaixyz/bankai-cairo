@@ -1,11 +1,11 @@
 use bankai_hints::types::StoneCircuitLayoutCairo;
 use cairo_runner::run;
 use clap::Parser;
-use tokio::signal;
 use std::path::Path;
 use std::sync::Arc;
 use std::time::Duration;
-use tracing::{info, instrument, Level};
+use tokio::signal;
+use tracing::{info, Level};
 use tracing_subscriber::FmtSubscriber;
 use warp::{http::StatusCode, Filter, Rejection, Reply};
 
@@ -68,8 +68,6 @@ async fn main() {
         .await;
 }
 
-
-#[instrument]
 async fn handle_generate_pie(
     input: StoneCircuitLayoutCairo,
     is_docker: Arc<bool>,
@@ -121,7 +119,6 @@ async fn handle_generate_pie(
     }
 }
 
-#[instrument]
 async fn generate_pie_internal(
     input: StoneCircuitLayoutCairo,
     is_docker: bool,
