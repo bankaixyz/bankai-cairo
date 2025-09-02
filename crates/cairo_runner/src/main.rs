@@ -23,8 +23,9 @@ fn main() {
 fn generate_pie(input: StoneCircuitLayoutCairo) {
     let program_path = "cairo/build/bankai_stone.json";
     let output_dir: &'static str = "output/";
+    let log_level: &'static str = "debug";
 
-    let pie = run(program_path, input).unwrap();
+    let pie = run(program_path, input, log_level).unwrap();
 
     pie.write_zip_file(&Path::new(output_dir).join("pie.zip"), true)
         .unwrap();

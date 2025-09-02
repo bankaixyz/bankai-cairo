@@ -61,7 +61,11 @@ fn load_program(path: &str) -> Result<Program, Error> {
 //     Ok(())
 // }
 
-pub fn run(path: &str, input: StoneCircuitLayoutCairo) -> Result<CairoPie, Error> {
+pub fn run(
+    path: &str,
+    input: StoneCircuitLayoutCairo,
+    log_level: &'static str,
+) -> Result<CairoPie, Error> {
     let program = load_program(path)?;
     let cairo_run_config = cairo_run::CairoRunConfig {
         allow_missing_builtins: Some(true),
@@ -73,6 +77,7 @@ pub fn run(path: &str, input: StoneCircuitLayoutCairo) -> Result<CairoPie, Error
     exec_scopes.insert_value("inputs", input.input);
     exec_scopes.insert_value("outputs", input.output);
     exec_scopes.insert_value("program_object", program.clone());
+    exec_scopes.insert_value("LOG_LEVEL_CAIRO", log_level);
 
     let cairo_runner = cairo_run_program_with_initial_scope(
         &program,

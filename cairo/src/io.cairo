@@ -49,12 +49,6 @@ struct CircuitOutput {
     next_committee_hash: Uint256,
 }
 
-struct CircuitOutput2 {
-    block_number: felt,
-    beacon: BeaconClientOutput,
-    execution: ExecutionClientOutput,
-}
-
 struct BeaconClientOutput {
     slot_number: felt,
     header_root: Uint256,
@@ -74,4 +68,9 @@ struct ExecutionClientOutput {
     finalized_height: felt,
     mmr_root_sha: Uint256,
     mmr_root_poseidon: Uint256,
+}
+struct CircuitOutput2 {
+    block_number: felt,
+    beacon: BeaconClientOutput,
+    execution: ExecutionClientOutput,
 }

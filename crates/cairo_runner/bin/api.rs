@@ -113,10 +113,10 @@ async fn generate_pie_internal(
     input: StoneCircuitLayoutCairo,
     is_docker: bool,
 ) -> Result<Vec<u8>, Box<dyn std::error::Error + Send + Sync>> {
-    let (program_path, output_dir) = if is_docker {
-        ("/app/cairo/build/bankai_stone.json", "/app/output/")
+    let (program_path, output_dir, log_level) = if is_docker {
+        ("/app/cairo/build/bankai_stone.json", "/app/output/", "info")
     } else {
-        ("cairo/build/bankai_stone.json", "output/")
+        ("cairo/build/bankai_stone.json", "output/", "debug")
     };
 
     // Generate timestamp for unique filename
@@ -128,7 +128,7 @@ async fn generate_pie_internal(
     std::fs::create_dir_all(output_dir)?;
 
     // Run the PIE generation in a blocking task to avoid blocking the async runtime
-    let pie = tokio::task::spawn_blocking(move || run(program_path, input)).await??;
+    let pie = tokio::task::spawn_blocking(move || run(program_path, input, log_level)).await??;
 
     // Write the PIE to zip file
     pie.write_zip_file(&output_path, true)?;

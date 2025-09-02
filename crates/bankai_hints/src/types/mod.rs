@@ -59,7 +59,6 @@ impl CairoWritable for CircuitOutput2 {
     }
 }
 
-
 #[derive(Debug, Serialize, Deserialize)]
 pub struct BeaconClientOutput {
     pub slot_number: Felt,
@@ -97,10 +96,9 @@ impl CairoWritable for BeaconClientOutput {
     }
 
     fn n_fields() -> usize {
-        Felt::n_fields() * 4 + Uint256::n_fields() *  5
+        Felt::n_fields() * 4 + Uint256::n_fields() * 5
     }
 }
-
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ExecutionClientOutput {
