@@ -2,11 +2,9 @@ from starkware.cairo.common.cairo_builtins import PoseidonBuiltin
 from cairo.src.io import CircuitOutput2
 from starkware.cairo.common.builtin_poseidon.poseidon import poseidon_hash_many
 
-
-func compute_output_hash{
-    range_check_ptr,
-    poseidon_ptr: PoseidonBuiltin*,
-}(program_hash: felt, previous_output: CircuitOutput2) -> (output_hash: felt) {
+func compute_output_hash{range_check_ptr, poseidon_ptr: PoseidonBuiltin*}(
+    program_hash: felt, previous_output: CircuitOutput2
+) -> (output_hash: felt) {
     alloc_locals;
 
     tempvar output_elements = cast(
