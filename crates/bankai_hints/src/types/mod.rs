@@ -30,7 +30,7 @@ pub struct ProofDataCairo {
     pub proof_output: CircuitOutputCairo2,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub struct CircuitOutputCairo2 {
     pub block_number: Felt,
     pub beacon: BeaconClientOutputCairo,
@@ -68,7 +68,7 @@ impl CairoType for CircuitOutputCairo2 {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub struct BeaconClientOutputCairo {
     pub slot_number: Felt,
     pub header_root: Uint256,
@@ -126,7 +126,7 @@ impl CairoType for BeaconClientOutputCairo {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub struct ExecutionClientOutputCairo {
     pub block_number: Felt,
     pub header_hash: Uint256,

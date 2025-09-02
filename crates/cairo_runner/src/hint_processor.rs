@@ -4,6 +4,7 @@ use bankai_hints::hints::input::{
     write_stone_proof_inputs, HINT_WRITE_COMMITTEE_UPDATE_INPUTS, HINT_WRITE_CONSENSUS_INPUTS,
     HINT_WRITE_EXPECTED_PROOF_OUTPUT, HINT_WRITE_STONE_PROOF_INPUTS,
 };
+use bankai_hints::hints::output::{assert_output, HINT_ASSERT_OUTPUT};
 use cairo_vm_base::default_hints::{default_hint_mapping, HintImpl};
 use cairo_vm_base::vm::cairo_vm::{
     hint_processor::{
@@ -86,6 +87,9 @@ impl HintProcessorLogic for CustomHintProcessor {
                 }
                 HINT_WRITE_EXPECTED_PROOF_OUTPUT => {
                     write_expected_proof_output(vm, exec_scopes, hpd, constants)
+                }
+                HINT_ASSERT_OUTPUT => {
+                    assert_output(vm, exec_scopes, hpd, constants)
                 }
                 _ => Err(HintError::UnknownHint(
                     hint_code.to_string().into_boxed_str(),
