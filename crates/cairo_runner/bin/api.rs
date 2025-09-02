@@ -1,6 +1,7 @@
 use bankai_hints::types::StoneCircuitLayoutCairo;
 use cairo_runner::run;
 use clap::Parser;
+use tokio::signal;
 use std::path::Path;
 use std::sync::Arc;
 use std::time::Duration;
@@ -48,13 +49,25 @@ async fn main() {
     info!("Request timeout: 5 minutes");
 
     let bind_addr = if args.docker {
-        ([0, 0, 0, 0], 3030) // Bind to all interfaces in Docker
+        ([0, 0, 0, 0], 3030)
     } else {
-        ([127, 0, 0, 1], 3030) // Bind to localhost only when running locally
+        ([127, 0, 0, 1], 3030)
     };
 
-    warp::serve(routes).run(bind_addr).await;
+    // Create the shutdown signal future
+    warp::serve(routes)
+        .bind(bind_addr)
+        .await
+        .graceful(async {
+            signal::ctrl_c()
+                .await
+                .expect("failed to install Ctrl+C handler");
+            info!("Received Ctrl+C, shutting down...");
+        })
+        .run()
+        .await;
 }
+
 
 #[instrument]
 async fn handle_generate_pie(
