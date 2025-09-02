@@ -27,7 +27,7 @@ pub struct StoneInputsCairo {
 pub struct ProofDataCairo {
     pub block_number: u64,
     pub proof: serde_json::Value,
-    pub proof_output: CircuitOutputCairo,
+    pub proof_output: CircuitOutputCairo2,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

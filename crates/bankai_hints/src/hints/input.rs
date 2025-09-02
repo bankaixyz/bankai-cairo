@@ -15,7 +15,7 @@ use crate::types::StoneInputsCairo;
 pub const HINT_WRITE_CONSENSUS_INPUTS: &str = r#"write_consensus_inputs()"#;
 pub const HINT_WRITE_STONE_PROOF_INPUTS: &str = r#"write_stone_proof_inputs()"#;
 pub const HINT_WRITE_COMMITTEE_UPDATE_INPUTS: &str = r#"write_committee_update_inputs()"#;
-pub const HINT_WRITE_EXPECTED_PROOF_OUTPUT: &str = r#"load_expected_proof_output()"#;
+pub const HINT_WRITE_EXPECTED_PROOF_OUTPUT: &str = r#"load_previous_output()"#;
 
 pub fn write_consensus_inputs(
     vm: &mut VirtualMachine,
@@ -88,7 +88,7 @@ pub fn write_expected_proof_output(
     let inputs = exec_scopes.get_ref::<StoneInputsCairo>("inputs")?;
     if let Some(proof_data) = &inputs.proof_data {
         let expected_output_ptr = get_relocatable_from_var_name(
-            "expected_proof_output",
+            "previous_output",
             vm,
             &hint_data.ids_data,
             &hint_data.ap_tracking,
