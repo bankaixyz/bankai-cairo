@@ -13,7 +13,7 @@ use crate::types::bls::{G1PointCairo, G2PointCairo};
 #[derive(Debug, Serialize, Deserialize)]
 pub struct StoneCircuitLayoutCairo {
     pub input: StoneInputsCairo,
-    pub output: CircuitOutputCairo2,
+    pub output: CircuitOutputCairo,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -27,17 +27,17 @@ pub struct StoneInputsCairo {
 pub struct ProofDataCairo {
     pub block_number: u64,
     pub proof: serde_json::Value,
-    pub proof_output: CircuitOutputCairo2,
+    pub proof_output: CircuitOutputCairo,
 }
 
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
-pub struct CircuitOutputCairo2 {
+pub struct CircuitOutputCairo {
     pub block_number: Felt,
     pub beacon: BeaconClientOutputCairo,
     pub execution: ExecutionClientOutputCairo,
 }
 
-impl CairoType for CircuitOutputCairo2 {
+impl CairoType for CircuitOutputCairo {
     fn to_memory(
         &self,
         vm: &mut cairo_vm_base::vm::cairo_vm::vm::vm_core::VirtualMachine,
@@ -180,54 +180,6 @@ impl CairoType for ExecutionClientOutputCairo {
 
     fn n_fields() -> usize {
         Felt::n_fields() * 4 + Uint256::n_fields() * 2
-    }
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct CircuitOutputCairo {
-    pub beacon_header_root: Uint256,
-    pub beacon_state_root: Uint256,
-    pub beacon_height: Felt,
-    pub n_signers: Felt,
-    pub execution_header_root: Uint256,
-    pub execution_header_height: Felt,
-    pub current_committee_hash: Uint256,
-    pub next_committee_hash: Uint256,
-}
-
-impl CairoWritable for CircuitOutputCairo {
-    fn to_memory(
-        &self,
-        vm: &mut cairo_vm_base::vm::cairo_vm::vm::vm_core::VirtualMachine,
-        address: cairo_vm_base::vm::cairo_vm::types::relocatable::Relocatable,
-    ) -> Result<
-        cairo_vm_base::vm::cairo_vm::types::relocatable::Relocatable,
-        cairo_vm_base::vm::cairo_vm::vm::errors::hint_errors::HintError,
-    > {
-        let mut current_ptr = address;
-
-        current_ptr = self.beacon_header_root.to_memory(vm, current_ptr)?;
-        current_ptr = self.beacon_state_root.to_memory(vm, current_ptr)?;
-        current_ptr = self.beacon_height.to_memory(vm, current_ptr)?;
-        current_ptr = self.n_signers.to_memory(vm, current_ptr)?;
-        current_ptr = self.execution_header_root.to_memory(vm, current_ptr)?;
-        current_ptr = self.execution_header_height.to_memory(vm, current_ptr)?;
-        current_ptr = self.current_committee_hash.to_memory(vm, current_ptr)?;
-        current_ptr = self.next_committee_hash.to_memory(vm, current_ptr)?;
-
-        // Check that the memory layout is correct
-        let expected_ptr = (address + CircuitOutputCairo::n_fields())?;
-        if current_ptr != expected_ptr {
-            return Err(cairo_vm_base::vm::cairo_vm::vm::errors::hint_errors::HintError::CustomHint(
-                format!("Memory layout mismatch for CircuitOutputCairo: expected pointer at {expected_ptr}, but got {current_ptr}").into()
-            ));
-        }
-
-        Ok(current_ptr)
-    }
-
-    fn n_fields() -> usize {
-        Uint256::n_fields() * 5 + Felt::n_fields() * 3
     }
 }
 
