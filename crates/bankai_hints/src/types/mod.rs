@@ -13,7 +13,7 @@ use crate::types::bls::{G1PointCairo, G2PointCairo};
 #[derive(Debug, Serialize, Deserialize)]
 pub struct StoneCircuitLayoutCairo {
     pub input: StoneInputsCairo,
-    pub output: CircuitOutputCairo,
+    pub output: CircuitOutputCairo2,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -31,13 +31,13 @@ pub struct ProofDataCairo {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct CircuitOutput2 {
+pub struct CircuitOutputCairo2 {
     pub block_number: Felt,
     pub beacon: BeaconClientOutput,
     pub execution: ExecutionClientOutput,
 }
 
-impl CairoWritable for CircuitOutput2 {
+impl CairoWritable for CircuitOutputCairo2 {
     fn to_memory(
         &self,
         vm: &mut cairo_vm_base::vm::cairo_vm::vm::vm_core::VirtualMachine,
@@ -63,11 +63,12 @@ impl CairoWritable for CircuitOutput2 {
 pub struct BeaconClientOutput {
     pub slot_number: Felt,
     pub header_root: Uint256,
+    pub state_root: Uint256,
     pub justified_height: Felt,
     pub finalized_height: Felt,
     pub num_signers: Felt,
     pub mmr_root_sha: Uint256,
-    pub mmr_root_poseidon: Uint256,
+    pub mmr_root_poseidon: Felt,
     pub current_committee_hash: Uint256,
     pub next_committee_hash: Uint256,
 }
@@ -84,6 +85,7 @@ impl CairoWritable for BeaconClientOutput {
         let mut current_ptr = address;
         current_ptr = self.slot_number.to_memory(vm, current_ptr)?;
         current_ptr = self.header_root.to_memory(vm, current_ptr)?;
+        current_ptr = self.state_root.to_memory(vm, current_ptr)?;
         current_ptr = self.justified_height.to_memory(vm, current_ptr)?;
         current_ptr = self.finalized_height.to_memory(vm, current_ptr)?;
         current_ptr = self.num_signers.to_memory(vm, current_ptr)?;
@@ -96,7 +98,7 @@ impl CairoWritable for BeaconClientOutput {
     }
 
     fn n_fields() -> usize {
-        Felt::n_fields() * 4 + Uint256::n_fields() * 5
+        Felt::n_fields() * 5 + Uint256::n_fields() * 5
     }
 }
 
@@ -107,7 +109,7 @@ pub struct ExecutionClientOutput {
     pub justified_height: Felt,
     pub finalized_height: Felt,
     pub mmr_root_sha: Uint256,
-    pub mmr_root_poseidon: Uint256,
+    pub mmr_root_poseidon: Felt,
 }
 
 impl CairoWritable for ExecutionClientOutput {
@@ -131,7 +133,7 @@ impl CairoWritable for ExecutionClientOutput {
     }
 
     fn n_fields() -> usize {
-        Felt::n_fields() * 3 + Uint256::n_fields() * 3
+        Felt::n_fields() * 2 + Uint256::n_fields() * 4
     }
 }
 
