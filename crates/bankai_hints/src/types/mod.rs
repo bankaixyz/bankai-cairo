@@ -33,8 +33,8 @@ pub struct ProofDataCairo {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct CircuitOutputCairo2 {
     pub block_number: Felt,
-    pub beacon: BeaconClientOutput,
-    pub execution: ExecutionClientOutput,
+    pub beacon: BeaconClientOutputCairo,
+    pub execution: ExecutionClientOutputCairo,
 }
 
 impl CairoWritable for CircuitOutputCairo2 {
@@ -55,12 +55,12 @@ impl CairoWritable for CircuitOutputCairo2 {
     }
 
     fn n_fields() -> usize {
-        Felt::n_fields() + BeaconClientOutput::n_fields() + ExecutionClientOutput::n_fields()
+        Felt::n_fields() + BeaconClientOutputCairo::n_fields() + ExecutionClientOutputCairo::n_fields()
     }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct BeaconClientOutput {
+pub struct BeaconClientOutputCairo {
     pub slot_number: Felt,
     pub header_root: Uint256,
     pub state_root: Uint256,
@@ -73,7 +73,7 @@ pub struct BeaconClientOutput {
     pub next_committee_hash: Uint256,
 }
 
-impl CairoWritable for BeaconClientOutput {
+impl CairoWritable for BeaconClientOutputCairo {
     fn to_memory(
         &self,
         vm: &mut cairo_vm_base::vm::cairo_vm::vm::vm_core::VirtualMachine,
@@ -103,7 +103,7 @@ impl CairoWritable for BeaconClientOutput {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct ExecutionClientOutput {
+pub struct ExecutionClientOutputCairo {
     pub block_number: Felt,
     pub header_hash: Uint256,
     pub justified_height: Felt,
@@ -112,7 +112,7 @@ pub struct ExecutionClientOutput {
     pub mmr_root_poseidon: Felt,
 }
 
-impl CairoWritable for ExecutionClientOutput {
+impl CairoWritable for ExecutionClientOutputCairo {
     fn to_memory(
         &self,
         vm: &mut cairo_vm_base::vm::cairo_vm::vm::vm_core::VirtualMachine,
