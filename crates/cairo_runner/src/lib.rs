@@ -74,8 +74,8 @@ pub fn run(
     };
     let mut hint_processor = CustomHintProcessor::new();
     let mut exec_scopes = ExecutionScopes::new();
-    exec_scopes.insert_value("inputs", input.input);
-    exec_scopes.insert_value("outputs", input.output);
+    exec_scopes.insert_value("input", input.input);
+    exec_scopes.insert_value("output", input.output);
     exec_scopes.insert_value("program_object", program.clone());
     exec_scopes.insert_value("LOG_LEVEL_CAIRO", log_level);
 

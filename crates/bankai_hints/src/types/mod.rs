@@ -13,7 +13,7 @@ use crate::types::bls::{G1PointCairo, G2PointCairo};
 #[derive(Debug, Serialize, Deserialize)]
 pub struct StoneCircuitLayoutCairo {
     pub input: StoneInputsCairo,
-    pub output: CircuitOutputCairo,
+    pub output: CircuitOutputCairo2,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -27,17 +27,17 @@ pub struct StoneInputsCairo {
 pub struct ProofDataCairo {
     pub block_number: u64,
     pub proof: serde_json::Value,
-    pub proof_output: CircuitOutputCairo,
+    pub proof_output: CircuitOutputCairo2,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct CircuitOutput2 {
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+pub struct CircuitOutputCairo2 {
     pub block_number: Felt,
-    pub beacon: BeaconClientOutput,
-    pub execution: ExecutionClientOutput,
+    pub beacon: BeaconClientOutputCairo,
+    pub execution: ExecutionClientOutputCairo,
 }
 
-impl CairoWritable for CircuitOutput2 {
+impl CairoType for CircuitOutputCairo2 {
     fn to_memory(
         &self,
         vm: &mut cairo_vm_base::vm::cairo_vm::vm::vm_core::VirtualMachine,
@@ -55,24 +55,39 @@ impl CairoWritable for CircuitOutput2 {
     }
 
     fn n_fields() -> usize {
-        Felt::n_fields() + BeaconClientOutput::n_fields() + ExecutionClientOutput::n_fields()
+        Felt::n_fields()
+            + BeaconClientOutputCairo::n_fields()
+            + ExecutionClientOutputCairo::n_fields()
+    }
+
+    fn from_memory(
+        vm: &cairo_vm_base::vm::cairo_vm::vm::vm_core::VirtualMachine,
+        address: cairo_vm_base::vm::cairo_vm::types::relocatable::Relocatable,
+    ) -> Result<Self, cairo_vm_base::vm::cairo_vm::vm::errors::hint_errors::HintError> {
+        let execution_offset = ((address + BeaconClientOutputCairo::n_fields())? + 1)?;
+        Ok(Self {
+            block_number: Felt::from_memory(vm, address)?,
+            beacon: BeaconClientOutputCairo::from_memory(vm, (address + 1)?)?,
+            execution: ExecutionClientOutputCairo::from_memory(vm, execution_offset)?,
+        })
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct BeaconClientOutput {
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+pub struct BeaconClientOutputCairo {
     pub slot_number: Felt,
     pub header_root: Uint256,
+    pub state_root: Uint256,
     pub justified_height: Felt,
     pub finalized_height: Felt,
     pub num_signers: Felt,
     pub mmr_root_sha: Uint256,
-    pub mmr_root_poseidon: Uint256,
+    pub mmr_root_poseidon: Felt,
     pub current_committee_hash: Uint256,
     pub next_committee_hash: Uint256,
 }
 
-impl CairoWritable for BeaconClientOutput {
+impl CairoType for BeaconClientOutputCairo {
     fn to_memory(
         &self,
         vm: &mut cairo_vm_base::vm::cairo_vm::vm::vm_core::VirtualMachine,
@@ -84,6 +99,7 @@ impl CairoWritable for BeaconClientOutput {
         let mut current_ptr = address;
         current_ptr = self.slot_number.to_memory(vm, current_ptr)?;
         current_ptr = self.header_root.to_memory(vm, current_ptr)?;
+        current_ptr = self.state_root.to_memory(vm, current_ptr)?;
         current_ptr = self.justified_height.to_memory(vm, current_ptr)?;
         current_ptr = self.finalized_height.to_memory(vm, current_ptr)?;
         current_ptr = self.num_signers.to_memory(vm, current_ptr)?;
@@ -95,22 +111,40 @@ impl CairoWritable for BeaconClientOutput {
         Ok(current_ptr)
     }
 
+    fn from_memory(
+        vm: &cairo_vm_base::vm::cairo_vm::vm::vm_core::VirtualMachine,
+        address: cairo_vm_base::vm::cairo_vm::types::relocatable::Relocatable,
+    ) -> Result<Self, cairo_vm_base::vm::cairo_vm::vm::errors::hint_errors::HintError> {
+        Ok(Self {
+            slot_number: Felt::from_memory(vm, address)?,
+            header_root: Uint256::from_memory(vm, (address + 1)?)?,
+            state_root: Uint256::from_memory(vm, (address + 3)?)?,
+            justified_height: Felt::from_memory(vm, (address + 5)?)?,
+            finalized_height: Felt::from_memory(vm, (address + 6)?)?,
+            num_signers: Felt::from_memory(vm, (address + 7)?)?,
+            mmr_root_sha: Uint256::from_memory(vm, (address + 8)?)?,
+            mmr_root_poseidon: Felt::from_memory(vm, (address + 10)?)?,
+            current_committee_hash: Uint256::from_memory(vm, (address + 11)?)?,
+            next_committee_hash: Uint256::from_memory(vm, (address + 13)?)?,
+        })
+    }
+
     fn n_fields() -> usize {
-        Felt::n_fields() * 4 + Uint256::n_fields() * 5
+        Felt::n_fields() * 5 + Uint256::n_fields() * 5
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct ExecutionClientOutput {
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+pub struct ExecutionClientOutputCairo {
     pub block_number: Felt,
     pub header_hash: Uint256,
     pub justified_height: Felt,
     pub finalized_height: Felt,
     pub mmr_root_sha: Uint256,
-    pub mmr_root_poseidon: Uint256,
+    pub mmr_root_poseidon: Felt,
 }
 
-impl CairoWritable for ExecutionClientOutput {
+impl CairoType for ExecutionClientOutputCairo {
     fn to_memory(
         &self,
         vm: &mut cairo_vm_base::vm::cairo_vm::vm::vm_core::VirtualMachine,
@@ -130,8 +164,22 @@ impl CairoWritable for ExecutionClientOutput {
         Ok(current_ptr)
     }
 
+    fn from_memory(
+        vm: &cairo_vm_base::vm::cairo_vm::vm::vm_core::VirtualMachine,
+        address: cairo_vm_base::vm::cairo_vm::types::relocatable::Relocatable,
+    ) -> Result<Self, cairo_vm_base::vm::cairo_vm::vm::errors::hint_errors::HintError> {
+        Ok(Self {
+            block_number: Felt::from_memory(vm, address)?,
+            header_hash: Uint256::from_memory(vm, (address + 1)?)?,
+            justified_height: Felt::from_memory(vm, (address + 3)?)?,
+            finalized_height: Felt::from_memory(vm, (address + 4)?)?,
+            mmr_root_sha: Uint256::from_memory(vm, (address + 5)?)?,
+            mmr_root_poseidon: Felt::from_memory(vm, (address + 7)?)?,
+        })
+    }
+
     fn n_fields() -> usize {
-        Felt::n_fields() * 3 + Uint256::n_fields() * 3
+        Felt::n_fields() * 4 + Uint256::n_fields() * 2
     }
 }
 

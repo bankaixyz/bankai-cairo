@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use cairo_vm_base::default_hints::HintImpl;
 
 pub mod input;
+pub mod output;
 pub mod utils;
 
 pub fn get_hints() -> HashMap<String, HintImpl> {

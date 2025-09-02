@@ -15,7 +15,7 @@ use crate::types::StoneInputsCairo;
 pub const HINT_WRITE_CONSENSUS_INPUTS: &str = r#"write_consensus_inputs()"#;
 pub const HINT_WRITE_STONE_PROOF_INPUTS: &str = r#"write_stone_proof_inputs()"#;
 pub const HINT_WRITE_COMMITTEE_UPDATE_INPUTS: &str = r#"write_committee_update_inputs()"#;
-pub const HINT_WRITE_EXPECTED_PROOF_OUTPUT: &str = r#"load_expected_proof_output()"#;
+pub const HINT_WRITE_EXPECTED_PROOF_OUTPUT: &str = r#"load_previous_output()"#;
 
 pub fn write_consensus_inputs(
     vm: &mut VirtualMachine,
@@ -23,7 +23,7 @@ pub fn write_consensus_inputs(
     hint_data: &HintProcessorData,
     _constants: &HashMap<String, Felt252>,
 ) -> Result<(), HintError> {
-    let inputs = exec_scopes.get_ref::<StoneInputsCairo>("inputs")?;
+    let inputs = exec_scopes.get_ref::<StoneInputsCairo>("input")?;
     let consensus_data = &inputs.consensus_data;
     let consensus_data_ptr = get_relocatable_from_var_name(
         "consensus_inputs",
@@ -85,10 +85,10 @@ pub fn write_expected_proof_output(
     hint_data: &HintProcessorData,
     _constants: &HashMap<String, Felt252>,
 ) -> Result<(), HintError> {
-    let inputs = exec_scopes.get_ref::<StoneInputsCairo>("inputs")?;
+    let inputs = exec_scopes.get_ref::<StoneInputsCairo>("input")?;
     if let Some(proof_data) = &inputs.proof_data {
         let expected_output_ptr = get_relocatable_from_var_name(
-            "expected_proof_output",
+            "previous_output",
             vm,
             &hint_data.ids_data,
             &hint_data.ap_tracking,
@@ -106,7 +106,7 @@ pub fn write_stone_proof_inputs(
     _hint_data: &HintProcessorData,
     _constants: &HashMap<String, Felt252>,
 ) -> Result<(), HintError> {
-    let inputs = exec_scopes.get_ref::<StoneInputsCairo>("inputs")?;
+    let inputs = exec_scopes.get_ref::<StoneInputsCairo>("input")?;
     if let Some(proof_data) = &inputs.proof_data {
         let proof_string = serde_json::json!({
             "proof": proof_data.proof
@@ -126,7 +126,7 @@ pub fn write_committee_update_inputs(
     hint_data: &HintProcessorData,
     _constants: &HashMap<String, Felt252>,
 ) -> Result<(), HintError> {
-    let inputs = exec_scopes.get_ref::<StoneInputsCairo>("inputs")?;
+    let inputs = exec_scopes.get_ref::<StoneInputsCairo>("input")?;
     if let Some(sync_committee_update) = &inputs.sync_committee_update {
         let aggregate_committee_key_ptr = get_relocatable_from_var_name(
             "aggregate_committee_key",
