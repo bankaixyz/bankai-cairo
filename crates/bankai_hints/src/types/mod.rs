@@ -37,7 +37,7 @@ pub struct CircuitOutputCairo2 {
     pub execution: ExecutionClientOutputCairo,
 }
 
-impl CairoWritable for CircuitOutputCairo2 {
+impl CairoType for CircuitOutputCairo2 {
     fn to_memory(
         &self,
         vm: &mut cairo_vm_base::vm::cairo_vm::vm::vm_core::VirtualMachine,
@@ -57,6 +57,15 @@ impl CairoWritable for CircuitOutputCairo2 {
     fn n_fields() -> usize {
         Felt::n_fields() + BeaconClientOutputCairo::n_fields() + ExecutionClientOutputCairo::n_fields()
     }
+    
+    fn from_memory(vm: &cairo_vm_base::vm::cairo_vm::vm::vm_core::VirtualMachine, address: cairo_vm_base::vm::cairo_vm::types::relocatable::Relocatable) -> Result<Self, cairo_vm_base::vm::cairo_vm::vm::errors::hint_errors::HintError> {
+        let execution_offset = ((address + BeaconClientOutputCairo::n_fields())? + 1)?;
+        Ok(Self {
+            block_number: Felt::from_memory(vm, address)?,
+            beacon: BeaconClientOutputCairo::from_memory(vm, (address + 1)?)?,
+            execution: ExecutionClientOutputCairo::from_memory(vm, execution_offset)?,
+        })
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -73,7 +82,7 @@ pub struct BeaconClientOutputCairo {
     pub next_committee_hash: Uint256,
 }
 
-impl CairoWritable for BeaconClientOutputCairo {
+impl CairoType for BeaconClientOutputCairo {
     fn to_memory(
         &self,
         vm: &mut cairo_vm_base::vm::cairo_vm::vm::vm_core::VirtualMachine,
@@ -97,6 +106,21 @@ impl CairoWritable for BeaconClientOutputCairo {
         Ok(current_ptr)
     }
 
+    fn from_memory(vm: &cairo_vm_base::vm::cairo_vm::vm::vm_core::VirtualMachine, address: cairo_vm_base::vm::cairo_vm::types::relocatable::Relocatable) -> Result<Self, cairo_vm_base::vm::cairo_vm::vm::errors::hint_errors::HintError> {
+        Ok(Self {
+            slot_number: Felt::from_memory(vm, address)?,
+            header_root: Uint256::from_memory(vm, (address + 1)?)?,
+            state_root: Uint256::from_memory(vm, (address + 3)?)?,
+            justified_height: Felt::from_memory(vm, (address + 5)?)?,
+            finalized_height: Felt::from_memory(vm, (address + 6)?)?,
+            num_signers: Felt::from_memory(vm, (address + 7)?)?,
+            mmr_root_sha: Uint256::from_memory(vm, (address + 8)?)?,
+            mmr_root_poseidon: Felt::from_memory(vm, (address + 10)?)?,
+            current_committee_hash: Uint256::from_memory(vm, (address + 11)?)?,
+            next_committee_hash: Uint256::from_memory(vm, (address + 13)?)?,
+        })
+    }
+
     fn n_fields() -> usize {
         Felt::n_fields() * 5 + Uint256::n_fields() * 5
     }
@@ -112,7 +136,7 @@ pub struct ExecutionClientOutputCairo {
     pub mmr_root_poseidon: Felt,
 }
 
-impl CairoWritable for ExecutionClientOutputCairo {
+impl CairoType for ExecutionClientOutputCairo {
     fn to_memory(
         &self,
         vm: &mut cairo_vm_base::vm::cairo_vm::vm::vm_core::VirtualMachine,
@@ -132,8 +156,19 @@ impl CairoWritable for ExecutionClientOutputCairo {
         Ok(current_ptr)
     }
 
+    fn from_memory(vm: &cairo_vm_base::vm::cairo_vm::vm::vm_core::VirtualMachine, address: cairo_vm_base::vm::cairo_vm::types::relocatable::Relocatable) -> Result<Self, cairo_vm_base::vm::cairo_vm::vm::errors::hint_errors::HintError> {
+        Ok(Self {
+            block_number: Felt::from_memory(vm, address)?,
+            header_hash: Uint256::from_memory(vm, (address + 1)?)?,
+            justified_height: Felt::from_memory(vm, (address + 3)?)?,
+            finalized_height: Felt::from_memory(vm, (address + 4)?)?,
+            mmr_root_sha: Uint256::from_memory(vm, (address + 5)?)?,
+            mmr_root_poseidon: Felt::from_memory(vm, (address + 7)?)?,
+        })
+    }
+
     fn n_fields() -> usize {
-        Felt::n_fields() * 2 + Uint256::n_fields() * 4
+        Felt::n_fields() * 4 + Uint256::n_fields() * 2
     }
 }
 
