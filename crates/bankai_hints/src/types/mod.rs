@@ -31,6 +31,113 @@ pub struct ProofDataCairo {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+pub struct CircuitOutput2 {
+    pub block_number: Felt,
+    pub beacon: BeaconClientOutput,
+    pub execution: ExecutionClientOutput,
+}
+
+impl CairoWritable for CircuitOutput2 {
+    fn to_memory(
+        &self,
+        vm: &mut cairo_vm_base::vm::cairo_vm::vm::vm_core::VirtualMachine,
+        address: cairo_vm_base::vm::cairo_vm::types::relocatable::Relocatable,
+    ) -> Result<
+        cairo_vm_base::vm::cairo_vm::types::relocatable::Relocatable,
+        cairo_vm_base::vm::cairo_vm::vm::errors::hint_errors::HintError,
+    > {
+        let mut current_ptr = address;
+        current_ptr = self.block_number.to_memory(vm, current_ptr)?;
+        current_ptr = self.beacon.to_memory(vm, current_ptr)?;
+        current_ptr = self.execution.to_memory(vm, current_ptr)?;
+
+        Ok(current_ptr)
+    }
+
+    fn n_fields() -> usize {
+        Felt::n_fields() + BeaconClientOutput::n_fields() + ExecutionClientOutput::n_fields()
+    }
+}
+
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct BeaconClientOutput {
+    pub slot_number: Felt,
+    pub header_root: Uint256,
+    pub justified_height: Felt,
+    pub finalized_height: Felt,
+    pub num_signers: Felt,
+    pub mmr_root_sha: Uint256,
+    pub mmr_root_poseidon: Uint256,
+    pub current_committee_hash: Uint256,
+    pub next_committee_hash: Uint256,
+}
+
+impl CairoWritable for BeaconClientOutput {
+    fn to_memory(
+        &self,
+        vm: &mut cairo_vm_base::vm::cairo_vm::vm::vm_core::VirtualMachine,
+        address: cairo_vm_base::vm::cairo_vm::types::relocatable::Relocatable,
+    ) -> Result<
+        cairo_vm_base::vm::cairo_vm::types::relocatable::Relocatable,
+        cairo_vm_base::vm::cairo_vm::vm::errors::hint_errors::HintError,
+    > {
+        let mut current_ptr = address;
+        current_ptr = self.slot_number.to_memory(vm, current_ptr)?;
+        current_ptr = self.header_root.to_memory(vm, current_ptr)?;
+        current_ptr = self.justified_height.to_memory(vm, current_ptr)?;
+        current_ptr = self.finalized_height.to_memory(vm, current_ptr)?;
+        current_ptr = self.num_signers.to_memory(vm, current_ptr)?;
+        current_ptr = self.mmr_root_sha.to_memory(vm, current_ptr)?;
+        current_ptr = self.mmr_root_poseidon.to_memory(vm, current_ptr)?;
+        current_ptr = self.current_committee_hash.to_memory(vm, current_ptr)?;
+        current_ptr = self.next_committee_hash.to_memory(vm, current_ptr)?;
+
+        Ok(current_ptr)
+    }
+
+    fn n_fields() -> usize {
+        Felt::n_fields() * 4 + Uint256::n_fields() *  5
+    }
+}
+
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ExecutionClientOutput {
+    pub block_number: Felt,
+    pub header_hash: Uint256,
+    pub justified_height: Felt,
+    pub finalized_height: Felt,
+    pub mmr_root_sha: Uint256,
+    pub mmr_root_poseidon: Uint256,
+}
+
+impl CairoWritable for ExecutionClientOutput {
+    fn to_memory(
+        &self,
+        vm: &mut cairo_vm_base::vm::cairo_vm::vm::vm_core::VirtualMachine,
+        address: cairo_vm_base::vm::cairo_vm::types::relocatable::Relocatable,
+    ) -> Result<
+        cairo_vm_base::vm::cairo_vm::types::relocatable::Relocatable,
+        cairo_vm_base::vm::cairo_vm::vm::errors::hint_errors::HintError,
+    > {
+        let mut current_ptr = address;
+        current_ptr = self.block_number.to_memory(vm, current_ptr)?;
+        current_ptr = self.header_hash.to_memory(vm, current_ptr)?;
+        current_ptr = self.justified_height.to_memory(vm, current_ptr)?;
+        current_ptr = self.finalized_height.to_memory(vm, current_ptr)?;
+        current_ptr = self.mmr_root_sha.to_memory(vm, current_ptr)?;
+        current_ptr = self.mmr_root_poseidon.to_memory(vm, current_ptr)?;
+
+        Ok(current_ptr)
+    }
+
+    fn n_fields() -> usize {
+        Felt::n_fields() * 3 + Uint256::n_fields() * 3
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct CircuitOutputCairo {
     pub beacon_header_root: Uint256,
     pub beacon_state_root: Uint256,
