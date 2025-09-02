@@ -263,7 +263,6 @@ func handle_genesis_case{
 }
 
 func write_circuit_output{output_ptr: felt*, range_check_ptr}(output: CircuitOutput2) {
-
     %{ assert_output() %}
 
     assert [output_ptr] = output.block_number;
