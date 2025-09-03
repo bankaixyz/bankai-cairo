@@ -24,6 +24,9 @@ pub fn assert_output(
     let circuit_output = CircuitOutputCairo::from_memory(vm, circuit_output_ptr)?;
 
     if circuit_output != *expected_output {
+        println!("Output mismatch:");
+        println!("Circuit output: {circuit_output:#?}");
+        println!("Expected output: {expected_output:#?}");
         return Err(HintError::CustomHint(format!("Circuit output do not match expected output: {circuit_output:?} != {expected_output:?}").into()));
     }
 

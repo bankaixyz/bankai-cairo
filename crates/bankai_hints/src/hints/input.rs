@@ -69,7 +69,7 @@ pub fn write_consensus_inputs(
     //     "0x5b6ff167e72599c14a2e99cac4a6e8db3036db0f0d9acac15d5822ea315287a",
     // );
     let program_hash = Felt252::from_hex_unchecked(
-        "0x6305ea579daa2cd35f92ce5c41fa3467a7b44c4d69f9849844aff9d552620e",
+        "0x67c0916e5dcd449148b4d8d825e2fdf99d83e4cac1adeadaf19011c1ed06ac0",
     );
     // let program_hash = Felt252::from_hex_unchecked(
     //     "0x5ab580b04e3532b6b18f81cfa654a05e29dd8e2352d88df1e765a84072db07",
