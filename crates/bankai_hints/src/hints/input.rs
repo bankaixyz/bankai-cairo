@@ -69,7 +69,7 @@ pub fn write_consensus_inputs(
     //     "0x5b6ff167e72599c14a2e99cac4a6e8db3036db0f0d9acac15d5822ea315287a",
     // );
     let program_hash = Felt252::from_hex_unchecked(
-        "0x67c0916e5dcd449148b4d8d825e2fdf99d83e4cac1adeadaf19011c1ed06ac0",
+        "0x5dd26dbafd599d27e16351298a1147520aef4e0833a5f4b4ff57a7dc589e952",
     );
     // let program_hash = Felt252::from_hex_unchecked(
     //     "0x5ab580b04e3532b6b18f81cfa654a05e29dd8e2352d88df1e765a84072db07",
@@ -101,20 +101,34 @@ pub fn write_expected_proof_output(
 }
 
 pub fn write_stone_proof_inputs(
-    _vm: &mut VirtualMachine,
+    vm: &mut VirtualMachine,
     exec_scopes: &mut ExecutionScopes,
     _hint_data: &HintProcessorData,
     _constants: &HashMap<String, Felt252>,
 ) -> Result<(), HintError> {
     let inputs = exec_scopes.get_ref::<StoneInputsCairo>("input")?;
+    let mock_mode_ptr = get_relocatable_from_var_name(
+        "mock_mode",
+        vm,
+        &_hint_data.ids_data,
+        &_hint_data.ap_tracking,
+    )?;
+
     if let Some(proof_data) = &inputs.proof_data {
-        let proof_string = serde_json::json!({
-            "proof": proof_data.proof
-        })
-        .to_string();
-        exec_scopes.insert_value("program_input", proof_string);
+        if proof_data.proof == serde_json::Value::Null {
+            vm.insert_value(mock_mode_ptr, Felt252::from(1))?;
+        } else {
+            let proof_string = serde_json::json!({
+                "proof": proof_data.proof
+            })
+            .to_string();
+            
+            vm.insert_value(mock_mode_ptr, Felt252::from(0))?;
+            exec_scopes.insert_value("program_input", proof_string);
+
+        }
     } else {
-        panic!("Stone proof not found");
+        panic!("Proof data not found");
     }
 
     Ok(())
