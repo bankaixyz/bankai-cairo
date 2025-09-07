@@ -165,24 +165,45 @@ func handle_recursive_case{
 
     info_string('expected output hash');
     info_felt_hex(expected_output_hash);
-
+    local mock_mode: felt;
     %{ write_stone_proof_inputs() %}
-    let (proof_program_hash, output_hash) = verify_stone_proof();
 
-    debug_string('program hash');
-    debug_felt_hex(program_hash);
+    local local_range_check_ptr: felt;
+    local local_bitwise_ptr: BitwiseBuiltin*;
+    local local_poseidon_ptr: PoseidonBuiltin*;
+    local local_pedersen_ptr: HashBuiltin*;
+    if (mock_mode == 0) {
+        let (proof_program_hash, output_hash) = verify_stone_proof();
+        debug_string('program hash');
+        debug_felt_hex(program_hash);
 
-    info_string('output hash');
-    info_felt_hex(output_hash);
+        info_string('output hash');
+        info_felt_hex(output_hash);
 
-    info_string('proof program hash');
-    info_felt_hex(proof_program_hash);
+        info_string('proof program hash');
+        info_felt_hex(proof_program_hash);
 
-    // Ensure the proof contains the expected values
-    assert output_hash = expected_output_hash;
-    assert proof_program_hash = BOOTLOADER_PROGRAM_HASH;
+        // Ensure the proof contains the expected values
+        assert output_hash = expected_output_hash;
+        assert proof_program_hash = BOOTLOADER_PROGRAM_HASH;
+        info_string('verified stone proof');
 
-    info_string('verified stone proof');
+        assert local_range_check_ptr = range_check_ptr;
+        assert local_bitwise_ptr = bitwise_ptr;
+        assert local_poseidon_ptr = poseidon_ptr;
+        assert local_pedersen_ptr = pedersen_ptr;
+    } else {
+        info_string('mock mode');
+        assert local_range_check_ptr = range_check_ptr;
+        assert local_bitwise_ptr = bitwise_ptr;
+        assert local_poseidon_ptr = poseidon_ptr;
+        assert local_pedersen_ptr = pedersen_ptr;
+    }
+
+    let range_check_ptr = local_range_check_ptr;
+    let bitwise_ptr = local_bitwise_ptr;
+    let poseidon_ptr = local_poseidon_ptr;
+    let pedersen_ptr = local_pedersen_ptr;
 
     info_string('ran beacon update');
     let (beacon_client_output, body_root) = run_beacon_update(
