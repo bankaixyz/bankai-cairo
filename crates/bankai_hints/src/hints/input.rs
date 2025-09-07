@@ -122,10 +122,9 @@ pub fn write_stone_proof_inputs(
                 "proof": proof_data.proof
             })
             .to_string();
-            
+
             vm.insert_value(mock_mode_ptr, Felt252::from(0))?;
             exec_scopes.insert_value("program_input", proof_string);
-
         }
     } else {
         panic!("Proof data not found");
