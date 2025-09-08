@@ -92,7 +92,7 @@ func run_beacon_update{
         justified_height=previous_output.beacon.slot_number,
         finalized_height=previous_output.beacon.justified_height,
         num_signers=n_signers,
-        mmr_root_sha=previous_output.beacon.mmr_root_sha,
+        mmr_root_keccak=previous_output.beacon.mmr_root_keccak,
         mmr_root_poseidon=previous_output.beacon.mmr_root_poseidon,
         current_committee_hash=current_committee_hash,
         next_committee_hash=next_committee_hash,
@@ -137,7 +137,7 @@ func run_execution_update{
         header_hash=header_hash,
         justified_height=previous_output.execution.block_number,
         finalized_height=previous_output.execution.justified_height,
-        mmr_root_sha=previous_output.beacon.mmr_root_sha,
+        mmr_root_keccak=previous_output.beacon.mmr_root_keccak,
         mmr_root_poseidon=previous_output.beacon.mmr_root_poseidon,
     );
 

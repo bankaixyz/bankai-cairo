@@ -138,7 +138,7 @@ func main{
                 justified_height=circuit_output.beacon.justified_height,
                 finalized_height=circuit_output.beacon.finalized_height,
                 num_signers=circuit_output.beacon.num_signers,
-                mmr_root_sha=circuit_output.beacon.mmr_root_sha,
+                mmr_root_keccak=circuit_output.beacon.mmr_root_keccak,
                 mmr_root_poseidon=circuit_output.beacon.mmr_root_poseidon,
                 current_committee_hash=circuit_output.beacon.current_committee_hash,
                 next_committee_hash=new_next_committee_hash,
@@ -277,7 +277,7 @@ func handle_genesis_case{
             justified_height=0,
             finalized_height=0,
             num_signers=0,
-            mmr_root_sha=Uint256(low=0x0, high=0x0),
+            mmr_root_keccak=Uint256(low=0x0, high=0x0),
             mmr_root_poseidon=0,
             current_committee_hash=expected_genesis_committee,
             next_committee_hash=Uint256(low=0x0, high=0x0),
@@ -287,7 +287,7 @@ func handle_genesis_case{
             header_hash=Uint256(low=0x0, high=0x0),
             justified_height=0,
             finalized_height=0,
-            mmr_root_sha=Uint256(low=0x0, high=0x0),
+            mmr_root_keccak=Uint256(low=0x0, high=0x0),
             mmr_root_poseidon=0,
         ),
     );
@@ -317,8 +317,8 @@ func write_circuit_output{output_ptr: felt*, range_check_ptr}(output: CircuitOut
     assert [output_ptr + 4] = output.beacon.justified_height;
     assert [output_ptr + 5] = output.beacon.finalized_height;
     assert [output_ptr + 6] = output.beacon.num_signers;
-    assert [output_ptr + 7] = output.beacon.mmr_root_sha.low;
-    assert [output_ptr + 8] = output.beacon.mmr_root_sha.high;
+    assert [output_ptr + 7] = output.beacon.mmr_root_keccak.low;
+    assert [output_ptr + 8] = output.beacon.mmr_root_keccak.high;
     assert [output_ptr + 9] = output.beacon.mmr_root_poseidon;
     assert [output_ptr + 10] = output.beacon.current_committee_hash.low;
     assert [output_ptr + 11] = output.beacon.current_committee_hash.high;
@@ -329,8 +329,8 @@ func write_circuit_output{output_ptr: felt*, range_check_ptr}(output: CircuitOut
     assert [output_ptr + 16] = output.execution.header_hash.high;
     assert [output_ptr + 17] = output.execution.justified_height;
     assert [output_ptr + 18] = output.execution.finalized_height;
-    assert [output_ptr + 19] = output.execution.mmr_root_sha.low;
-    assert [output_ptr + 20] = output.execution.mmr_root_sha.high;
+    assert [output_ptr + 19] = output.execution.mmr_root_keccak.low;
+    assert [output_ptr + 20] = output.execution.mmr_root_keccak.high;
     assert [output_ptr + 21] = output.execution.mmr_root_poseidon;
 
     let output_ptr = output_ptr + 22;
