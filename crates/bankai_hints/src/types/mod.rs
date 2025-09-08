@@ -81,7 +81,7 @@ pub struct BeaconClientOutputCairo {
     pub justified_height: Felt,
     pub finalized_height: Felt,
     pub num_signers: Felt,
-    pub mmr_root_sha: Uint256,
+    pub mmr_root_keccak: Uint256,
     pub mmr_root_poseidon: Felt,
     pub current_committee_hash: Uint256,
     pub next_committee_hash: Uint256,
@@ -103,7 +103,7 @@ impl CairoType for BeaconClientOutputCairo {
         current_ptr = self.justified_height.to_memory(vm, current_ptr)?;
         current_ptr = self.finalized_height.to_memory(vm, current_ptr)?;
         current_ptr = self.num_signers.to_memory(vm, current_ptr)?;
-        current_ptr = self.mmr_root_sha.to_memory(vm, current_ptr)?;
+        current_ptr = self.mmr_root_keccak.to_memory(vm, current_ptr)?;
         current_ptr = self.mmr_root_poseidon.to_memory(vm, current_ptr)?;
         current_ptr = self.current_committee_hash.to_memory(vm, current_ptr)?;
         current_ptr = self.next_committee_hash.to_memory(vm, current_ptr)?;
@@ -122,7 +122,7 @@ impl CairoType for BeaconClientOutputCairo {
             justified_height: Felt::from_memory(vm, (address + 5)?)?,
             finalized_height: Felt::from_memory(vm, (address + 6)?)?,
             num_signers: Felt::from_memory(vm, (address + 7)?)?,
-            mmr_root_sha: Uint256::from_memory(vm, (address + 8)?)?,
+            mmr_root_keccak: Uint256::from_memory(vm, (address + 8)?)?,
             mmr_root_poseidon: Felt::from_memory(vm, (address + 10)?)?,
             current_committee_hash: Uint256::from_memory(vm, (address + 11)?)?,
             next_committee_hash: Uint256::from_memory(vm, (address + 13)?)?,
