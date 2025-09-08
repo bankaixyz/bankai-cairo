@@ -376,9 +376,8 @@ impl CairoWritable for ConsensusInputsCairo {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SyncCommitteeUpdateProofCairo {
-    pub beacon_slot: Felt,
-    pub next_sync_committee_branch: Vec<Uint256Bits32>,
-    pub next_aggregate_sync_committee: UInt384,
+    pub path: Vec<Uint256Bits32>,
+    pub next_committee_key: UInt384,
     pub committee_keys_root: Uint256Bits32,
 }
 
@@ -392,22 +391,22 @@ impl CairoWritable for SyncCommitteeUpdateProofCairo {
         cairo_vm_base::vm::cairo_vm::vm::errors::hint_errors::HintError,
     > {
         let mut current_ptr = address;
-
-        current_ptr = self.beacon_slot.to_memory(vm, current_ptr)?;
-
         // Create segment for next sync committee branch and store its pointer
-        let next_sync_committee_branch_segment = vm.add_memory_segment();
-        vm.insert_value(current_ptr, next_sync_committee_branch_segment)?;
+        let path_segment = vm.add_memory_segment();
+        vm.insert_value(current_ptr, path_segment)?;
         current_ptr = (current_ptr + 1)?;
 
         // Write each next sync committee branch element
-        let mut segment_ptr = next_sync_committee_branch_segment;
-        for branch in &self.next_sync_committee_branch {
+        let mut segment_ptr = path_segment;
+        for branch in &self.path {
             segment_ptr = branch.to_memory(vm, segment_ptr)?;
         }
 
+        vm.insert_value(current_ptr, Felt252::from(self.path.len() as u64))?;
+        current_ptr = (current_ptr + 1)?;
+
         current_ptr = self
-            .next_aggregate_sync_committee
+            .next_committee_key
             .to_memory(vm, current_ptr)?;
         current_ptr = self.committee_keys_root.to_memory(vm, current_ptr)?;
 

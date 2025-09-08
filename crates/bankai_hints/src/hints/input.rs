@@ -141,47 +141,14 @@ pub fn write_committee_update_inputs(
 ) -> Result<(), HintError> {
     let inputs = exec_scopes.get_ref::<StoneInputsCairo>("input")?;
     if let Some(sync_committee_update) = &inputs.sync_committee_update {
-        let aggregate_committee_key_ptr = get_relocatable_from_var_name(
-            "aggregate_committee_key",
+        let committee_input_ptr = get_relocatable_from_var_name(
+            "committee_input",
             vm,
             &hint_data.ids_data,
             &hint_data.ap_tracking,
         )?;
-        sync_committee_update
-            .next_aggregate_sync_committee
-            .to_memory(vm, aggregate_committee_key_ptr)?;
 
-        let committee_keys_root_ptr = get_ptr_from_var_name(
-            "committee_keys_root",
-            vm,
-            &hint_data.ids_data,
-            &hint_data.ap_tracking,
-        )?;
-        sync_committee_update
-            .committee_keys_root
-            .to_memory(vm, committee_keys_root_ptr)?;
-
-        let path_ptr =
-            get_ptr_from_var_name("path", vm, &hint_data.ids_data, &hint_data.ap_tracking)?;
-
-        for (i, branch) in sync_committee_update
-            .next_sync_committee_branch
-            .iter()
-            .enumerate()
-        {
-            let branch_segment = vm.add_memory_segment();
-            branch.to_memory(vm, branch_segment)?;
-            vm.insert_value((path_ptr + i)?, branch_segment)?;
-        }
-
-        let path_len_ptr = get_relocatable_from_var_name(
-            "path_len",
-            vm,
-            &hint_data.ids_data,
-            &hint_data.ap_tracking,
-        )?;
-        let path_len = Felt252::from(sync_committee_update.next_sync_committee_branch.len());
-        vm.insert_value(path_len_ptr, path_len)?;
+        sync_committee_update.to_memory(vm, committee_input_ptr)?;
 
         Ok(())
     } else {
