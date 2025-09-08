@@ -56,7 +56,7 @@ struct BeaconClientOutput {
     justified_height: felt,
     finalized_height: felt,
     num_signers: felt,
-    mmr_root_sha: Uint256,
+    mmr_root_keccak: Uint256,
     mmr_root_poseidon: felt,
     current_committee_hash: Uint256,
     next_committee_hash: Uint256,
@@ -67,7 +67,7 @@ struct ExecutionClientOutput {
     header_hash: Uint256,
     justified_height: felt,
     finalized_height: felt,
-    mmr_root_sha: Uint256,
+    mmr_root_keccak: Uint256,
     mmr_root_poseidon: felt,
 }
 struct CircuitOutput2 {

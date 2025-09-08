@@ -140,7 +140,7 @@ pub struct ExecutionClientOutputCairo {
     pub header_hash: Uint256,
     pub justified_height: Felt,
     pub finalized_height: Felt,
-    pub mmr_root_sha: Uint256,
+    pub mmr_root_keccak: Uint256,
     pub mmr_root_poseidon: Felt,
 }
 
@@ -158,7 +158,7 @@ impl CairoType for ExecutionClientOutputCairo {
         current_ptr = self.header_hash.to_memory(vm, current_ptr)?;
         current_ptr = self.justified_height.to_memory(vm, current_ptr)?;
         current_ptr = self.finalized_height.to_memory(vm, current_ptr)?;
-        current_ptr = self.mmr_root_sha.to_memory(vm, current_ptr)?;
+        current_ptr = self.mmr_root_keccak.to_memory(vm, current_ptr)?;
         current_ptr = self.mmr_root_poseidon.to_memory(vm, current_ptr)?;
 
         Ok(current_ptr)
@@ -173,7 +173,7 @@ impl CairoType for ExecutionClientOutputCairo {
             header_hash: Uint256::from_memory(vm, (address + 1)?)?,
             justified_height: Felt::from_memory(vm, (address + 3)?)?,
             finalized_height: Felt::from_memory(vm, (address + 4)?)?,
-            mmr_root_sha: Uint256::from_memory(vm, (address + 5)?)?,
+            mmr_root_keccak: Uint256::from_memory(vm, (address + 5)?)?,
             mmr_root_poseidon: Felt::from_memory(vm, (address + 7)?)?,
         })
     }
