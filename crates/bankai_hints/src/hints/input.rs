@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 
 use cairo_vm_base::vm::cairo_vm::hint_processor::builtin_hint_processor::builtin_hint_processor_definition::HintProcessorData;
-use cairo_vm_base::vm::cairo_vm::hint_processor::builtin_hint_processor::hint_utils::get_ptr_from_var_name;
 use cairo_vm_base::vm::cairo_vm::hint_processor::builtin_hint_processor::hint_utils::get_relocatable_from_var_name;
 use cairo_vm_base::vm::cairo_vm::vm::vm_core::VirtualMachine;
 use cairo_vm_base::vm::cairo_vm::vm::errors::hint_errors::HintError;
@@ -65,15 +64,10 @@ pub fn write_consensus_inputs(
         &hint_data.ids_data,
         &hint_data.ap_tracking,
     )?;
-    // let program_hash = Felt252::from_hex_unchecked(
-    //     "0x5b6ff167e72599c14a2e99cac4a6e8db3036db0f0d9acac15d5822ea315287a",
-    // );
     let program_hash = Felt252::from_hex_unchecked(
-        "0x5dd26dbafd599d27e16351298a1147520aef4e0833a5f4b4ff57a7dc589e952",
+        "0x2abf52cd24c25506fba477a9e56632a93b5f61d8a09ebc7244b3ae9cccf8a87",
     );
-    // let program_hash = Felt252::from_hex_unchecked(
-    //     "0x5ab580b04e3532b6b18f81cfa654a05e29dd8e2352d88df1e765a84072db07",
-    // );
+
     vm.insert_value(program_hash_ptr, program_hash)?;
 
     Ok(())

@@ -253,8 +253,7 @@ impl CairoWritable for ExecutionHeaderProofCairo {
         cairo_vm_base::vm::cairo_vm::types::relocatable::Relocatable,
         cairo_vm_base::vm::cairo_vm::vm::errors::hint_errors::HintError,
     > {
-        println!("ExecutionHeaderProofCairo: {self:?}");
-        let mut current_ptr = address;
+        let mut current_ptr: cairo_vm_base::vm::cairo_vm::types::relocatable::Relocatable = address;
 
         current_ptr = self.root.to_memory(vm, current_ptr)?;
 
@@ -282,7 +281,6 @@ impl CairoWritable for ExecutionHeaderProofCairo {
         for field in &self.execution_payload_header {
             payload_fields_ptr = field.to_memory(vm, payload_fields_ptr)?;
         }
-        println!("payload fields written");
 
         // Check that the memory layout is correct
         let expected_ptr = (address + Self::n_fields())?;
@@ -405,9 +403,7 @@ impl CairoWritable for SyncCommitteeUpdateProofCairo {
         vm.insert_value(current_ptr, Felt252::from(self.path.len() as u64))?;
         current_ptr = (current_ptr + 1)?;
 
-        current_ptr = self
-            .next_committee_key
-            .to_memory(vm, current_ptr)?;
+        current_ptr = self.next_committee_key.to_memory(vm, current_ptr)?;
         current_ptr = self.committee_keys_root.to_memory(vm, current_ptr)?;
 
         // Check that the memory layout is correct
