@@ -7,7 +7,7 @@ from sha import SHA256
 from debug import print_string, print_felt_hex, print_felt
 from bls12_381.multi_pairing_check_2 import multi_pairing_check_2P
 from hash_to_curve import hash_to_curve
-
+from cairo.src.debug.print import info_string, info_uint256, debug_string
 from cairo.src.utils.ssz import SSZ, MerkleTree, MerkleUtils
 from cairo.src.utils.constants import g1_negative
 from cairo.src.utils.domain import Domain, Network
@@ -58,6 +58,7 @@ func run_beacon_update{
 
     // 5. Verify signature
     verify_signature(agg_key, msg_point, consensus_inputs.signature.signature_point);
+    debug_string('beacon: signature verified');
 
     local current_committee_hash: Uint256;
     local next_committee_hash: Uint256;
@@ -83,6 +84,7 @@ func run_beacon_update{
         assert next_committee_hash.high = previous_output.beacon.next_committee_hash.high;
     }
 
+    debug_string('beacon: committee hashes set');
     let output = BeaconClientOutput(
         slot_number=consensus_inputs.beacon_header.slot.low,
         header_root=header_root,
@@ -141,67 +143,6 @@ func run_execution_update{
 
     return (output=output);
 }
-
-// func run_epoch_update{
-//     output_ptr: felt*,
-//     range_check_ptr,
-//     bitwise_ptr: BitwiseBuiltin*,
-//     poseidon_ptr: PoseidonBuiltin*,
-//     range_check96_ptr: felt*,
-//     add_mod_ptr: ModBuiltin*,
-//     mul_mod_ptr: ModBuiltin*,
-//     pow2_array: felt*,
-//     sha256_ptr: felt*,
-// }(consensus_inputs: ConsensusInputs) -> (output: EpochUpdateOutput) {
-//     alloc_locals;
-
-// // 1. Hash beacon header
-//     let (header_root, body_root, state_root) = hash_header(consensus_inputs.beacon_header);
-
-// // 2. Compute signing root (this is what validators sign)
-//     let signing_root = Domain.compute_signing_root(
-//         Network.SEPOLIA, header_root, consensus_inputs.beacon_header.slot.low
-//     );
-
-// // 3. Hash to curve to get message point
-//     let (msg_point) = hash_to_curve(1, signing_root);
-
-// // 4. Aggregate signer to get aggregate key that was used to sign the message
-//     let (committee_hash, agg_key, n_non_signers) = aggregate_signer_pubs(
-//         consensus_inputs.signature
-//     );
-//     let n_signers = 512 - n_non_signers;
-
-// // 5. Verify signature
-//     verify_signature(agg_key, msg_point, consensus_inputs.signature.signature_point);
-
-// // 6. Hash execution payload root (SSZ encoded execution payload) which is stored in the beacon state
-//     let (execution_root, execution_hash, execution_height) = SSZ.hash_execution_payload_header_root(
-//         consensus_inputs.execution_header_proof.payload_fields
-//     );
-
-// // 7. Verify ssz inclusion proof
-//     let root_felts = MerkleUtils.chunk_uint256(execution_root);
-//     let computed_body_root = MerkleTree.hash_merkle_path(
-//         path=consensus_inputs.execution_header_proof.path, path_len=4, leaf=root_felts, index=9
-//     );
-
-// // 8. Assert that the computed body root matches the body root of the verified header
-//     assert computed_body_root.low = body_root.low;
-//     assert computed_body_root.high = body_root.high;
-
-// let output = EpochUpdateOutput(
-//         beacon_header_root=header_root,
-//         beacon_state_root=state_root,
-//         beacon_height=consensus_inputs.beacon_header.slot.low,
-//         n_signers=n_signers,
-//         execution_header_root=execution_hash,
-//         execution_header_height=execution_height,
-//         current_committee_hash=committee_hash,
-//     );
-
-// return (output=output);
-// }
 
 func hash_header{
     range_check_ptr, bitwise_ptr: BitwiseBuiltin*, pow2_array: felt*, sha256_ptr: felt*

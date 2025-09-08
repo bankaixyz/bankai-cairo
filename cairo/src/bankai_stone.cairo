@@ -24,6 +24,7 @@ from cairo.src.debug.print import (
     info_felt_hex,
     info_felt,
     info_string,
+    info_uint256,
 )
 from cairo.src.io import (
     ConsensusInputs,
@@ -65,16 +66,16 @@ func main{
     local program_hash: felt;
     %{ write_consensus_inputs() %}
 
-    debug_string('wrote epoch');
-
     debug_string('is_genesis');
     debug_felt_hex(is_genesis);
     debug_string('is_committee_update');
     debug_felt_hex(is_committee_update);
+
     debug_string('program_hash');
     debug_felt_hex(program_hash);
 
     if (is_genesis == 1) {
+        info_string('handle_genesis_case');
         with pow2_array, sha256_ptr {
             let (circuit_output) = handle_genesis_case(consensus_inputs);
         }
@@ -86,8 +87,7 @@ func main{
 
         return ();
     } else {
-        debug_string('recursive case');
-
+        info_string('handle_recursive_case');
         let (_, remainder) = felt_divmod(
             consensus_inputs.beacon_header.slot.low + 1, SYNC_COMMITTEE_PERIOD
         );
@@ -97,6 +97,7 @@ func main{
         } else {
             is_committee_transition = 0;
         }
+
         debug_string('is_committee_transition');
         debug_felt_hex(is_committee_transition);
 
@@ -105,28 +106,50 @@ func main{
                 consensus_inputs, program_hash, is_committee_transition
             );
         }
-        debug_string('confirmed epoch');
+        info_string('confirmed epoch');
 
         if (is_committee_update == 1) {
-            debug_string('committee update');
+            info_string('committee update');
             // sanity check: next_committee_hash should be 0x0 if we update
             assert circuit_output.beacon.next_committee_hash.low = 0x0;
             assert circuit_output.beacon.next_committee_hash.high = 0x0;
 
             local committee_input: SyncCommitteeUpdateInputs;
-
             %{ write_committee_update_inputs() %}
+
             with pow2_array, sha256_ptr {
                 let (state_root, new_next_committee_hash) = run_committee_update(
                     committee_input=committee_input, slot=circuit_output.beacon.slot_number
                 );
             }
-            debug_string('committee update done');
 
             // Ensure a valid state root is used to decommit new next_committee_hash
             assert circuit_output.beacon.state_root.low = state_root.low;
             assert circuit_output.beacon.state_root.high = state_root.high;
-            write_circuit_output(circuit_output);
+
+            info_string('updated next_committee_hash');
+            info_uint256(new_next_committee_hash);
+
+            // Update the next_committee_hash in the final output
+            let updated_beacon_output = BeaconClientOutput(
+                slot_number=circuit_output.beacon.slot_number,
+                header_root=circuit_output.beacon.header_root,
+                state_root=circuit_output.beacon.state_root,
+                justified_height=circuit_output.beacon.justified_height,
+                finalized_height=circuit_output.beacon.finalized_height,
+                num_signers=circuit_output.beacon.num_signers,
+                mmr_root_sha=circuit_output.beacon.mmr_root_sha,
+                mmr_root_poseidon=circuit_output.beacon.mmr_root_poseidon,
+                current_committee_hash=circuit_output.beacon.current_committee_hash,
+                next_committee_hash=new_next_committee_hash,
+            );
+            let final_output = CircuitOutput2(
+                block_number=circuit_output.block_number,
+                beacon=updated_beacon_output,
+                execution=circuit_output.execution,
+            );
+
+            write_circuit_output(final_output);
 
             SHA256.finalize(sha256_start_ptr=sha256_ptr_start, sha256_end_ptr=sha256_ptr);
             return ();
@@ -156,15 +179,15 @@ func handle_recursive_case{
 ) {
     alloc_locals;
 
-    debug_string('handle_recursive_case');
+    info_string('handle_recursive_case');
 
     local previous_output: CircuitOutput2;
     %{ load_previous_output() %}
 
     let (expected_output_hash) = compute_output_hash(program_hash, previous_output);
 
-    info_string('expected output hash');
-    info_felt_hex(expected_output_hash);
+    debug_string('expected output hash');
+    debug_felt_hex(expected_output_hash);
     local mock_mode: felt;
     %{ write_stone_proof_inputs() %}
 
@@ -205,7 +228,6 @@ func handle_recursive_case{
     let poseidon_ptr = local_poseidon_ptr;
     let pedersen_ptr = local_pedersen_ptr;
 
-    info_string('ran beacon update');
     let (beacon_client_output, body_root) = run_beacon_update(
         consensus_inputs, is_committee_transition, previous_output
     );
@@ -215,6 +237,8 @@ func handle_recursive_case{
     let (execution_client_output) = run_execution_update(
         body_root, consensus_inputs.execution_header_proof, previous_output
     );
+
+    info_string('ran execution update');
 
     let circuit_output = CircuitOutput2(
         block_number=previous_output.block_number + 1,

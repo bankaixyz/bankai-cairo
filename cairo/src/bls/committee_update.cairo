@@ -13,7 +13,7 @@ from starkware.cairo.common.memset import memset
 from definitions import UInt384
 from sha import SHA256, HashUtils
 from ec_ops import derive_g1_point_from_x
-from debug import print_felt_hex, print_uint384, print_string
+from cairo.src.debug.print import info_string, debug_string, debug_felt, debug_felt_hex
 
 from cairo.src.utils.domain import Network
 from cairo.src.utils.utils import pow2alloc128, felt_divmod
@@ -105,6 +105,7 @@ func run_committee_update{
     state_root: Uint256, committee_hash: Uint256
 ) {
     alloc_locals;
+    info_string('committee update');
 
     let fork = Network.get_fork_version(Network.SEPOLIA, slot);
     local next_committee_index: felt;
@@ -113,6 +114,8 @@ func run_committee_update{
     } else {
         next_committee_index = 55;
     }
+    debug_string('next committee index');
+    debug_felt(next_committee_index);
 
     let leaf_hash = compute_leaf_hash(
         committee_input.committee_keys_root, committee_input.next_committee_key
@@ -125,6 +128,7 @@ func run_committee_update{
         index=next_committee_index,
     );
     let committee_hash = compute_committee_hash(committee_input.next_committee_key);
+    info_string('committee update ok');
 
     return (state_root, committee_hash);
 }
