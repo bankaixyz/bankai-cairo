@@ -1,10 +1,11 @@
-%builtins output pedersen range_check bitwise poseidon range_check96 add_mod mul_mod
+%builtins output pedersen range_check bitwise keccak poseidon range_check96 add_mod mul_mod
 
 from starkware.cairo.common.cairo_builtins import (
     PoseidonBuiltin,
     ModBuiltin,
     BitwiseBuiltin,
     HashBuiltin,
+    KeccakBuiltin,
 )
 from starkware.cairo.stark_verifier.core.stark import StarkProof
 from starkware.cairo.common.uint256 import Uint256
@@ -51,6 +52,7 @@ func main{
     pedersen_ptr: HashBuiltin*,
     range_check_ptr,
     bitwise_ptr: BitwiseBuiltin*,
+    keccak_ptr: KeccakBuiltin*,
     poseidon_ptr: PoseidonBuiltin*,
     range_check96_ptr: felt*,
     add_mod_ptr: ModBuiltin*,
@@ -171,6 +173,7 @@ func handle_recursive_case{
     pedersen_ptr: HashBuiltin*,
     range_check_ptr,
     bitwise_ptr: BitwiseBuiltin*,
+    keccak_ptr: KeccakBuiltin*,
     poseidon_ptr: PoseidonBuiltin*,
     range_check96_ptr: felt*,
     add_mod_ptr: ModBuiltin*,
@@ -257,6 +260,7 @@ func handle_genesis_case{
     pedersen_ptr: HashBuiltin*,
     range_check_ptr,
     bitwise_ptr: BitwiseBuiltin*,
+    keccak_ptr: KeccakBuiltin*,
     poseidon_ptr: PoseidonBuiltin*,
     range_check96_ptr: felt*,
     add_mod_ptr: ModBuiltin*,
