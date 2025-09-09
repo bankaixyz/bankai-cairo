@@ -35,8 +35,8 @@ if ! python3.10 -m venv --help >/dev/null 2>&1; then
     exit 1
 fi
 
-echo "Fetching Garaga-zero as submodule..."
-git submodule update --init
+echo "Fetching submodules..."
+git submodule update --init --recursive
 mkdir -p cairo/build
 
 # Create virtual environment
@@ -45,18 +45,18 @@ if ! python3.10 -m venv venv; then
     exit 1
 fi
 
-echo 'export PYTHONPATH="$PWD:$PWD/cairo/packages/garaga-zero:$PYTHONPATH"' >> venv/bin/activate
+echo 'export PYTHONPATH="$PWD:$PWD/cairo/packages/garaga_zero:$PYTHONPATH"' >> venv/bin/activate
 source venv/bin/activate
 
 pip install uv
-uv pip compile cairo/packages/garaga-zero/pyproject.toml --output-file cairo/packages/garaga-zero/tools/make/requirements.txt -q
-uv pip install -r cairo/packages/garaga-zero/tools/make/requirements.txt
+uv pip compile cairo/packages/garaga_zero/pyproject.toml --output-file cairo/packages/garaga_zero/tools/make/requirements.txt -q
+uv pip install -r cairo/packages/garaga_zero/tools/make/requirements.txt
 
 pip install py_ecc
 pip install cairo-lang-0.13.5.zip --no-cache-dir || { echo "Failed to install cairo-lang-0.13.5."; exit 1; }
 
 echo "Applying patch to instances.py..."
-patch venv/lib/python3.10/site-packages/starkware/cairo/lang/instances.py < cairo/packages/garaga-zero/tools/make/instances.patch
+patch venv/lib/python3.10/site-packages/starkware/cairo/lang/instances.py < cairo/packages/garaga_zero/tools/make/instances.patch
 
 deactivate
 

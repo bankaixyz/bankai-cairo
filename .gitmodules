@@ -1,3 +1,7 @@
-[submodule "cairo/packages/garaga-zero"]
-	path = cairo/packages/garaga-zero
+[submodule "cairo/packages/garaga_zero"]
+	path = cairo/packages/garaga_zero
 	url = https://github.com/bankaixyz/garaga-zero
+[submodule "cairo/packages/mmr_header_accumulator"]
+	path = cairo/packages/mmr_header_accumulator
+	url = https://github.com/bankaixyz/mmr-header-accumulator
+	branch = main
