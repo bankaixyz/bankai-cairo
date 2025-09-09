@@ -9,7 +9,10 @@ use cairo_vm_base::vm::cairo_vm::Felt252;
 use serde::{Deserialize, Serialize};
 
 use crate::types::bls::{G1PointCairo, G2PointCairo};
-pub use mmr_header_accumulator_hints::types::{BeaconHeaderCairo as MmrBeaconHeaderCairo, MmrSnapshotCairo, LastLeafProofCairo, BeaconMmrUpdateCairo};
+pub use mmr_header_accumulator_hints::types::{
+    BeaconHeaderCairo as MmrBeaconHeaderCairo, BeaconMmrUpdateCairo, LastLeafProofCairo,
+    MmrSnapshotCairo,
+};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct StoneCircuitLayoutCairo {
