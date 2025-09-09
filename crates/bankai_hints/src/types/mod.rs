@@ -21,6 +21,24 @@ pub struct StoneInputsCairo {
     pub consensus_data: ConsensusInputsCairo,
     pub sync_committee_update: Option<SyncCommitteeUpdateProofCairo>,
     pub proof_data: Option<ProofDataCairo>,
+    pub beacon_mmr_update: MmrUpdateCairo<BeaconHeaderCairo>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct MmrUpdateCairo<T> {
+    pub start_snapshot: MmrSnapshotCairo,
+    pub end_snapshot: MmrSnapshotCairo,
+    pub added_headers: Vec<T>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct MmrSnapshotCairo {
+    pub keccak_root: Uint256,
+    pub poseidon_root: Felt,
+    pub elements_count: Felt,
+    pub leafs_count: Felt,
+    pub keccak_peaks: Vec<Uint256>,
+    pub poseidon_peaks: Vec<Felt>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
