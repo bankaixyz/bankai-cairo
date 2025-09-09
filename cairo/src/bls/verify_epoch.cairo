@@ -22,6 +22,7 @@ from cairo.src.io import (
     CircuitOutput2,
 )
 from cairo.src.types import EpochUpdateOutput
+from src.beacon.lib import run_beacon_mmr_update
 
 func run_beacon_update{
     range_check_ptr,
@@ -83,6 +84,8 @@ func run_beacon_update{
         assert next_committee_hash.low = previous_output.beacon.next_committee_hash.low;
         assert next_committee_hash.high = previous_output.beacon.next_committee_hash.high;
     }
+
+    run_beacon_mmr_update();
 
     debug_string('beacon: committee hashes set');
     let output = BeaconClientOutput(
