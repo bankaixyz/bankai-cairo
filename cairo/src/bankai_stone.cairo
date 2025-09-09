@@ -14,9 +14,8 @@ from starkware.cairo.common.builtin_poseidon.poseidon import poseidon_hash_many
 from starkware.cairo.common.alloc import alloc
 // these imports are cursed!
 // garaga_zero the compiler looks in garaga_zero/src/. If I change this, the internal garaga-zero imports break.
-from definitions import UInt384
 // for mmr_header_accumulator, the compiler looks in the root dir of the submodule.
-from src.beacon.lib import run as run_beacon_mmr_update
+from definitions import UInt384
 
 from cairo.src.recursion.stone import verify_stone_proof
 
