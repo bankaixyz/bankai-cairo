@@ -86,7 +86,7 @@ func run_beacon_update{
         assert next_committee_hash.high = previous_output.beacon.next_committee_hash.high;
     }
 
-    run_beacon_mmr_update();
+    let (new_keccak_root, new_poseidon_root, new_mmr_size) = run_beacon_mmr_update();
 
     debug_string('beacon: committee hashes set');
     let output = BeaconClientOutput(
@@ -96,8 +96,8 @@ func run_beacon_update{
         justified_height=previous_output.beacon.slot_number,
         finalized_height=previous_output.beacon.justified_height,
         num_signers=n_signers,
-        mmr_root_keccak=previous_output.beacon.mmr_root_keccak,
-        mmr_root_poseidon=previous_output.beacon.mmr_root_poseidon,
+        mmr_root_keccak=new_keccak_root,
+        mmr_root_poseidon=new_poseidon_root,
         current_committee_hash=current_committee_hash,
         next_committee_hash=next_committee_hash,
     );
@@ -141,8 +141,8 @@ func run_execution_update{
         header_hash=header_hash,
         justified_height=previous_output.execution.block_number,
         finalized_height=previous_output.execution.justified_height,
-        mmr_root_keccak=previous_output.beacon.mmr_root_keccak,
-        mmr_root_poseidon=previous_output.beacon.mmr_root_poseidon,
+        mmr_root_keccak=previous_output.execution.mmr_root_keccak,
+        mmr_root_poseidon=previous_output.execution.mmr_root_poseidon,
     );
 
     return (output=output);
