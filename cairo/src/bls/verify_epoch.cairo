@@ -12,7 +12,7 @@ from sha import SHA256
 from debug import print_string, print_felt_hex, print_felt
 from bls12_381.multi_pairing_check_2 import multi_pairing_check_2P
 from hash_to_curve import hash_to_curve
-from cairo.src.debug.print import info_string, info_uint256, debug_string
+from cairo.src.debug.print import info_string, info_uint256, debug_string, debug_uint256
 from cairo.src.utils.ssz import SSZ, MerkleTree, MerkleUtils
 from cairo.src.utils.constants import g1_negative
 from cairo.src.utils.domain import Domain, Network
@@ -91,8 +91,10 @@ func run_beacon_update{
         assert next_committee_hash.high = previous_output.beacon.next_committee_hash.high;
     }
 
-    let (new_keccak_root, new_poseidon_root, new_mmr_size, last_header_root) = run_beacon_mmr_update();
-    
+    let (
+        new_keccak_root, new_poseidon_root, new_mmr_size, last_header_root
+    ) = run_beacon_mmr_update();
+
     // Ensure the MMR root corresponds to the header verified via BLS
     assert last_header_root.low = header_root.low;
     assert last_header_root.high = header_root.high;
