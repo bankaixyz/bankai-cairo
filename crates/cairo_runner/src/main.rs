@@ -15,6 +15,10 @@ struct Args {
 
     #[arg(long, conflicts_with = "stwo", required_unless_present = "stwo")]
     stone: bool,
+
+    #[arg(long, requires = "stwo")]
+    prove: bool,
+
 }
 
 fn main() {
@@ -27,7 +31,7 @@ fn main() {
 
     if args.stwo {
         let program_path = "cairo/build/bankai_stwo.json";
-        run_stwo(program_path, input, log_level, output_dir).unwrap();
+        run_stwo(program_path, input, log_level, output_dir, args.prove).unwrap();
         println!("STWO artifacts generated successfully");
     } else {
         let program_path = "cairo/build/bankai_stone.json";

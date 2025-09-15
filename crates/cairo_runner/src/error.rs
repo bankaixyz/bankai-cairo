@@ -51,4 +51,6 @@ pub enum Error {
     IlegalInputValue,
     #[error("Runner Error: {0}")]
     Runner(#[from] RunnerError),
+    #[error(transparent)]
+    Prover(#[from] bankai_stwo_prover::Error),
 }

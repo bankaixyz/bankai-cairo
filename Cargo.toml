@@ -3,6 +3,7 @@ members = [
     "crates/bankai_hints",
     "crates/stone_verifier_hints",
     "crates/cairo_runner",
+    "crates/stwo_prover",
 ]
 exclude = ["tests"]
 resolver = "2"
@@ -11,6 +12,7 @@ resolver = "2"
 cairo-vm-base = { git = "https://github.com/bankaixyz/cairo-vm-base" }
 mmr-header-accumulator-hints = { git = "https://github.com/bankaixyz/mmr-header-accumulator" }
 beacon_types = { git = "https://github.com/bankaixyz/lighthouse.git", package = "types", rev = "9759655"}
+
 alloy-primitives = { version = "0.8.13" }
 bls12_381 = {version = "0.8.0"}
 serde = { version = "1.0.215", features = ["derive"] }
@@ -27,3 +29,15 @@ clap = { version = "4.5.22", features = ["derive"] }
 warp = { version = "0.4", features = ["server"] }
 tokio = { version = "1.47.1", features = ["full"] }
 chrono = { version = "0.4", features = ["serde"] }
+
+stwo_cairo_prover = { git = "https://github.com/starkware-libs/stwo-cairo" }
+stwo_cairo_utils = { git = "https://github.com/starkware-libs/stwo-cairo" }
+stwo-cairo-adapter = { git = "https://github.com/starkware-libs/stwo-cairo" }
+stwo-cairo-serialize = { git = "https://github.com/starkware-libs/stwo-cairo" }
+cairo-air = { git = "https://github.com/starkware-libs/stwo-cairo" }
+stwo = { git = "https://github.com/starkware-libs/stwo", rev = "d9176e6e22319370a8501f799829b920c0db2eac", features = [
+    "parallel",
+    "prover",
+], default-features = false }
+sonic-rs = { version = "0.3.17" }
+starknet-ff = { version = "0.3.7" }

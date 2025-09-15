@@ -45,6 +45,7 @@ pub fn run_stwo(
     input: StoneCircuitLayoutCairo,
     log_level: &'static str,
     output_dir: &str,
+    prove: bool,
 ) -> Result<(), Error> {
     let program = load_program(path)?;
     let cairo_run_config = cairo_run::CairoRunConfig {
@@ -74,6 +75,15 @@ pub fn run_stwo(
 
     println!("Resources: {:?}", cairo_runner.get_execution_resources());
     generate_stwo_files(&cairo_runner, output_dir)?;
+    if prove {
+        bankai_stwo_prover::generate_proof(
+            &Path::new(output_dir).join("pub.json"),
+            &Path::new(output_dir).join("priv.json"),
+            Some(true),
+            Some(bankai_stwo_prover::ProofFormat::Json),
+        )?;
+    }
+
     Ok(())
 }
 
@@ -134,7 +144,7 @@ fn generate_stwo_files(cairo_runner: &CairoRunner, output_dir: &str) -> Result<(
     let public_input = cairo_runner.get_air_public_input();
     let public_input_json = serde_json::to_string_pretty(&public_input.unwrap()).unwrap();
     std::fs::write(
-        Path::new(output_dir).join("air_public_inputs.json"),
+        Path::new(output_dir).join("pub.json"),
         public_input_json,
     )?;
 
@@ -143,7 +153,7 @@ fn generate_stwo_files(cairo_runner: &CairoRunner, output_dir: &str) -> Result<(
         private_input.to_serializable("trace.bin".to_string(), "memory.bin".to_string());
     let private_input_json = serde_json::to_string_pretty(&private_input_serializable).unwrap();
     std::fs::write(
-        Path::new(output_dir).join("air_private_inputs.json"),
+        Path::new(output_dir).join("priv.json"),
         private_input_json,
     )?;
 
