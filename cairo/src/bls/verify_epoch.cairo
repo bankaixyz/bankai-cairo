@@ -1,4 +1,9 @@
-from starkware.cairo.common.cairo_builtins import PoseidonBuiltin, ModBuiltin, BitwiseBuiltin, KeccakBuiltin
+from starkware.cairo.common.cairo_builtins import (
+    PoseidonBuiltin,
+    ModBuiltin,
+    BitwiseBuiltin,
+    KeccakBuiltin,
+)
 from starkware.cairo.common.registers import get_fp_and_pc
 from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.uint256 import Uint256
@@ -86,7 +91,11 @@ func run_beacon_update{
         assert next_committee_hash.high = previous_output.beacon.next_committee_hash.high;
     }
 
-    let (new_keccak_root, new_poseidon_root, new_mmr_size) = run_beacon_mmr_update();
+    let (new_keccak_root, new_poseidon_root, new_mmr_size, last_header_root) = run_beacon_mmr_update();
+    
+    // Ensure the MMR root corresponds to the header verified via BLS
+    assert last_header_root.low = header_root.low;
+    assert last_header_root.high = header_root.high;
 
     debug_string('beacon: committee hashes set');
     let output = BeaconClientOutput(
