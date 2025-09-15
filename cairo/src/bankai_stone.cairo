@@ -1,10 +1,11 @@
-%builtins output pedersen range_check bitwise poseidon range_check96 add_mod mul_mod
+%builtins output pedersen range_check bitwise keccak poseidon range_check96 add_mod mul_mod
 
 from starkware.cairo.common.cairo_builtins import (
     PoseidonBuiltin,
     ModBuiltin,
     BitwiseBuiltin,
     HashBuiltin,
+    KeccakBuiltin,
 )
 from starkware.cairo.stark_verifier.core.stark import StarkProof
 from starkware.cairo.common.uint256 import Uint256
@@ -12,6 +13,9 @@ from starkware.cairo.common.memcpy import memcpy
 from starkware.cairo.common.registers import get_fp_and_pc
 from starkware.cairo.common.builtin_poseidon.poseidon import poseidon_hash_many
 from starkware.cairo.common.alloc import alloc
+// these imports are cursed!
+// garaga_zero the compiler looks in garaga_zero/src/. If I change this, the internal garaga-zero imports break.
+// for mmr_header_accumulator, the compiler looks in the root dir of the submodule.
 from definitions import UInt384
 
 from cairo.src.recursion.stone import verify_stone_proof
@@ -48,6 +52,7 @@ func main{
     pedersen_ptr: HashBuiltin*,
     range_check_ptr,
     bitwise_ptr: BitwiseBuiltin*,
+    keccak_ptr: KeccakBuiltin*,
     poseidon_ptr: PoseidonBuiltin*,
     range_check96_ptr: felt*,
     add_mod_ptr: ModBuiltin*,
@@ -138,7 +143,7 @@ func main{
                 justified_height=circuit_output.beacon.justified_height,
                 finalized_height=circuit_output.beacon.finalized_height,
                 num_signers=circuit_output.beacon.num_signers,
-                mmr_root_sha=circuit_output.beacon.mmr_root_sha,
+                mmr_root_keccak=circuit_output.beacon.mmr_root_keccak,
                 mmr_root_poseidon=circuit_output.beacon.mmr_root_poseidon,
                 current_committee_hash=circuit_output.beacon.current_committee_hash,
                 next_committee_hash=new_next_committee_hash,
@@ -168,6 +173,7 @@ func handle_recursive_case{
     pedersen_ptr: HashBuiltin*,
     range_check_ptr,
     bitwise_ptr: BitwiseBuiltin*,
+    keccak_ptr: KeccakBuiltin*,
     poseidon_ptr: PoseidonBuiltin*,
     range_check96_ptr: felt*,
     add_mod_ptr: ModBuiltin*,
@@ -254,6 +260,7 @@ func handle_genesis_case{
     pedersen_ptr: HashBuiltin*,
     range_check_ptr,
     bitwise_ptr: BitwiseBuiltin*,
+    keccak_ptr: KeccakBuiltin*,
     poseidon_ptr: PoseidonBuiltin*,
     range_check96_ptr: felt*,
     add_mod_ptr: ModBuiltin*,
@@ -277,7 +284,7 @@ func handle_genesis_case{
             justified_height=0,
             finalized_height=0,
             num_signers=0,
-            mmr_root_sha=Uint256(low=0x0, high=0x0),
+            mmr_root_keccak=Uint256(low=0x0, high=0x0),
             mmr_root_poseidon=0,
             current_committee_hash=expected_genesis_committee,
             next_committee_hash=Uint256(low=0x0, high=0x0),
@@ -287,7 +294,7 @@ func handle_genesis_case{
             header_hash=Uint256(low=0x0, high=0x0),
             justified_height=0,
             finalized_height=0,
-            mmr_root_sha=Uint256(low=0x0, high=0x0),
+            mmr_root_keccak=Uint256(low=0x0, high=0x0),
             mmr_root_poseidon=0,
         ),
     );
@@ -317,8 +324,8 @@ func write_circuit_output{output_ptr: felt*, range_check_ptr}(output: CircuitOut
     assert [output_ptr + 4] = output.beacon.justified_height;
     assert [output_ptr + 5] = output.beacon.finalized_height;
     assert [output_ptr + 6] = output.beacon.num_signers;
-    assert [output_ptr + 7] = output.beacon.mmr_root_sha.low;
-    assert [output_ptr + 8] = output.beacon.mmr_root_sha.high;
+    assert [output_ptr + 7] = output.beacon.mmr_root_keccak.low;
+    assert [output_ptr + 8] = output.beacon.mmr_root_keccak.high;
     assert [output_ptr + 9] = output.beacon.mmr_root_poseidon;
     assert [output_ptr + 10] = output.beacon.current_committee_hash.low;
     assert [output_ptr + 11] = output.beacon.current_committee_hash.high;
@@ -329,8 +336,8 @@ func write_circuit_output{output_ptr: felt*, range_check_ptr}(output: CircuitOut
     assert [output_ptr + 16] = output.execution.header_hash.high;
     assert [output_ptr + 17] = output.execution.justified_height;
     assert [output_ptr + 18] = output.execution.finalized_height;
-    assert [output_ptr + 19] = output.execution.mmr_root_sha.low;
-    assert [output_ptr + 20] = output.execution.mmr_root_sha.high;
+    assert [output_ptr + 19] = output.execution.mmr_root_keccak.low;
+    assert [output_ptr + 20] = output.execution.mmr_root_keccak.high;
     assert [output_ptr + 21] = output.execution.mmr_root_poseidon;
 
     let output_ptr = output_ptr + 22;

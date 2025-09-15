@@ -9,6 +9,10 @@ use cairo_vm_base::vm::cairo_vm::Felt252;
 use serde::{Deserialize, Serialize};
 
 use crate::types::bls::{G1PointCairo, G2PointCairo};
+pub use mmr_header_accumulator_hints::types::{
+    BeaconHeaderCairo as MmrBeaconHeaderCairo, BeaconMmrUpdateCairo, LastLeafProofCairo,
+    MmrSnapshotCairo,
+};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct StoneCircuitLayoutCairo {
@@ -21,6 +25,7 @@ pub struct StoneInputsCairo {
     pub consensus_data: ConsensusInputsCairo,
     pub sync_committee_update: Option<SyncCommitteeUpdateProofCairo>,
     pub proof_data: Option<ProofDataCairo>,
+    pub beacon_mmr_update: BeaconMmrUpdateCairo,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

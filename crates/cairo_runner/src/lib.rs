@@ -72,9 +72,11 @@ pub fn run(
         layout: LayoutName::all_cairo,
         ..Default::default()
     };
+    let beacon_mmr_update = input.input.beacon_mmr_update.clone();
     let mut hint_processor = CustomHintProcessor::new();
     let mut exec_scopes = ExecutionScopes::new();
     exec_scopes.insert_value("input", input.input);
+    exec_scopes.insert_value("beacon_mmr_update", beacon_mmr_update);
     exec_scopes.insert_value("output", input.output);
     exec_scopes.insert_value("program_object", program.clone());
     exec_scopes.insert_value("LOG_LEVEL_CAIRO", log_level);

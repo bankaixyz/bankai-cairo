@@ -1,4 +1,9 @@
-from starkware.cairo.common.cairo_builtins import PoseidonBuiltin, ModBuiltin, BitwiseBuiltin
+from starkware.cairo.common.cairo_builtins import (
+    PoseidonBuiltin,
+    ModBuiltin,
+    BitwiseBuiltin,
+    KeccakBuiltin,
+)
 from starkware.cairo.common.registers import get_fp_and_pc
 from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.uint256 import Uint256
@@ -7,7 +12,7 @@ from sha import SHA256
 from debug import print_string, print_felt_hex, print_felt
 from bls12_381.multi_pairing_check_2 import multi_pairing_check_2P
 from hash_to_curve import hash_to_curve
-from cairo.src.debug.print import info_string, info_uint256, debug_string
+from cairo.src.debug.print import info_string, info_uint256, debug_string, debug_uint256
 from cairo.src.utils.ssz import SSZ, MerkleTree, MerkleUtils
 from cairo.src.utils.constants import g1_negative
 from cairo.src.utils.domain import Domain, Network
@@ -22,10 +27,12 @@ from cairo.src.io import (
     CircuitOutput2,
 )
 from cairo.src.types import EpochUpdateOutput
+from src.beacon.lib import run_beacon_mmr_update
 
 func run_beacon_update{
     range_check_ptr,
     bitwise_ptr: BitwiseBuiltin*,
+    keccak_ptr: KeccakBuiltin*,
     poseidon_ptr: PoseidonBuiltin*,
     range_check96_ptr: felt*,
     add_mod_ptr: ModBuiltin*,
@@ -84,6 +91,14 @@ func run_beacon_update{
         assert next_committee_hash.high = previous_output.beacon.next_committee_hash.high;
     }
 
+    let (
+        new_keccak_root, new_poseidon_root, new_mmr_size, last_header_root
+    ) = run_beacon_mmr_update();
+
+    // Ensure the MMR root corresponds to the header verified via BLS
+    assert last_header_root.low = header_root.low;
+    assert last_header_root.high = header_root.high;
+
     debug_string('beacon: committee hashes set');
     let output = BeaconClientOutput(
         slot_number=consensus_inputs.beacon_header.slot.low,
@@ -92,8 +107,8 @@ func run_beacon_update{
         justified_height=previous_output.beacon.slot_number,
         finalized_height=previous_output.beacon.justified_height,
         num_signers=n_signers,
-        mmr_root_sha=previous_output.beacon.mmr_root_sha,
-        mmr_root_poseidon=previous_output.beacon.mmr_root_poseidon,
+        mmr_root_keccak=new_keccak_root,
+        mmr_root_poseidon=new_poseidon_root,
         current_committee_hash=current_committee_hash,
         next_committee_hash=next_committee_hash,
     );
@@ -137,8 +152,8 @@ func run_execution_update{
         header_hash=header_hash,
         justified_height=previous_output.execution.block_number,
         finalized_height=previous_output.execution.justified_height,
-        mmr_root_sha=previous_output.beacon.mmr_root_sha,
-        mmr_root_poseidon=previous_output.beacon.mmr_root_poseidon,
+        mmr_root_keccak=previous_output.execution.mmr_root_keccak,
+        mmr_root_poseidon=previous_output.execution.mmr_root_poseidon,
     );
 
     return (output=output);

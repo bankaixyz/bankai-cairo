@@ -429,6 +429,7 @@ version = "0.1.0"
 dependencies = [
  "cairo-vm-base",
  "hex",
+ "mmr-header-accumulator-hints",
  "num-bigint",
  "serde",
  "serde_json",
@@ -1153,6 +1154,7 @@ dependencies = [
  "clap",
  "garaga-zero",
  "hex",
+ "mmr-header-accumulator-hints",
  "num-bigint",
  "serde",
  "serde_json",
@@ -2878,6 +2880,28 @@ dependencies = [
  "libc",
  "wasi 0.11.0+wasi-snapshot-preview1",
  "windows-sys 0.59.0",
+]
+
+[[package]]
+name = "mmr-header-accumulator-hints"
+version = "0.1.0"
+source = "git+https://github.com/bankaixyz/mmr-header-accumulator#1e68f3f6dc6077f5b3b1a5a1771bbbcc9da8334f"
+dependencies = [
+ "alloy-primitives",
+ "bincode",
+ "cairo-vm-base",
+ "clap",
+ "hex",
+ "num-bigint",
+ "num-traits",
+ "rand 0.8.5",
+ "serde",
+ "serde_json",
+ "sha3",
+ "starknet-crypto",
+ "starknet-types-core",
+ "thiserror 1.0.69",
+ "tiny-keccak",
 ]
 
 [[package]]

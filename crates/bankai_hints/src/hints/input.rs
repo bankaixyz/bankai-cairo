@@ -65,7 +65,7 @@ pub fn write_consensus_inputs(
         &hint_data.ap_tracking,
     )?;
     let program_hash = Felt252::from_hex_unchecked(
-        "0x2abf52cd24c25506fba477a9e56632a93b5f61d8a09ebc7244b3ae9cccf8a87",
+        "0x13b99c4febbce601fadb03261d9cea3a81c6e3aecd61002986a9476667870dd",
     );
 
     vm.insert_value(program_hash_ptr, program_hash)?;

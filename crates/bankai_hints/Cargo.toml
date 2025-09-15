@@ -13,3 +13,4 @@ num-bigint.workspace = true
 hex.workspace = true
 tree_hash.workspace = true
 tracing.workspace = true
+mmr-header-accumulator-hints.workspace = true

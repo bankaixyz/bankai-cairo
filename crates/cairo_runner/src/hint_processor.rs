@@ -21,6 +21,8 @@ use cairo_vm_base::vm::cairo_vm::{
     Felt252,
 };
 use garaga_zero::hints::get_hints as get_garaga_zero_hints;
+use mmr_header_accumulator_hints::hints::get_hints as get_mmr_header_accumulator_hints;
+use mmr_header_accumulator_hints::hints::input::{write_beacon_input, HINT_WRITE_BEACON_INPUT};
 use std::any::Any;
 use std::collections::HashMap;
 use stone_verifier_hints::hints::get_hints as get_stone_verifier_hints;
@@ -49,6 +51,7 @@ impl CustomHintProcessor {
         hints.extend(get_stone_verifier_hints());
         hints.extend(get_garaga_zero_hints());
         hints.extend(get_bankai_hints());
+        hints.extend(get_mmr_header_accumulator_hints());
         hints
     }
 }
@@ -89,6 +92,7 @@ impl HintProcessorLogic for CustomHintProcessor {
                     write_expected_proof_output(vm, exec_scopes, hpd, constants)
                 }
                 HINT_ASSERT_OUTPUT => assert_output(vm, exec_scopes, hpd, constants),
+                HINT_WRITE_BEACON_INPUT => write_beacon_input(vm, exec_scopes, hpd, constants),
                 _ => Err(HintError::UnknownHint(
                     hint_code.to_string().into_boxed_str(),
                 )),
