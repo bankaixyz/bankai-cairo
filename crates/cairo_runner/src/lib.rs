@@ -11,8 +11,7 @@ use cairo_vm_base::vm::cairo_vm::{
     },
     types::{exec_scope::ExecutionScopes, layout_name::LayoutName, program::Program},
     vm::{
-        errors::trace_errors::TraceError,
-        runners::cairo_pie::CairoPie,
+        errors::trace_errors::TraceError, runners::cairo_pie::CairoPie,
         runners::cairo_runner::CairoRunner,
     },
 };

@@ -11,7 +11,6 @@ from starkware.cairo.common.alloc import alloc
 
 from cairo.src.lib import run_bankai
 
-
 func main{
     output_ptr: felt*,
     pedersen_ptr: HashBuiltin*,
@@ -45,5 +44,4 @@ func main{
     finalize_keccak(keccak_ptr_start=start_keccak_felt_ptr, keccak_ptr_end=keccak_felt_ptr);
 
     return ();
-
 }

@@ -12,7 +12,6 @@ from starkware.cairo.common.alloc import alloc
 
 from cairo.src.lib import run_bankai
 
-
 const BOOTLOADER_PROGRAM_HASH = 0x5AB580B04E3532B6B18F81CFA654A05E29DD8E2352D88DF1E765A84072DB07;
 const SYNC_COMMITTEE_PERIOD = 8192;
 

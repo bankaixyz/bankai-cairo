@@ -13,7 +13,6 @@ from starkware.cairo.common.alloc import alloc
 // for mmr_header_accumulator, the compiler looks in the root dir of the submodule.
 from definitions import UInt384
 
-
 from sha import SHA256
 from cairo.src.debug.print import (
     debug_felt_hex,

@@ -26,7 +26,7 @@
 //     assert builtins_address[n_builtins] = 0;
 //     return (n_builtins=n_builtins, builtins=builtins_address);
 
-//     data:
+// data:
 //     dw 'output';
 //     dw 'pedersen';
 //     dw 'range_check';
@@ -59,7 +59,7 @@
 //             proof_json=program_input["proof"]))
 //     %}
 
-//     verify_proof(proof=proof, security_bits=SECURITY_BITS);
+// verify_proof(proof=proof, security_bits=SECURITY_BITS);
 //     return _verify_public_input(public_input=cast(proof.public_input, PublicInput*));
 // }
 
@@ -72,7 +72,7 @@
 //     alloc_locals;
 //     local public_segments: SegmentInfo* = public_input.segments;
 
-//     local initial_pc = public_segments[segments.PROGRAM].begin_addr;
+// local initial_pc = public_segments[segments.PROGRAM].begin_addr;
 //     local final_pc = public_segments[segments.PROGRAM].stop_ptr;
 //     local initial_ap = public_segments[segments.EXECUTION].begin_addr;
 //     let initial_fp = initial_ap;
@@ -80,17 +80,17 @@
 //     local output_start = public_segments[segments.OUTPUT].begin_addr;
 //     local output_stop = public_segments[segments.OUTPUT].stop_ptr;
 
-//     // Sanity checks.
+// // Sanity checks.
 //     assert_nn_le(initial_ap, MAX_ADDRESS);
 //     assert_nn_le(final_ap, MAX_ADDRESS);
 
-//     assert public_input.n_continuous_pages = 0;
+// assert public_input.n_continuous_pages = 0;
 
-//     // Program builtins.
+// // Program builtins.
 //     let (n_program_builtins, program_builtins) = get_program_builtins();
 //     let (n_layout_builtins, layout_builtins) = get_layout_builtins();
 
-//     // Verify the public memory.
+// // Verify the public memory.
 //     let memory: AddrValue* = public_input.main_page;
 //     with memory {
 //         // 1. Program segment.
@@ -111,7 +111,7 @@
 //         // Program hash.
 //         let (program_hash: felt) = poseidon_hash_many(n=program_len, elements=program);
 
-//         // 2. Execution segment.
+// // 2. Execution segment.
 //         // 2.1. initial_fp, initial_pc.
 //         // Make sure [initial_fp - 2] = initial_fp.
 //         // This is required for the "safe call" feature (that is, all "call" instructions will
@@ -139,13 +139,13 @@
 //         local output_len = output_stop - output_start;
 //         extract_range(addr=output_start, length=output_len, output=output);
 
-//         let (output_hash: felt) = poseidon_hash_many(n=output_len, elements=output);
+// let (output_hash: felt) = poseidon_hash_many(n=output_len, elements=output);
 //     }
 
-//     // Make sure main_page_len is correct.
+// // Make sure main_page_len is correct.
 //     assert memory = &public_input.main_page[public_input.main_page_len];
 
-//     return (program_hash=program_hash, output_hash=output_hash);
+// return (program_hash=program_hash, output_hash=output_hash);
 // }
 
 // // Verifies the initial or the final part of the stack.
@@ -159,7 +159,7 @@
 //         return ();
 //     }
 
-//     if (program_builtins[0] != layout_builtins[0]) {
+// if (program_builtins[0] != layout_builtins[0]) {
 //         // Skip.
 //         assert memory[0] = AddrValue(address=start_ap, value=0);
 //         let memory = &memory[1];

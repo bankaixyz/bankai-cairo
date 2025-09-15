@@ -32,8 +32,7 @@ fn main() {
     } else {
         let program_path = "cairo/build/bankai_stone.json";
         let pie = run(program_path, input, log_level).unwrap();
-        pie
-            .write_zip_file(&Path::new(output_dir).join("pie.zip"), true)
+        pie.write_zip_file(&Path::new(output_dir).join("pie.zip"), true)
             .unwrap();
         println!("Pie generated successfully");
     }
