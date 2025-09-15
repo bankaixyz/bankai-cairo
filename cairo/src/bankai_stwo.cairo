@@ -1,5 +1,4 @@
-%builtins output pedersen range_check bitwise keccak poseidon range_check96 add_mod mul_mod
-
+%builtins output pedersen range_check ecdsa bitwise ec_op keccak poseidon range_check96 add_mod mul_mod
 from starkware.cairo.common.cairo_builtins import (
     BitwiseBuiltin,
     KeccakBuiltin,
@@ -13,15 +12,14 @@ from starkware.cairo.common.alloc import alloc
 from cairo.src.lib import run_bankai
 
 
-const BOOTLOADER_PROGRAM_HASH = 0x5AB580B04E3532B6B18F81CFA654A05E29DD8E2352D88DF1E765A84072DB07;
-const SYNC_COMMITTEE_PERIOD = 8192;
-
 func main{
     output_ptr: felt*,
     pedersen_ptr: HashBuiltin*,
     range_check_ptr,
+    ecdsa_ptr: felt*,
     bitwise_ptr: BitwiseBuiltin*,
-    keccak_ptr: KeccakBuiltin*,
+    ec_op_ptr: felt*,
+    keccak_ptr: felt*,
     poseidon_ptr: PoseidonBuiltin*,
     range_check96_ptr: felt*,
     add_mod_ptr: ModBuiltin*,
@@ -29,7 +27,8 @@ func main{
 }() {
     alloc_locals;
 
-    let keccak_felt_ptr = cast(keccak_ptr, felt*);
+    let (keccak_felt_ptr: felt*) = alloc();
+    let start_keccak_felt_ptr = keccak_felt_ptr;
 
     run_bankai{
         output_ptr=output_ptr,
@@ -43,7 +42,8 @@ func main{
         mul_mod_ptr=mul_mod_ptr,
     }();
 
-    tempvar keccak_ptr = cast(keccak_felt_ptr, KeccakBuiltin*);
+    finalize_keccak(keccak_ptr_start=start_keccak_felt_ptr, keccak_ptr_end=keccak_felt_ptr);
 
     return ();
+
 }
