@@ -2885,7 +2885,7 @@ dependencies = [
 [[package]]
 name = "mmr-header-accumulator-hints"
 version = "0.1.0"
-source = "git+https://github.com/bankaixyz/mmr-header-accumulator#1e68f3f6dc6077f5b3b1a5a1771bbbcc9da8334f"
+source = "git+https://github.com/bankaixyz/mmr-header-accumulator#07439c6f78e7a108d7509f5e7a91dba9cd8e27b0"
 dependencies = [
  "alloy-primitives",
  "bincode",
