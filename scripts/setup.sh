@@ -36,7 +36,7 @@ if ! python3.10 -m venv --help >/dev/null 2>&1; then
 fi
 
 echo "Fetching submodules..."
-git submodule update --init --recursive
+git submodule update --init
 mkdir -p cairo/build
 
 # Create virtual environment
