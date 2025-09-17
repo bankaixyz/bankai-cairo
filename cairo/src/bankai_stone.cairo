@@ -14,6 +14,7 @@ from cairo.src.lib import run_bankai
 
 const BOOTLOADER_PROGRAM_HASH = 0x5AB580B04E3532B6B18F81CFA654A05E29DD8E2352D88DF1E765A84072DB07;
 const SYNC_COMMITTEE_PERIOD = 8192;
+const USE_BUILTIN_KECCAK = 0;
 
 func main{
     output_ptr: felt*,
@@ -28,7 +29,26 @@ func main{
 }() {
     alloc_locals;
 
-    let keccak_felt_ptr = cast(keccak_ptr, felt*);
+    if (USE_BUILTIN_KECCAK == 1) {
+
+        let keccak_felt_ptr = cast(keccak_ptr, felt*);
+        run_bankai{
+            output_ptr=output_ptr,
+            pedersen_ptr=pedersen_ptr,
+            range_check_ptr=range_check_ptr,
+            bitwise_ptr=bitwise_ptr,
+            keccak_ptr=keccak_felt_ptr,
+            poseidon_ptr=poseidon_ptr,
+            range_check96_ptr=range_check96_ptr,
+            add_mod_ptr=add_mod_ptr,
+            mul_mod_ptr=mul_mod_ptr,
+        }();
+        tempvar keccak_ptr = cast(keccak_felt_ptr, KeccakBuiltin*);
+        return ();
+    } 
+
+    let (keccak_felt_ptr: felt*) = alloc();
+    let start_keccak_felt_ptr = keccak_felt_ptr;
 
     run_bankai{
         output_ptr=output_ptr,
@@ -42,7 +62,7 @@ func main{
         mul_mod_ptr=mul_mod_ptr,
     }();
 
-    tempvar keccak_ptr = cast(keccak_felt_ptr, KeccakBuiltin*);
+    finalize_keccak(keccak_ptr_start=start_keccak_felt_ptr, keccak_ptr_end=keccak_felt_ptr);
 
     return ();
 }
