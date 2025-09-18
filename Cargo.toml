@@ -10,6 +10,7 @@ resolver = "2"
 
 [workspace.dependencies]
 cairo-vm-base = { git = "https://github.com/bankaixyz/cairo-vm-base" }
+#cairo-vm-base = { path = "../cairo-vm-base" }
 mmr-header-accumulator-hints = { git = "https://github.com/bankaixyz/mmr-header-accumulator" }
 beacon_types = { git = "https://github.com/bankaixyz/lighthouse.git", package = "types", rev = "9759655"}
 
