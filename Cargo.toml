@@ -30,6 +30,8 @@ clap = { version = "4.5.22", features = ["derive"] }
 warp = { version = "0.4", features = ["server"] }
 tokio = { version = "1.47.1", features = ["full"] }
 chrono = { version = "0.4", features = ["serde"] }
+rayon = { version = "1.10" }
+num_cpus = { version = "1.16" }
 
 stwo_cairo_prover = { git = "https://github.com/starkware-libs/stwo-cairo" }
 stwo_cairo_utils = { git = "https://github.com/starkware-libs/stwo-cairo" }

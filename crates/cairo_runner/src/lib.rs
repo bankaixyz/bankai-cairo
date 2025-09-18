@@ -3,7 +3,7 @@ pub mod error;
 pub mod hint_processor;
 
 use crate::{error::Error, hint_processor::CustomHintProcessor};
-use bankai_hints::types::StoneCircuitLayoutCairo;
+use bankai_hints::types::CircuitRunDataCairo;
 use cairo_vm_base::stwo_utils::FileWriter;
 use cairo_vm_base::vm::cairo_vm::{
     cairo_run::{
@@ -42,12 +42,13 @@ fn load_program(path: &str) -> Result<Program, Error> {
 
 pub fn run_stwo(
     path: &str,
-    input: StoneCircuitLayoutCairo,
+    input: CircuitRunDataCairo,
     log_level: &'static str,
     output_dir: &str,
     prove: bool,
 ) -> Result<(), Error> {
     let program = load_program(path)?;
+    let overall_start = std::time::Instant::now();
     let cairo_run_config = cairo_run::CairoRunConfig {
         layout: LayoutName::all_cairo_stwo,
         trace_enabled: true,
@@ -75,23 +76,35 @@ pub fn run_stwo(
     )?;
 
     println!("Resources: {:?}", cairo_runner.get_execution_resources());
+    let files_start = std::time::Instant::now();
     generate_stwo_files(&cairo_runner, output_dir)?;
+    println!(
+        "Trace/memory/public/private generation took: {:.1?}",
+        files_start.elapsed()
+    );
     if prove {
+        let prove_start = std::time::Instant::now();
         let res = bankai_stwo_prover::generate_proof(
             &Path::new(output_dir).join("pub.json"),
             &Path::new(output_dir).join("priv.json"),
             Some(true),
             Some(bankai_stwo_prover::ProofFormat::Json),
         )?;
-        println!("Proof generated successfully: {:?}", res);
+        println!(
+            "Proof generated successfully in {:.1?}: {:?}",
+            prove_start.elapsed(),
+            res
+        );
     }
+
+    println!("STWO end-to-end took: {:.1?}", overall_start.elapsed());
 
     Ok(())
 }
 
 pub fn run(
     path: &str,
-    input: StoneCircuitLayoutCairo,
+    input: CircuitRunDataCairo,
     log_level: &'static str,
 ) -> Result<CairoPie, Error> {
     let program = load_program(path)?;

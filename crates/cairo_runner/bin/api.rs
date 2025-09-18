@@ -1,4 +1,4 @@
-use bankai_hints::types::StoneCircuitLayoutCairo;
+use bankai_hints::types::CircuitRunDataCairo;
 use cairo_runner::{run, run_stwo};
 use clap::Parser;
 use std::path::Path;
@@ -7,6 +7,8 @@ use std::time::Duration;
 use tokio::signal;
 use tracing::info;
 use warp::{http::StatusCode, Filter, Rejection, Reply};
+use rayon::ThreadPoolBuilder;
+use num_cpus;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -19,6 +21,14 @@ struct Args {
 #[tokio::main]
 async fn main() {
     let args = Args::parse();
+    // Configure Rayon to use all available CPU cores for prover-heavy workloads
+    let num_threads = num_cpus::get();
+    std::env::set_var("RAYON_NUM_THREADS", num_threads.to_string());
+    if ThreadPoolBuilder::new().num_threads(num_threads).build_global().is_ok() {
+        info!("Configured Rayon global thread pool with {num_threads} threads");
+    } else {
+        info!("Rayon global thread pool already configured");
+    }
     info!(
         "Running in {} mode",
         if args.docker { "Docker" } else { "local" }
@@ -70,7 +80,7 @@ async fn main() {
 }
 
 async fn handle_generate_pie(
-    input: StoneCircuitLayoutCairo,
+    input: CircuitRunDataCairo,
     is_docker: Arc<bool>,
 ) -> Result<Box<dyn Reply>, Rejection> {
     // Set a 5-minute timeout for the operation
@@ -121,7 +131,7 @@ async fn handle_generate_pie(
 }
 
 async fn generate_pie_internal(
-    input: StoneCircuitLayoutCairo,
+    input: CircuitRunDataCairo,
     is_docker: bool,
 ) -> Result<Vec<u8>, Box<dyn std::error::Error + Send + Sync>> {
     let (program_path, output_dir, log_level) = if is_docker {
@@ -154,15 +164,36 @@ async fn generate_pie_internal(
 }
 
 async fn handle_generate_proof(
-    input: StoneCircuitLayoutCairo,
+    input: CircuitRunDataCairo,
     is_docker: Arc<bool>,
 ) -> Result<Box<dyn Reply>, Rejection> {
     info!("Generating STWO trace and proof...");
+    let start = std::time::Instant::now();
     let timeout_duration = Duration::from_secs(300);
     info!("Timeout duration: {:?}", timeout_duration);
-    match tokio::time::timeout(timeout_duration, generate_proof_internal(input, *is_docker)).await {
+    // Periodic elapsed-time logger while proving runs
+    let (tx, mut rx) = tokio::sync::mpsc::unbounded_channel::<()>();
+    let ticker_handle = tokio::spawn(async move {
+        let mut interval = tokio::time::interval(Duration::from_secs(10));
+        loop {
+            tokio::select! {
+                _ = interval.tick() => {
+                    let elapsed = start.elapsed();
+                    info!("STWO proving in progress... elapsed: {:.1?}", elapsed);
+                }
+                _ = rx.recv() => {
+                    break;
+                }
+            }
+        }
+    });
+
+    let result = tokio::time::timeout(timeout_duration, generate_proof_internal(input, *is_docker)).await;
+    let _ = tx.send(());
+    let _ = ticker_handle.await;
+    match result {
         Ok(Ok(proof_data)) => {
-            info!("Proof generated successfully");
+            info!("Proof generated successfully in {:.1?}", start.elapsed());
             let timestamp = chrono::Utc::now().timestamp();
             let filename = format!("proof_{timestamp}.json");
 
@@ -179,7 +210,7 @@ async fn handle_generate_proof(
             Ok(Box::new(reply))
         }
         Ok(Err(e)) => {
-            info!("Failed to generate proof: {e}");
+            info!("Failed to generate proof after {:.1?}: {e}", start.elapsed());
             let response = serde_json::json!({
                 "status": "error",
                 "message": format!("Failed to generate proof: {}", e)
@@ -191,7 +222,7 @@ async fn handle_generate_proof(
             Ok(Box::new(reply))
         }
         Err(_) => {
-            info!("Proof generation timed out after 5 minutes");
+            info!("Proof generation timed out after {:.1?}", start.elapsed());
             let response = serde_json::json!({
                 "status": "error",
                 "message": "Proof generation timed out after 5 minutes"
@@ -204,7 +235,7 @@ async fn handle_generate_proof(
 }
 
 async fn generate_proof_internal(
-    input: StoneCircuitLayoutCairo,
+    input: CircuitRunDataCairo,
     is_docker: bool,
 ) -> Result<Vec<u8>, Box<dyn std::error::Error + Send + Sync>> {
     let (program_path, base_output_dir, log_level) = if is_docker {

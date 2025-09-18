@@ -15,7 +15,7 @@ pub use mmr_header_accumulator_hints::types::{
 };
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct StoneCircuitLayoutCairo {
+pub struct CircuitRunDataCairo {
     pub input: StoneInputsCairo,
     pub output: CircuitOutputCairo,
 }

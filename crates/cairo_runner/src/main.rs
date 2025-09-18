@@ -1,5 +1,5 @@
 #![allow(clippy::result_large_err)]
-use bankai_hints::types::StoneCircuitLayoutCairo;
+use bankai_hints::types::CircuitRunDataCairo;
 use cairo_runner::{run, run_stwo};
 use clap::Parser;
 use std::{path::Path, path::PathBuf};
@@ -35,7 +35,7 @@ fn main() {
 
     let args = Args::parse();
     let input_str = std::fs::read_to_string(args.input_path).unwrap();
-    let input: StoneCircuitLayoutCairo = serde_json::from_str(&input_str).unwrap();
+    let input: CircuitRunDataCairo = serde_json::from_str(&input_str).unwrap();
 
     let output_dir: &'static str = "output/";
     let log_level: &'static str = "debug";

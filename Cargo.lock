@@ -938,6 +938,8 @@ dependencies = [
  "hex",
  "mmr-header-accumulator-hints",
  "num-bigint",
+ "num_cpus",
+ "rayon",
  "serde",
  "serde_json",
  "stone-verifier-hints",
