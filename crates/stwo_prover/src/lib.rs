@@ -54,12 +54,6 @@ pub fn generate_proof(
 ) -> Result<PathBuf, Error> {
     let _span = span!(Level::INFO, "run").entered();
 
-    println!("Generating proof...");
-    println!("Public input: {:?}", pub_json);
-    println!("Private input: {:?}", priv_json);
-    println!("Verify: {:?}", verify);
-    println!("Proof format: {:?}", proof_format);
-
     let vm_output: ProverInput = adapt_vm_output(pub_json, priv_json)?;
 
     log_prover_input(&vm_output);
@@ -80,7 +74,7 @@ pub fn generate_proof(
                 n_queries: 70,
             },
         },
-        preprocessed_trace: PreProcessedTraceVariant::Canonical,
+        preprocessed_trace: PreProcessedTraceVariant::CanonicalWithoutPedersen,
     };
 
 

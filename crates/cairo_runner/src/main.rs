@@ -32,7 +32,6 @@ fn main() {
     if args.stwo {
         let program_path = "cairo/build/bankai_stwo.json";
         run_stwo(program_path, input, log_level, output_dir, args.prove).unwrap();
-        println!("STWO artifacts generated successfully");
     } else {
         let program_path = "cairo/build/bankai_stone.json";
         let pie = run(program_path, input, log_level).unwrap();

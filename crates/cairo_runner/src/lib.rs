@@ -49,11 +49,12 @@ pub fn run_stwo(
 ) -> Result<(), Error> {
     let program = load_program(path)?;
     let cairo_run_config = cairo_run::CairoRunConfig {
-        allow_missing_builtins: None,
         layout: LayoutName::all_cairo_stwo,
-        relocate_mem: true,
         trace_enabled: true,
+        relocate_trace: true,
+        relocate_mem: true,
         proof_mode: true,
+        fill_holes: true,
         ..Default::default()
     };
 
@@ -76,12 +77,13 @@ pub fn run_stwo(
     println!("Resources: {:?}", cairo_runner.get_execution_resources());
     generate_stwo_files(&cairo_runner, output_dir)?;
     if prove {
-        bankai_stwo_prover::generate_proof(
+        let res = bankai_stwo_prover::generate_proof(
             &Path::new(output_dir).join("pub.json"),
             &Path::new(output_dir).join("priv.json"),
             Some(true),
             Some(bankai_stwo_prover::ProofFormat::Json),
         )?;
+        println!("Proof generated successfully: {:?}", res);
     }
 
     Ok(())
@@ -156,6 +158,7 @@ fn generate_stwo_files(cairo_runner: &CairoRunner, output_dir: &str) -> Result<(
         Path::new(output_dir).join("priv.json"),
         private_input_json,
     )?;
+    println!("Trace and memory files generated successfully");
 
     Ok(())
 }
