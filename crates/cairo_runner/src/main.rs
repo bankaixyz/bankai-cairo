@@ -3,6 +3,9 @@ use bankai_hints::types::StoneCircuitLayoutCairo;
 use cairo_runner::{run, run_stwo};
 use clap::Parser;
 use std::{path::Path, path::PathBuf};
+use tracing::Level;
+use tracing_subscriber::fmt::format::FmtSpan;
+use tracing_subscriber::FmtSubscriber;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -22,6 +25,14 @@ struct Args {
 }
 
 fn main() {
+    // Initialize tracing for terminal output
+    let subscriber = FmtSubscriber::builder()
+        .with_max_level(Level::INFO)
+        .with_span_events(FmtSpan::CLOSE)
+        .with_target(true)
+        .finish();
+    tracing::subscriber::set_global_default(subscriber).expect("setting default subscriber failed");
+
     let args = Args::parse();
     let input_str = std::fs::read_to_string(args.input_path).unwrap();
     let input: StoneCircuitLayoutCairo = serde_json::from_str(&input_str).unwrap();

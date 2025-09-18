@@ -5,8 +5,7 @@ use std::path::Path;
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::signal;
-use tracing::{info, Level};
-use tracing_subscriber::FmtSubscriber;
+use tracing::info;
 use warp::{http::StatusCode, Filter, Rejection, Reply};
 
 #[derive(Parser, Debug)]
@@ -20,13 +19,6 @@ struct Args {
 #[tokio::main]
 async fn main() {
     let args = Args::parse();
-
-    // Initialize tracing
-    let subscriber = FmtSubscriber::builder()
-        .with_max_level(Level::INFO)
-        .finish();
-    tracing::subscriber::set_global_default(subscriber).expect("setting default subscriber failed");
-
     info!(
         "Running in {} mode",
         if args.docker { "Docker" } else { "local" }
