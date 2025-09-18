@@ -30,7 +30,6 @@ func main{
     alloc_locals;
 
     if (USE_BUILTIN_KECCAK == 1) {
-
         let keccak_felt_ptr = cast(keccak_ptr, felt*);
         run_bankai{
             output_ptr=output_ptr,
@@ -45,7 +44,7 @@ func main{
         }();
         tempvar keccak_ptr = cast(keccak_felt_ptr, KeccakBuiltin*);
         return ();
-    } 
+    }
 
     let (keccak_felt_ptr: felt*) = alloc();
     let start_keccak_felt_ptr = keccak_felt_ptr;
