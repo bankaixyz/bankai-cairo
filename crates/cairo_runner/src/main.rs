@@ -21,7 +21,6 @@ struct Args {
 
     #[arg(long, requires = "stwo")]
     prove: bool,
-
 }
 
 fn main() {

@@ -1,14 +1,13 @@
 use bankai_hints::types::CircuitRunDataCairo;
 use cairo_runner::{run, run_stwo};
 use clap::Parser;
+use rayon::ThreadPoolBuilder;
 use std::path::Path;
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::signal;
 use tracing::info;
 use warp::{http::StatusCode, Filter, Rejection, Reply};
-use rayon::ThreadPoolBuilder;
-use num_cpus;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -24,7 +23,11 @@ async fn main() {
     // Configure Rayon to use all available CPU cores for prover-heavy workloads
     let num_threads = num_cpus::get();
     std::env::set_var("RAYON_NUM_THREADS", num_threads.to_string());
-    if ThreadPoolBuilder::new().num_threads(num_threads).build_global().is_ok() {
+    if ThreadPoolBuilder::new()
+        .num_threads(num_threads)
+        .build_global()
+        .is_ok()
+    {
         info!("Configured Rayon global thread pool with {num_threads} threads");
     } else {
         info!("Rayon global thread pool already configured");
@@ -188,7 +191,8 @@ async fn handle_generate_proof(
         }
     });
 
-    let result = tokio::time::timeout(timeout_duration, generate_proof_internal(input, *is_docker)).await;
+    let result =
+        tokio::time::timeout(timeout_duration, generate_proof_internal(input, *is_docker)).await;
     let _ = tx.send(());
     let _ = ticker_handle.await;
     match result {
@@ -210,7 +214,10 @@ async fn handle_generate_proof(
             Ok(Box::new(reply))
         }
         Ok(Err(e)) => {
-            info!("Failed to generate proof after {:.1?}: {e}", start.elapsed());
+            info!(
+                "Failed to generate proof after {:.1?}: {e}",
+                start.elapsed()
+            );
             let response = serde_json::json!({
                 "status": "error",
                 "message": format!("Failed to generate proof: {}", e)
@@ -256,7 +263,10 @@ async fn generate_proof_internal(
         .to_string();
 
     // Run the STWO flow in a blocking task
-    tokio::task::spawn_blocking(move || run_stwo(program_path, input, log_level, &output_dir_string, true)).await??;
+    tokio::task::spawn_blocking(move || {
+        run_stwo(program_path, input, log_level, &output_dir_string, true)
+    })
+    .await??;
 
     // Read proof.json and return its contents
     let proof_path = output_dir_path.join("proof.json");

@@ -77,7 +77,6 @@ pub fn generate_proof(
         preprocessed_trace: PreProcessedTraceVariant::CanonicalWithoutPedersen,
     };
 
-
     let run_inner_fn = match proof_params.channel_hash {
         ChannelHash::Blake2s => run_inner::<Blake2sMerkleChannel>,
         ChannelHash::Poseidon252 => run_inner::<Poseidon252MerkleChannel>,

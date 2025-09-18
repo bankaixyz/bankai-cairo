@@ -158,19 +158,13 @@ fn generate_stwo_files(cairo_runner: &CairoRunner, output_dir: &str) -> Result<(
 
     let public_input = cairo_runner.get_air_public_input();
     let public_input_json = serde_json::to_string_pretty(&public_input.unwrap()).unwrap();
-    std::fs::write(
-        Path::new(output_dir).join("pub.json"),
-        public_input_json,
-    )?;
+    std::fs::write(Path::new(output_dir).join("pub.json"), public_input_json)?;
 
     let private_input = cairo_runner.get_air_private_input();
     let private_input_serializable =
         private_input.to_serializable("trace.bin".to_string(), "memory.bin".to_string());
     let private_input_json = serde_json::to_string_pretty(&private_input_serializable).unwrap();
-    std::fs::write(
-        Path::new(output_dir).join("priv.json"),
-        private_input_json,
-    )?;
+    std::fs::write(Path::new(output_dir).join("priv.json"), private_input_json)?;
     println!("Trace and memory files generated successfully");
 
     Ok(())
