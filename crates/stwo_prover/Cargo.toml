@@ -1,0 +1,17 @@
+[package]
+name = "bankai-stwo-prover"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+cairo-air.workspace = true
+serde.workspace = true
+stwo_cairo_prover.workspace = true
+stwo_cairo_utils.workspace = true
+stwo-cairo-adapter.workspace = true
+stwo-cairo-serialize.workspace = true
+stwo.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+sonic-rs.workspace = true
+starknet-ff.workspace = true

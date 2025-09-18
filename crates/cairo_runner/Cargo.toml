@@ -9,6 +9,7 @@ path = "bin/api.rs"
 
 [dependencies]
 garaga-zero = { path = "../../cairo/packages/garaga_zero" }
+bankai-stwo-prover = { path = "../stwo_prover" }
 bankai-hints = { path = "../bankai_hints" }
 mmr-header-accumulator-hints.workspace = true
 stone-verifier-hints = { path = "../stone_verifier_hints" }
@@ -29,3 +30,5 @@ warp.workspace = true
 tokio.workspace = true
 chrono.workspace = true
 tracing-subscriber.workspace = true
+rayon = "1.10"
+num_cpus = "1.16"

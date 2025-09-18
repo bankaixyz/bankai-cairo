@@ -1,32 +1,52 @@
 #![allow(clippy::result_large_err)]
-use bankai_hints::types::StoneCircuitLayoutCairo;
-use cairo_runner::run;
+use bankai_hints::types::CircuitRunDataCairo;
+use cairo_runner::{run, run_stwo};
 use clap::Parser;
 use std::{path::Path, path::PathBuf};
+use tracing::Level;
+use tracing_subscriber::fmt::format::FmtSpan;
+use tracing_subscriber::FmtSubscriber;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {
     #[arg(short, long)]
     input_path: PathBuf,
+
+    #[arg(long, conflicts_with = "stone", required_unless_present = "stone")]
+    stwo: bool,
+
+    #[arg(long, conflicts_with = "stwo", required_unless_present = "stwo")]
+    stone: bool,
+
+    #[arg(long, requires = "stwo")]
+    prove: bool,
 }
 
 fn main() {
+    // Initialize tracing for terminal output
+    let subscriber = FmtSubscriber::builder()
+        .with_max_level(Level::INFO)
+        .with_span_events(FmtSpan::CLOSE)
+        .with_target(true)
+        .finish();
+    tracing::subscriber::set_global_default(subscriber).expect("setting default subscriber failed");
+
     let args = Args::parse();
     let input_str = std::fs::read_to_string(args.input_path).unwrap();
-    let input: StoneCircuitLayoutCairo = serde_json::from_str(&input_str).unwrap();
+    let input: CircuitRunDataCairo = serde_json::from_str(&input_str).unwrap();
 
-    generate_pie(input);
-    println!("Pie generated successfully");
-}
-
-fn generate_pie(input: StoneCircuitLayoutCairo) {
-    let program_path = "cairo/build/bankai_stone.json";
     let output_dir: &'static str = "output/";
     let log_level: &'static str = "debug";
 
-    let pie = run(program_path, input, log_level).unwrap();
-
-    pie.write_zip_file(&Path::new(output_dir).join("pie.zip"), true)
-        .unwrap();
+    if args.stwo {
+        let program_path = "cairo/build/bankai_stwo.json";
+        run_stwo(program_path, input, log_level, output_dir, args.prove).unwrap();
+    } else {
+        let program_path = "cairo/build/bankai_stone.json";
+        let pie = run(program_path, input, log_level).unwrap();
+        pie.write_zip_file(&Path::new(output_dir).join("pie.zip"), true)
+            .unwrap();
+        println!("Pie generated successfully");
+    }
 }
