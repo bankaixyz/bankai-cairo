@@ -15,6 +15,7 @@ use cairo_vm_base::vm::cairo_vm::{
         runners::cairo_runner::CairoRunner,
     },
 };
+use tracing::info;
 use std::{io, path::Path};
 
 fn load_program(path: &str) -> Result<Program, Error> {
@@ -22,7 +23,6 @@ fn load_program(path: &str) -> Result<Program, Error> {
     let final_path = if path.starts_with('/') && !std::path::Path::new(path).exists() {
         // Try converting absolute path to relative
         let relative_path = path.strip_prefix('/').unwrap_or(path);
-        println!("Absolute path not found, trying relative: {relative_path}");
         relative_path
     } else {
         path
@@ -36,7 +36,6 @@ fn load_program(path: &str) -> Result<Program, Error> {
     };
 
     let program = Program::from_bytes(&program_file, Some(cairo_run_config.entrypoint))?;
-    println!("Program loaded successfully");
     Ok(program)
 }
 
@@ -75,10 +74,10 @@ pub fn run_stwo(
         exec_scopes,
     )?;
 
-    println!("Resources: {:?}", cairo_runner.get_execution_resources());
+    info!("Resources: {:?}", cairo_runner.get_execution_resources());
     let files_start = std::time::Instant::now();
     generate_stwo_files(&cairo_runner, output_dir)?;
-    println!(
+    info!(
         "Trace/memory/public/private generation took: {:.1?}",
         files_start.elapsed()
     );
@@ -90,14 +89,14 @@ pub fn run_stwo(
             Some(true),
             Some(bankai_stwo_prover::ProofFormat::Json),
         )?;
-        println!(
+        info!(
             "Proof generated successfully in {:.1?}: {:?}",
             prove_start.elapsed(),
             res
         );
     }
 
-    println!("STWO end-to-end took: {:.1?}", overall_start.elapsed());
+    info!("STWO end-to-end took: {:.1?}", overall_start.elapsed());
 
     Ok(())
 }
@@ -129,7 +128,7 @@ pub fn run(
         exec_scopes,
     )?;
 
-    println!("Resources: {:?}", cairo_runner.get_execution_resources());
+    info!("Resources: {:?}", cairo_runner.get_execution_resources());
 
     let pie = cairo_runner.get_cairo_pie()?;
     Ok(pie)
@@ -165,7 +164,7 @@ fn generate_stwo_files(cairo_runner: &CairoRunner, output_dir: &str) -> Result<(
         private_input.to_serializable("trace.bin".to_string(), "memory.bin".to_string());
     let private_input_json = serde_json::to_string_pretty(&private_input_serializable).unwrap();
     std::fs::write(Path::new(output_dir).join("priv.json"), private_input_json)?;
-    println!("Trace and memory files generated successfully");
+    info!("Trace and memory files generated successfully");
 
     Ok(())
 }

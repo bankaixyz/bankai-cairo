@@ -6,7 +6,8 @@ use std::path::Path;
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::signal;
-use tracing::info;
+use tracing::{info, Level};
+use tracing_subscriber::FmtSubscriber;
 use warp::{http::StatusCode, Filter, Rejection, Reply};
 
 #[derive(Parser, Debug)]
@@ -19,6 +20,13 @@ struct Args {
 
 #[tokio::main]
 async fn main() {
+    // Initialize tracing for logging
+    let subscriber = FmtSubscriber::builder()
+        .with_max_level(Level::INFO)
+        .with_target(false)
+        .finish();
+    tracing::subscriber::set_global_default(subscriber).expect("setting default subscriber failed");
+
     let args = Args::parse();
     // Configure Rayon to use all available CPU cores for prover-heavy workloads
     let num_threads = num_cpus::get();

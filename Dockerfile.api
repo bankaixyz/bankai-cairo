@@ -77,6 +77,7 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     gcc \
     libgmp-dev \
+    curl \
     && ln -s /usr/bin/python3 /usr/bin/python \
     && pip install --no-cache-dir --force-reinstall uv
 
@@ -101,6 +102,7 @@ ENV PYTHONPATH=/usr/local/lib/python3.10:/app/cairo/packages/garaga_zero:/usr/lo
 
 # Copy the compiled API binary from the builder stage
 COPY --from=builder /app/target/release/api /app/bin/api
+RUN chmod +x /app/bin/api
 
 # Copy the compiled cairo files into the image. Adjust source/destination as needed.
 COPY --from=builder /app/cairo/build/ /app/cairo/build/

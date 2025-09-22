@@ -29,11 +29,24 @@ A dedicated Cairo runner in `crates/cairo_runner/` is used to execute the compil
 The `cairo_runner` crate also includes a web server that exposes an API for generating PIEs. The API is implemented in `crates/cairo_runner/bin/api.rs` and provides a `/generate-pie` endpoint. This allows for remote generation of proofs without needing to run the cairo runner locally.
 
 ###### Docker Commands
-To build and push the Docker image for the API runner, use the following commands:
+To build and push single-architecture images for the API runner:
 
+- linux/amd64 (typical Linux servers):
 ```sh
-docker build -f Dockerfile.api -t petscheit/bankai-runner .
-docker push petscheit/bankai-runner:latest
+docker buildx build -f Dockerfile.api --platform linux/amd64 \
+  -t petscheit/bankai-runner:amd64 --push .
+```
+
+- linux/arm64 (Apple Silicon and arm64 Linux):
+```sh
+docker buildx build -f Dockerfile.api --platform linux/arm64 \
+  -t petscheit/bankai-runner:arm64 --push .
+```
+
+For a local image without pushing (loads into your local Docker):
+```sh
+docker buildx build -f Dockerfile.api --platform linux/amd64 \
+  -t bankai-runner:amd64 --load .
 ```
 
 #### Bankai Hints
