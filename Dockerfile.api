@@ -36,16 +36,18 @@ COPY Cargo.toml Cargo.lock rust-toolchain.toml ./
 COPY crates/bankai_hints/Cargo.toml ./crates/bankai_hints/Cargo.toml
 COPY crates/stone_verifier_hints/Cargo.toml ./crates/stone_verifier_hints/Cargo.toml
 COPY crates/cairo_runner/Cargo.toml ./crates/cairo_runner/Cargo.toml
+COPY crates/stwo_prover/Cargo.toml ./crates/stwo_prover/Cargo.toml
 RUN mkdir -p crates/bankai_hints/src && touch crates/bankai_hints/src/lib.rs && \
     mkdir -p crates/stone_verifier_hints/src && touch crates/stone_verifier_hints/src/lib.rs && \
     mkdir -p crates/cairo_runner/src && touch crates/cairo_runner/src/lib.rs && \
-    mkdir -p crates/cairo_runner/bin && touch crates/cairo_runner/bin/api.rs
+    mkdir -p crates/cairo_runner/bin && touch crates/cairo_runner/bin/api.rs && \
+    mkdir -p crates/stwo_prover/src && touch crates/stwo_prover/src/lib.rs
 
 # Copy Cargo.toml for the path dependency and create stub src file/dir.
-# Path from Cargo.toml: "../cairo/packages/garaga-zero/hints/rust-vm"
-# Resolved from project root: "cairo/packages/garaga-zero/hints/rust-vm"
-COPY cairo/packages/garaga-zero/Cargo.toml ./cairo/packages/garaga-zero/Cargo.toml
-RUN mkdir -p cairo/packages/garaga-zero/hints/rust-vm/src && touch cairo/packages/garaga-zero/hints/rust-vm/src/lib.rs
+# Path from Cargo.toml: "../cairo/packages/garaga_zero/hints/rust-vm"
+# Resolved from project root: "cairo/packages/garaga_zero/hints/rust-vm"
+COPY cairo/packages/garaga_zero/Cargo.toml ./cairo/packages/garaga_zero/Cargo.toml
+RUN mkdir -p cairo/packages/garaga_zero/hints/rust-vm/src && touch cairo/packages/garaga_zero/hints/rust-vm/src/lib.rs
 
 RUN cargo chef prepare --recipe-path recipe.json
 
@@ -79,11 +81,11 @@ RUN apt-get update && apt-get install -y \
     && pip install --no-cache-dir --force-reinstall uv
 
 # Copy only the pyproject.toml file first to leverage caching for dependencies
-COPY cairo/packages/garaga-zero/pyproject.toml ./cairo/packages/garaga-zero/pyproject.toml
+COPY cairo/packages/garaga_zero/pyproject.toml ./cairo/packages/garaga_zero/pyproject.toml
 
 # Install Python dependencies based on pyproject.toml
 # These layers will be cached if pyproject.toml hasn't changed
-RUN uv pip compile cairo/packages/garaga-zero/pyproject.toml --output-file requirements.txt -q
+RUN uv pip compile cairo/packages/garaga_zero/pyproject.toml --output-file requirements.txt -q
 RUN uv pip install --no-cache-dir --force-reinstall --system -r requirements.txt
 RUN pip install --no-cache-dir --force-reinstall py_ecc
 
@@ -91,11 +93,11 @@ RUN pip install --no-cache-dir --force-reinstall py_ecc
 COPY crates/ ./crates/
 COPY cairo/src/ ./cairo/src/
 COPY cairo/build/ ./cairo/build/
-COPY cairo/packages/garaga-zero/ ./cairo/packages/garaga-zero/
+COPY cairo/packages/garaga_zero/ ./cairo/packages/garaga_zero/
 
 # Set the environment variable for pyo3
 ENV PYO3_PYTHON=python3
-ENV PYTHONPATH=/usr/local/lib/python3.10:/app/cairo/packages/garaga-zero:/usr/local/lib/python3.10/site-packages
+ENV PYTHONPATH=/usr/local/lib/python3.10:/app/cairo/packages/garaga_zero:/usr/local/lib/python3.10/site-packages
 
 # Copy the compiled API binary from the builder stage
 COPY --from=builder /app/target/release/api /app/bin/api
