@@ -15,8 +15,8 @@ use cairo_vm_base::vm::cairo_vm::{
         runners::cairo_runner::CairoRunner,
     },
 };
-use tracing::info;
 use std::{io, path::Path};
+use tracing::info;
 
 fn load_program(path: &str) -> Result<Program, Error> {
     // Check if it's an absolute path that doesn't exist, try relative
