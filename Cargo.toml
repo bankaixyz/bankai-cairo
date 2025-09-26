@@ -12,9 +12,9 @@ resolver = "2"
 cairo-vm-base = { git = "https://github.com/bankaixyz/cairo-vm-base" }
 #cairo-vm-base = { path = "../cairo-vm-base" }
 mmr-header-accumulator-hints = { git = "https://github.com/bankaixyz/mmr-header-accumulator" }
-beacon_types = { git = "https://github.com/bankaixyz/lighthouse.git", package = "types", rev = "9759655"}
+beacon_types = { git = "https://github.com/sigp/lighthouse.git", package = "types", rev = "20c6ce4"}
 
-alloy-primitives = { version = "0.8.13" }
+alloy-primitives = { version = "1.0.29" }
 bls12_381 = {version = "0.8.0"}
 serde = { version = "1.0.215", features = ["derive"] }
 serde_json = { version = "1.0.133" }
@@ -25,7 +25,7 @@ hex = { version = "0.4.3" }
 thiserror = { version = "2.0.9" }
 tracing = { version = "0.1.41" }
 tracing-subscriber = { version = "0.3.20" }
-tree_hash = { version = "0.9" }
+tree_hash = { version = "0.10" }
 clap = { version = "4.5.22", features = ["derive"] }
 warp = { version = "0.4", features = ["server"] }
 tokio = { version = "1.47.1", features = ["full"] }

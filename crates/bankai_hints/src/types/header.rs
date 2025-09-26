@@ -73,7 +73,20 @@ impl ExecutionPayloadHeaderCairo {
                 roots.push(u64_to_uint256(h.excess_blob_gas));
                 roots
             }
-            ExecutionPayloadHeader::Fulu(_h) => panic!("Fulu not supported"),
+            ExecutionPayloadHeader::Fulu(h) => {
+                let mut roots = extract_common_fields!(h);
+                roots.push(to_uint256(h.withdrawals_root.as_slice()));
+                roots.push(u64_to_uint256(h.blob_gas_used));
+                roots.push(u64_to_uint256(h.excess_blob_gas));
+                roots
+            }
+            ExecutionPayloadHeader::Gloas(h) => {
+                let mut roots = extract_common_fields!(h);
+                roots.push(to_uint256(h.withdrawals_root.as_slice()));
+                roots.push(u64_to_uint256(h.blob_gas_used));
+                roots.push(u64_to_uint256(h.excess_blob_gas));
+                roots
+            }
         };
 
         roots
