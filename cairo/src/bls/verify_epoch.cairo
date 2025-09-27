@@ -28,6 +28,7 @@ from cairo.src.io import (
 )
 from cairo.src.types import EpochUpdateOutput
 from src.beacon.lib import run_beacon_mmr_update
+from src.execution.lib import run_execution_mmr_update
 
 func run_beacon_update{
     range_check_ptr,
@@ -58,6 +59,8 @@ func run_beacon_update{
     let (msg_point) = hash_to_curve(1, signing_root);
 
     // 4. Aggregate signer to get aggregate key that was used to sign the message
+    // ToDo: this is not secure, a sync committee memeber could collude with the prover to make invalid headers pass.
+    // Fix is ready, just needs to be applied.
     let (committee_hash, agg_key, n_non_signers) = aggregate_signer_pubs(
         consensus_inputs.signature
     );
@@ -119,6 +122,7 @@ func run_beacon_update{
 func run_execution_update{
     range_check_ptr,
     bitwise_ptr: BitwiseBuiltin*,
+    keccak_ptr: felt*,
     poseidon_ptr: PoseidonBuiltin*,
     range_check96_ptr: felt*,
     add_mod_ptr: ModBuiltin*,
@@ -147,13 +151,20 @@ func run_execution_update{
     assert computed_body_root.low = body_root.low;
     assert computed_body_root.high = body_root.high;
 
+    // 4. Update the MMR
+    let (new_keccak_root, new_poseidon_root, new_mmr_size, last_header_hash) = run_execution_mmr_update();
+
+    // 5. Assert that the last header hash matches the header hash
+    assert last_header_hash.low = header_hash.low;
+    assert last_header_hash.high = header_hash.high;
+
     let output = ExecutionClientOutput(
         block_number=block_number,
         header_hash=header_hash,
         justified_height=previous_output.execution.block_number,
         finalized_height=previous_output.execution.justified_height,
-        mmr_root_keccak=previous_output.execution.mmr_root_keccak,
-        mmr_root_poseidon=previous_output.execution.mmr_root_poseidon,
+        mmr_root_keccak=new_keccak_root,
+        mmr_root_poseidon=new_poseidon_root,
     );
 
     return (output=output);
