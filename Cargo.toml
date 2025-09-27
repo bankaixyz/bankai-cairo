@@ -12,6 +12,7 @@ resolver = "2"
 cairo-vm-base = { git = "https://github.com/bankaixyz/cairo-vm-base" }
 #cairo-vm-base = { path = "../cairo-vm-base" }
 mmr-header-accumulator-hints = { git = "https://github.com/bankaixyz/mmr-header-accumulator" }
+#mmr-header-accumulator-hints = { path = "../mmr-header-accumulator/mmr-header-accumulator-hints", package = "mmr-header-accumulator-hints" }
 beacon_types = { git = "https://github.com/sigp/lighthouse.git", package = "types", rev = "20c6ce4"}
 
 alloy-primitives = { version = "1.0.29" }
