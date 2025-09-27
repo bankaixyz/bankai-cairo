@@ -152,7 +152,9 @@ func run_execution_update{
     assert computed_body_root.high = body_root.high;
 
     // 4. Update the MMR
-    let (new_keccak_root, new_poseidon_root, new_mmr_size, last_header_hash) = run_execution_mmr_update();
+    let (
+        new_keccak_root, new_poseidon_root, new_mmr_size, last_header_hash
+    ) = run_execution_mmr_update();
 
     // 5. Assert that the last header hash matches the header hash
     assert last_header_hash.low = header_hash.low;
