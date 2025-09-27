@@ -10,8 +10,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::types::bls::{G1PointCairo, G2PointCairo};
 pub use mmr_header_accumulator_hints::types::{
-    BeaconHeaderCairo as MmrBeaconHeaderCairo, BeaconMmrUpdateCairo, LastLeafProofCairo,
-    MmrSnapshotCairo,
+    BeaconHeaderCairo as MmrBeaconHeaderCairo, BeaconMmrUpdateCairo, ExecutionHeaderCairo,
+    ExecutionMmrUpdateCairo, LastLeafProofCairo, MmrSnapshotCairo,
 };
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -26,6 +26,7 @@ pub struct StoneInputsCairo {
     pub sync_committee_update: Option<SyncCommitteeUpdateProofCairo>,
     pub proof_data: Option<ProofDataCairo>,
     pub beacon_mmr_update: BeaconMmrUpdateCairo,
+    pub execution_mmr_update: ExecutionMmrUpdateCairo,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

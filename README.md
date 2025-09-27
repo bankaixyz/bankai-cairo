@@ -9,7 +9,7 @@ This Cairo implementation currently supports:
 - **Beacon chain sync committee verification logic** - Validates BLS signatures from the sync committee for each consensus epoch
 - **Decommit execution chain headers** - Processes and validates execution chain header data
 - **Build MMR tree for beacon headers** - Constructs Merkle Mountain Range trees for beacon chain data
-- **MMR for execution headers coming soon** - Execution chain MMR support is in development
+- **Build MMR tree for execution headers** - Constructs Merkle Mountain Range trees for execution chain data
 - **Output generation** - All verification results and commitments are written to the output
 
 The core logic validates the progression of the Ethereum blockchain by verifying BLS signatures from the sync committee for each consensus epoch. The program then grows the MMR (Merkle Mountain Range) tree and writes the commitments to the output. This process will eventually allow the validity of a large portion of Ethereum's history to be compressed into a single, compact STARK proof.

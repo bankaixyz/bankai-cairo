@@ -1724,7 +1724,7 @@ dependencies = [
 [[package]]
 name = "cairo-vm-base"
 version = "0.1.0"
-source = "git+https://github.com/bankaixyz/cairo-vm-base#4fb597dc62599c8776fde8750a37fc84d69eb253"
+source = "git+https://github.com/bankaixyz/cairo-vm-base#7afe5fa936facb99c638e02550f35a4b1ee9ab73"
 dependencies = [
  "alloy-primitives 0.8.25",
  "bincode 2.0.1",
@@ -3571,7 +3571,7 @@ dependencies = [
 [[package]]
 name = "mmr-header-accumulator-hints"
 version = "0.1.0"
-source = "git+https://github.com/bankaixyz/mmr-header-accumulator#173badbdd7e56a47dc40c2837806e137a53a4757"
+source = "git+https://github.com/bankaixyz/mmr-header-accumulator#0a77ab94d767c2a910c3246c5d5dcb9d2617f779"
 dependencies = [
  "alloy-primitives 0.8.25",
  "bincode 2.0.1",
