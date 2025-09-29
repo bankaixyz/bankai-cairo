@@ -265,7 +265,7 @@ func handle_genesis_case{
 
     // For the genesis case, I hardcode the previous proof values.
     tempvar expected_genesis_committee = Uint256(
-        low=0x36c253a239c2878d1a6aa8d46dfe4be8, high=0xdfb8eb2acda46f413d93538c7d6b3610
+        low=0xfed6161b1d9fbc2aefd9ef882097b032, high=0xda6c7921d7f35b063bf38ed307d811cf
     );
 
     let genesis_output = CircuitOutput2(
