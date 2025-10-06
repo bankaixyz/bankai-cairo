@@ -12,7 +12,14 @@ from sha import SHA256
 from debug import print_string, print_felt_hex, print_felt
 from bls12_381.multi_pairing_check_2 import multi_pairing_check_2P
 from hash_to_curve import hash_to_curve
-from cairo.src.debug.print import info_string, info_uint256, debug_string, debug_uint256
+from cairo.src.debug.print import (
+    info_string,
+    info_uint256,
+    debug_string,
+    debug_uint256,
+    debug_felt_hex,
+    debug_felt,
+)
 from cairo.src.utils.ssz import SSZ, MerkleTree, MerkleUtils
 from cairo.src.utils.constants import g1_negative
 from cairo.src.utils.domain import Domain, Network

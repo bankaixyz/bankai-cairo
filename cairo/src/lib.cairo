@@ -50,12 +50,12 @@ func run_bankai{
     range_check96_ptr: felt*,
     add_mod_ptr: ModBuiltin*,
     mul_mod_ptr: ModBuiltin*,
+    sha256_ptr: felt*,
 }() {
     alloc_locals;
 
     debug_string('main');
 
-    let (sha256_ptr, sha256_ptr_start) = SHA256.init();
     let (pow2_array) = pow2alloc128();
 
     local consensus_inputs: ConsensusInputs;
@@ -81,28 +81,12 @@ func run_bankai{
 
         write_circuit_output(circuit_output);
 
-        SHA256.finalize(sha256_start_ptr=sha256_ptr_start, sha256_end_ptr=sha256_ptr);
-
         return ();
     } else {
         info_string('handle_recursive_case');
-        let (_, remainder) = felt_divmod(
-            consensus_inputs.beacon_header.slot.low + 1, SYNC_COMMITTEE_PERIOD
-        );
-        local is_committee_transition: felt;
-        if (remainder == 0) {
-            is_committee_transition = 1;
-        } else {
-            is_committee_transition = 0;
-        }
-
-        debug_string('is_committee_transition');
-        debug_felt_hex(is_committee_transition);
 
         with pow2_array, sha256_ptr {
-            let (circuit_output) = handle_recursive_case(
-                consensus_inputs, program_hash, is_committee_transition
-            );
+            let (circuit_output) = handle_recursive_case(consensus_inputs, program_hash);
         }
         info_string('confirmed epoch');
 
@@ -149,13 +133,11 @@ func run_bankai{
 
             write_circuit_output(final_output);
 
-            SHA256.finalize(sha256_start_ptr=sha256_ptr_start, sha256_end_ptr=sha256_ptr);
             return ();
         } else {
             debug_string('no committee update');
             write_circuit_output(circuit_output);
 
-            SHA256.finalize(sha256_start_ptr=sha256_ptr_start, sha256_end_ptr=sha256_ptr);
             return ();
         }
     }
@@ -173,15 +155,26 @@ func handle_recursive_case{
     mul_mod_ptr: ModBuiltin*,
     sha256_ptr: felt*,
     pow2_array: felt*,
-}(consensus_inputs: ConsensusInputs, program_hash: felt, is_committee_transition: felt) -> (
-    circuit_output: CircuitOutput2
-) {
+}(consensus_inputs: ConsensusInputs, program_hash: felt) -> (circuit_output: CircuitOutput2) {
     alloc_locals;
 
     info_string('handle_recursive_case');
 
     local previous_output: CircuitOutput2;
     %{ load_previous_output() %}
+
+    let (old_committee_term, _) = felt_divmod(
+        previous_output.beacon.slot_number + 1, SYNC_COMMITTEE_PERIOD
+    );
+
+    let (new_committee_term, _) = felt_divmod(
+        consensus_inputs.beacon_header.slot.low + 1, SYNC_COMMITTEE_PERIOD
+    );
+
+    local is_committee_transition = new_committee_term - old_committee_term;
+
+    debug_string('is_committee_transition');
+    debug_felt_hex(is_committee_transition);
 
     let (expected_output_hash) = compute_output_hash(program_hash, previous_output);
 

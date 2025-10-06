@@ -8,6 +8,7 @@ from starkware.cairo.common.cairo_builtins import (
 )
 from starkware.cairo.common.cairo_keccak.keccak import finalize_keccak
 from starkware.cairo.common.alloc import alloc
+from sha import SHA256
 
 from cairo.src.lib import run_bankai
 
@@ -28,6 +29,7 @@ func main{
 
     let (keccak_felt_ptr: felt*) = alloc();
     let start_keccak_felt_ptr = keccak_felt_ptr;
+    let (sha256_ptr, sha256_ptr_start) = SHA256.init();
 
     run_bankai{
         output_ptr=output_ptr,
@@ -39,8 +41,10 @@ func main{
         range_check96_ptr=range_check96_ptr,
         add_mod_ptr=add_mod_ptr,
         mul_mod_ptr=mul_mod_ptr,
+        sha256_ptr=sha256_ptr,
     }();
 
+    SHA256.finalize(sha256_start_ptr=sha256_ptr_start, sha256_end_ptr=sha256_ptr);
     finalize_keccak(keccak_ptr_start=start_keccak_felt_ptr, keccak_ptr_end=keccak_felt_ptr);
 
     return ();

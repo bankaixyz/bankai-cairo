@@ -45,17 +45,32 @@ pub fn run_stwo(
     log_level: &'static str,
     output_dir: &str,
     prove: bool,
-) -> Result<(), Error> {
+    pie: bool,
+) -> Result<Option<CairoPie>, Error> {
     let program = load_program(path)?;
     let overall_start = std::time::Instant::now();
-    let cairo_run_config = cairo_run::CairoRunConfig {
-        layout: LayoutName::all_cairo_stwo,
-        trace_enabled: true,
-        relocate_trace: true,
-        relocate_mem: true,
-        proof_mode: true,
-        fill_holes: true,
-        ..Default::default()
+    let proof_mode = false;
+    let cairo_run_config = if pie {
+        cairo_run::CairoRunConfig {
+            allow_missing_builtins: Some(true),
+            layout: LayoutName::all_cairo,
+            proof_mode,
+            secure_run: None,
+            relocate_mem: true,
+            trace_enabled: true,
+            disable_trace_padding: proof_mode,
+            ..Default::default()
+        }
+    } else {
+        cairo_run::CairoRunConfig {
+            layout: LayoutName::all_cairo_stwo,
+            trace_enabled: true,
+            relocate_trace: true,
+            relocate_mem: true,
+            proof_mode: true,
+            fill_holes: true,
+            ..Default::default()
+        }
     };
 
     let beacon_mmr_update = input.input.beacon_mmr_update.clone();
@@ -89,7 +104,7 @@ pub fn run_stwo(
             &Path::new(output_dir).join("pub.json"),
             &Path::new(output_dir).join("priv.json"),
             Some(true),
-            Some(bankai_stwo_prover::ProofFormat::Json),
+            Some(bankai_stwo_prover::ProofFormat::CairoSerde),
         )?;
         info!(
             "Proof generated successfully in {:.1?}: {:?}",
@@ -100,7 +115,12 @@ pub fn run_stwo(
 
     info!("STWO end-to-end took: {:.1?}", overall_start.elapsed());
 
-    Ok(())
+    if pie {
+        let pie = cairo_runner.get_cairo_pie()?;
+        Ok(Some(pie))
+    } else {
+        Ok(None)
+    }
 }
 
 pub fn run(

@@ -272,7 +272,14 @@ async fn generate_proof_internal(
 
     // Run the STWO flow in a blocking task
     tokio::task::spawn_blocking(move || {
-        run_stwo(program_path, input, log_level, &output_dir_string, true)
+        run_stwo(
+            program_path,
+            input,
+            log_level,
+            &output_dir_string,
+            true,
+            false,
+        )
     })
     .await??;
 
