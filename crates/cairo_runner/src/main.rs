@@ -19,8 +19,11 @@ struct Args {
     #[arg(long, conflicts_with = "stwo", required_unless_present = "stwo")]
     stone: bool,
 
-    #[arg(long, requires = "stwo")]
+    #[arg(long, requires = "stwo", conflicts_with = "pie")]
     prove: bool,
+
+    #[arg(long, requires = "stwo", conflicts_with = "prove")]
+    pie: bool,
 }
 
 fn main() {
@@ -41,7 +44,12 @@ fn main() {
 
     if args.stwo {
         let program_path = "cairo/build/bankai_stwo.json";
-        run_stwo(program_path, input, log_level, output_dir, args.prove).unwrap();
+        let result = run_stwo(program_path, input, log_level, output_dir, args.prove, args.pie).unwrap();
+        if let Some(pie) = result {
+            pie.write_zip_file(&Path::new(output_dir).join("pie.zip"), true)
+                .unwrap();
+            println!("Pie generated successfully");
+        }
     } else {
         let program_path = "cairo/build/bankai_stone.json";
         let pie = run(program_path, input, log_level).unwrap();
