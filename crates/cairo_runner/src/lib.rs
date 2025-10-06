@@ -72,7 +72,7 @@ pub fn run_stwo(
             ..Default::default()
         }
     };
-    
+
     let beacon_mmr_update = input.input.beacon_mmr_update.clone();
     let execution_mmr_update = input.input.execution_mmr_update.clone();
     let mut hint_processor = CustomHintProcessor::new();

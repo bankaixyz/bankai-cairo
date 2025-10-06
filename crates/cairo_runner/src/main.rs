@@ -44,7 +44,15 @@ fn main() {
 
     if args.stwo {
         let program_path = "cairo/build/bankai_stwo.json";
-        let result = run_stwo(program_path, input, log_level, output_dir, args.prove, args.pie).unwrap();
+        let result = run_stwo(
+            program_path,
+            input,
+            log_level,
+            output_dir,
+            args.prove,
+            args.pie,
+        )
+        .unwrap();
         if let Some(pie) = result {
             pie.write_zip_file(&Path::new(output_dir).join("pie.zip"), true)
                 .unwrap();
