@@ -10,6 +10,8 @@ from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.uint256 import Uint256
 from starkware.cairo.common.memcpy import memcpy
 from starkware.cairo.common.memset import memset
+from starkware.cairo.common.math_cmp import is_le
+
 from definitions import UInt384
 from sha import SHA256, HashUtils
 from ec_ops import derive_g1_point_from_x
@@ -109,10 +111,11 @@ func run_committee_update{
 
     let fork = Network.get_fork_version(Network.SEPOLIA, slot);
     local next_committee_index: felt;
-    if (fork == Network.ELECTRA) {
-        next_committee_index = 87;
-    } else {
+    let old_index = is_le(fork, Network.DENEB);
+    if (old_index == 1) {
         next_committee_index = 55;
+    } else {
+        next_committee_index = 87;
     }
     debug_string('next committee index');
     debug_felt(next_committee_index);
