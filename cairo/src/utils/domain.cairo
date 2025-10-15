@@ -19,6 +19,7 @@ namespace Network {
     const CAPELLA = 3;
     const DENEB = 4;
     const ELECTRA = 5;
+    const FULU = 6;
 
     func get_genesis_validator_root(network_id: felt) -> Uint256 {
         if (network_id == Network.MAINNET) {
@@ -38,7 +39,6 @@ namespace Network {
 
     func get_fork_version{range_check_ptr}(network_id: felt, slot: felt) -> felt {
         alloc_locals;
-
         local fork: felt;
         let (fork_schedule) = get_fork_schedule();  // required for hint, no great way to do this
         %{ check_fork_version() %}
@@ -59,7 +59,6 @@ namespace Network {
 
     func get_fork_id{range_check_ptr}(network_id: felt, slot: felt) -> felt {
         alloc_locals;
-
         let fork = get_fork_version(network_id, slot);
 
         if (fork == Network.GENESIS) {
@@ -113,6 +112,13 @@ namespace Network {
             return fork_id;
         }
 
+        if (fork == Network.FULU) {
+            let (fork_id, fulu_activation_slot) = get_fork_data(network_id, Network.FULU);
+            assert [range_check_ptr] = fulu_activation_slot - slot;
+            tempvar range_check_ptr = range_check_ptr + 1;
+            return fork_id;
+        }
+
         assert 1 = 0;
         return 0xFFFFFFFFFFFFFFFF;
     }
@@ -123,17 +129,17 @@ namespace Network {
     ) {
         alloc_locals;
 
+        const N_HARDFORKS = 7;
+
         assert [range_check_ptr] = 2 - network_id;  // Check network_id is valid (0 or 1)
-        assert [range_check_ptr + 1] = 5 - fork_id;  // Check fork_id is valid (0-5)
+        assert [range_check_ptr + 1] = N_HARDFORKS - 1 - fork_id;  // Check fork_id is valid (0-6)
         tempvar range_check_ptr = range_check_ptr + 2;
 
         let (fork_schedule) = get_fork_schedule();
-
-        // Each network has 12 values (6 forks × 2 values per fork)
+        // Each network has 14 values (7 forks × 2 values per fork)
         // For each fork: [version, slot]
-        local version = [fork_schedule + (fork_id * 2) + (12 * network_id)];
-        local slot = [fork_schedule + (fork_id * 2) + 1 + (12 * network_id)];
-
+        local version = [fork_schedule + (fork_id * 2) + (N_HARDFORKS * 2 * network_id)];
+        local slot = [fork_schedule + (fork_id * 2) + 1 + (N_HARDFORKS * 2 * network_id)];
         return (version, slot);
     }
 
@@ -159,7 +165,10 @@ namespace Network {
         dw 8626176;  // DENEB_ACTIVATION_SLOT (269568 * 32)
         // ELECTRA
         dw 0x05000000000000000000000000000000;  // ELECTRA_FORK_VERSION
-        dw 0xFFFFFFFFFFFFFFFF;  // ELECTRA_ACTIVATION_SLOT (Infinity)
+        dw 11649024;  // ELECTRA_ACTIVATION_SLOT (222464 * 32)
+        // FULU
+        dw 0x06000000000000000000000000000000;  // FULU_FORK_VERSION
+        dw 0xFFFFFFFFFFFFFFFF;  // FULU_ACTIVATION_SLOT (Infinity)
 
         // SEPOLIA fork data (version, slot)
         // GENESIS
@@ -180,6 +189,9 @@ namespace Network {
         // ELECTRA
         dw 0x90000074000000000000000000000000;  // ELECTRA_FORK_VERSION
         dw 7118848;  // ELECTRA_ACTIVATION_SLOT (222464 * 32)
+        // FULU
+        dw 0x90000075000000000000000000000000;  // FULU_FORK_VERSION
+        dw 8724480;  // FULU_ACTIVATION_SLOT (272640 * 32)
     }
 }
 
@@ -231,6 +243,9 @@ namespace Domain {
         dw 0x883b712607f952d5198d0f5677564636;  // Electra low
         dw 0x70000006a95a1a967855d676d48be69;  // Electra high
 
+        dw 0x7ac5f562cf682ce6bc41b8ec28ba1a07;  // Fulu low
+        dw 0x700000082fae541f8a3db43adb5e799;  // Fulu high
+
         domain_data_sepolia:
         dw 0x5f699a49ccd9b3fd666c35d4ae5f79e;  // Genesis low
         dw 0x7000000a8fee8ee9978418b64f1140b;  // Genesis high
@@ -249,6 +264,9 @@ namespace Domain {
 
         dw 0x5b64eb2f9c81e0683f21dd0491e95aaa;  // Electra low
         dw 0x700000014045b5a1d8da091c2ee9e63;  // Electra high
+
+        dw 0x22af469210b5b2c8807e372b6b9ca539;  // Fulu low
+        dw 0x7000000f52c15272cff99835cd05aa5;  // Fulu high
     }
 
     func compute{
@@ -268,80 +286,92 @@ namespace Domain {
 }
 
 // this function is used to compute the domain values found in get_domain()
-// func precompute_domains{range_check_ptr, bitwise_ptr: BitwiseBuiltin*, pow2_array: felt*, sha256_ptr: felt*}() {
-//     alloc_locals;
+func precompute_domains{
+    range_check_ptr, bitwise_ptr: BitwiseBuiltin*, pow2_array: felt*, sha256_ptr: felt*
+}() {
+    alloc_locals;
 
-// // Precompute domains for MAINNET.
-//     let (_, genesis_slot_mainnet) = Network.get_fork_data(Network.MAINNET, Network.GENESIS);
-//     let domain_mainnet_genesis = Domain.compute(Network.MAINNET, genesis_slot_mainnet);
-//     print_string('domain_mainnet_genesis');
-//     print_uint256(domain_mainnet_genesis);
+    // Precompute domains for MAINNET.
+    let (_, genesis_slot_mainnet) = Network.get_fork_data(Network.MAINNET, Network.GENESIS);
+    let domain_mainnet_genesis = Domain.compute(Network.MAINNET, genesis_slot_mainnet);
+    print_string('domain_mainnet_genesis');
+    print_uint256(domain_mainnet_genesis);
 
-// let (_, altair_slot_mainnet) = Network.get_fork_data(Network.MAINNET, Network.ALTAIR);
-//     let domain_mainnet_altair = Domain.compute(Network.MAINNET, altair_slot_mainnet);
-//     print_string('domain_mainnet_altair');
-//     print_uint256(domain_mainnet_altair);
+    let (_, altair_slot_mainnet) = Network.get_fork_data(Network.MAINNET, Network.ALTAIR);
+    let domain_mainnet_altair = Domain.compute(Network.MAINNET, altair_slot_mainnet);
+    print_string('domain_mainnet_altair');
+    print_uint256(domain_mainnet_altair);
 
-// let (_, bellatrix_slot_mainnet) = Network.get_fork_data(Network.MAINNET, Network.BELLATRIX);
-//     let domain_mainnet_bellatrix = Domain.compute(Network.MAINNET, bellatrix_slot_mainnet);
-//     print_string('domain_mainnet_bellatrix');
-//     print_uint256(domain_mainnet_bellatrix);
+    let (_, bellatrix_slot_mainnet) = Network.get_fork_data(Network.MAINNET, Network.BELLATRIX);
+    let domain_mainnet_bellatrix = Domain.compute(Network.MAINNET, bellatrix_slot_mainnet);
+    print_string('domain_mainnet_bellatrix');
+    print_uint256(domain_mainnet_bellatrix);
 
-// let (_, capella_slot_mainnet) = Network.get_fork_data(Network.MAINNET, Network.CAPELLA);
-//     let domain_mainnet_capella = Domain.compute(Network.MAINNET, capella_slot_mainnet);
-//     print_string('domain_mainnet_capella');
-//     print_uint256(domain_mainnet_capella);
+    let (_, capella_slot_mainnet) = Network.get_fork_data(Network.MAINNET, Network.CAPELLA);
+    let domain_mainnet_capella = Domain.compute(Network.MAINNET, capella_slot_mainnet);
+    print_string('domain_mainnet_capella');
+    print_uint256(domain_mainnet_capella);
 
-// let (_, deneb_slot_mainnet) = Network.get_fork_data(Network.MAINNET, Network.DENEB);
-//     let domain_mainnet_deneb = Domain.compute(Network.MAINNET, deneb_slot_mainnet);
-//     print_string('domain_mainnet_deneb');
-//     print_uint256(domain_mainnet_deneb);
+    let (_, deneb_slot_mainnet) = Network.get_fork_data(Network.MAINNET, Network.DENEB);
+    let domain_mainnet_deneb = Domain.compute(Network.MAINNET, deneb_slot_mainnet);
+    print_string('domain_mainnet_deneb');
+    print_uint256(domain_mainnet_deneb);
 
-// let (_, electra_slot_mainnet) = Network.get_fork_data(Network.MAINNET, Network.ELECTRA);
-//     print_string('got fork data');
-//     let domain_mainnet_electra = Domain.compute(Network.MAINNET, electra_slot_mainnet - 1);
-//     print_string('domain_mainnet_electra');
-//     print_uint256(domain_mainnet_electra);
+    let (_, electra_slot_mainnet) = Network.get_fork_data(Network.MAINNET, Network.ELECTRA);
+    print_string('got fork data');
+    let domain_mainnet_electra = Domain.compute(Network.MAINNET, electra_slot_mainnet - 1);
+    print_string('domain_mainnet_electra');
+    print_uint256(domain_mainnet_electra);
 
-// // Precompute domains for SEPOLIA.
-//     let (_, genesis_slot_sepolia) = Network.get_fork_data(Network.SEPOLIA, Network.GENESIS);
-//     let domain_sepolia_genesis = Domain.compute(Network.SEPOLIA, genesis_slot_sepolia);
-//     print_string('domain_sepolia_genesis');
-//     print_uint256(domain_sepolia_genesis);
+    let (_, fulu_slot_mainnet) = Network.get_fork_data(Network.MAINNET, Network.FULU);
+    let domain_mainnet_fulu = Domain.compute(Network.MAINNET, fulu_slot_mainnet);
+    print_string('domain_mainnet_fulu');
+    print_uint256(domain_mainnet_fulu);
 
-// let (_, altair_slot_sepolia) = Network.get_fork_data(Network.SEPOLIA, Network.ALTAIR);
-//     let domain_sepolia_altair = Domain.compute(Network.SEPOLIA, altair_slot_sepolia);
-//     print_string('domain_sepolia_altair');
-//     print_uint256(domain_sepolia_altair);
+    // Precompute domains for SEPOLIA.
+    let (_, genesis_slot_sepolia) = Network.get_fork_data(Network.SEPOLIA, Network.GENESIS);
+    let domain_sepolia_genesis = Domain.compute(Network.SEPOLIA, genesis_slot_sepolia);
+    print_string('domain_sepolia_genesis');
+    print_uint256(domain_sepolia_genesis);
 
-// let (_, bellatrix_slot_sepolia) = Network.get_fork_data(Network.SEPOLIA, Network.BELLATRIX);
-//     let domain_sepolia_bellatrix = Domain.compute(Network.SEPOLIA, bellatrix_slot_sepolia);
-//     print_string('domain_sepolia_bellatrix');
-//     print_uint256(domain_sepolia_bellatrix);
+    let (_, altair_slot_sepolia) = Network.get_fork_data(Network.SEPOLIA, Network.ALTAIR);
+    let domain_sepolia_altair = Domain.compute(Network.SEPOLIA, altair_slot_sepolia);
+    print_string('domain_sepolia_altair');
+    print_uint256(domain_sepolia_altair);
 
-// let (_, capella_slot_sepolia) = Network.get_fork_data(Network.SEPOLIA, Network.CAPELLA);
-//     let domain_sepolia_capella = Domain.compute(Network.SEPOLIA, capella_slot_sepolia);
-//     print_string('domain_sepolia_capella');
-//     print_uint256(domain_sepolia_capella);
+    let (_, bellatrix_slot_sepolia) = Network.get_fork_data(Network.SEPOLIA, Network.BELLATRIX);
+    let domain_sepolia_bellatrix = Domain.compute(Network.SEPOLIA, bellatrix_slot_sepolia);
+    print_string('domain_sepolia_bellatrix');
+    print_uint256(domain_sepolia_bellatrix);
 
-// let (_, deneb_slot_sepolia) = Network.get_fork_data(Network.SEPOLIA, Network.DENEB);
-//     let domain_sepolia_deneb = Domain.compute(Network.SEPOLIA, deneb_slot_sepolia);
-//     print_string('domain_sepolia_deneb');
-//     print_uint256(domain_sepolia_deneb);
+    let (_, capella_slot_sepolia) = Network.get_fork_data(Network.SEPOLIA, Network.CAPELLA);
+    let domain_sepolia_capella = Domain.compute(Network.SEPOLIA, capella_slot_sepolia);
+    print_string('domain_sepolia_capella');
+    print_uint256(domain_sepolia_capella);
 
-// let (_, electra_slot_sepolia) = Network.get_fork_data(Network.SEPOLIA, Network.ELECTRA);
-//     let domain_sepolia_electra = Domain.compute(Network.SEPOLIA, electra_slot_sepolia);
-//     print_string('domain_sepolia_electra');
-//     print_uint256(domain_sepolia_electra);
+    let (_, deneb_slot_sepolia) = Network.get_fork_data(Network.SEPOLIA, Network.DENEB);
+    let domain_sepolia_deneb = Domain.compute(Network.SEPOLIA, deneb_slot_sepolia);
+    print_string('domain_sepolia_deneb');
+    print_uint256(domain_sepolia_deneb);
 
-// return ();
+    let (_, electra_slot_sepolia) = Network.get_fork_data(Network.SEPOLIA, Network.ELECTRA);
+    let domain_sepolia_electra = Domain.compute(Network.SEPOLIA, electra_slot_sepolia);
+    print_string('domain_sepolia_electra');
+    print_uint256(domain_sepolia_electra);
 
-// }
+    let (_, fulu_slot_sepolia) = Network.get_fork_data(Network.SEPOLIA, Network.FULU);
+    print_string('giot slot');
+    let domain_sepolia_fulu = Domain.compute(Network.SEPOLIA, fulu_slot_sepolia);
+    print_string('domain_sepolia_fulu');
+    print_uint256(domain_sepolia_fulu);
 
-// func print_uint256(value: Uint256) {
-//     print_string('Uint256:');
-//     print_felt_hex(value.low);
-//     print_felt_hex(value.high);
+    return ();
+}
 
-// return ();
-// }
+func print_uint256(value: Uint256) {
+    print_string('Uint256:');
+    print_felt_hex(value.low);
+    print_felt_hex(value.high);
+
+    return ();
+}

@@ -40,11 +40,11 @@ pub fn hint_check_fork_version(
 
     // Each network has 12 values (6 forks × 2 values per fork)
     // For each fork: [version, slot]
-    let network_offset = network_id * 12;
+    let network_offset = network_id * 14;
 
     // Read activation slots for the selected network
     let mut activation_slots = Vec::new();
-    for i in 0..6 {
+    for i in 0..7 {
         let slot_address = (fork_schedule_ptr + (i * 2 + 1 + network_offset))?;
         let activation_slot = *vm.get_integer(slot_address)?;
         activation_slots.push(activation_slot);
