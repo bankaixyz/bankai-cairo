@@ -92,27 +92,26 @@ func run_bankai{
 
         if (is_committee_update == 1) {
             info_string('committee update');
-            // sanity check: next_committee_hash should be 0x0 if we update
-            assert circuit_output.beacon.next_committee_hash.low = 0x0;
-            assert circuit_output.beacon.next_committee_hash.high = 0x0;
+            // sanity check: next_validator_root should be 0x0 if we update
+            assert circuit_output.beacon.next_validator_root = 0x0;
 
             local committee_input: SyncCommitteeUpdateInputs;
             %{ write_committee_update_inputs() %}
 
             with pow2_array, sha256_ptr {
-                let (state_root, new_next_committee_hash) = run_committee_update(
-                    committee_input=committee_input, slot=circuit_output.beacon.slot_number
+                let (state_root, new_next_validator_root) = run_committee_update(
+                    committee_input=committee_input
                 );
             }
 
-            // Ensure a valid state root is used to decommit new next_committee_hash
+            // Ensure a valid state root is used to decommit new next_validator_root
             assert circuit_output.beacon.state_root.low = state_root.low;
             assert circuit_output.beacon.state_root.high = state_root.high;
 
-            info_string('updated next_committee_hash');
-            info_uint256(new_next_committee_hash);
+            info_string('updated next_validator_root');
+            info_felt(new_next_validator_root);
 
-            // Update the next_committee_hash in the final output
+            // Update the next_validator_root in the final output
             let updated_beacon_output = BeaconClientOutput(
                 slot_number=circuit_output.beacon.slot_number,
                 header_root=circuit_output.beacon.header_root,
@@ -122,8 +121,8 @@ func run_bankai{
                 num_signers=circuit_output.beacon.num_signers,
                 mmr_root_keccak=circuit_output.beacon.mmr_root_keccak,
                 mmr_root_poseidon=circuit_output.beacon.mmr_root_poseidon,
-                current_committee_hash=circuit_output.beacon.current_committee_hash,
-                next_committee_hash=new_next_committee_hash,
+                current_validator_root=circuit_output.beacon.current_validator_root,
+                next_validator_root=new_next_validator_root,
             );
             let final_output = CircuitOutput2(
                 block_number=circuit_output.block_number,
@@ -256,10 +255,8 @@ func handle_genesis_case{
 }(consensus_inputs: ConsensusInputs) -> (circuit_output: CircuitOutput2) {
     alloc_locals;
 
-    // For the genesis case, I hardcode the previous proof values.
-    tempvar expected_genesis_committee = Uint256(
-        low=0xfed6161b1d9fbc2aefd9ef882097b032, high=0xda6c7921d7f35b063bf38ed307d811cf
-    );
+    // For the genesis case, hardcode the previous proof values.
+    tempvar expected_genesis_validator_root = 0x02d9146e7362978e985649a4104e76396d77e1fd69335b6713dc531285ac0976;
 
     let genesis_output = CircuitOutput2(
         block_number=0,
@@ -272,8 +269,8 @@ func handle_genesis_case{
             num_signers=0,
             mmr_root_keccak=Uint256(low=0x0, high=0x0),
             mmr_root_poseidon=0,
-            current_committee_hash=expected_genesis_committee,
-            next_committee_hash=Uint256(low=0x0, high=0x0),
+            current_validator_root=expected_genesis_validator_root,
+            next_validator_root=0x0,
         ),
         execution=ExecutionClientOutput(
             block_number=0,
@@ -313,19 +310,17 @@ func write_circuit_output{output_ptr: felt*, range_check_ptr}(output: CircuitOut
     assert [output_ptr + 7] = output.beacon.mmr_root_keccak.low;
     assert [output_ptr + 8] = output.beacon.mmr_root_keccak.high;
     assert [output_ptr + 9] = output.beacon.mmr_root_poseidon;
-    assert [output_ptr + 10] = output.beacon.current_committee_hash.low;
-    assert [output_ptr + 11] = output.beacon.current_committee_hash.high;
-    assert [output_ptr + 12] = output.beacon.next_committee_hash.low;
-    assert [output_ptr + 13] = output.beacon.next_committee_hash.high;
-    assert [output_ptr + 14] = output.execution.block_number;
-    assert [output_ptr + 15] = output.execution.header_hash.low;
-    assert [output_ptr + 16] = output.execution.header_hash.high;
-    assert [output_ptr + 17] = output.execution.justified_height;
-    assert [output_ptr + 18] = output.execution.finalized_height;
-    assert [output_ptr + 19] = output.execution.mmr_root_keccak.low;
-    assert [output_ptr + 20] = output.execution.mmr_root_keccak.high;
-    assert [output_ptr + 21] = output.execution.mmr_root_poseidon;
+    assert [output_ptr + 10] = output.beacon.current_validator_root;
+    assert [output_ptr + 11] = output.beacon.next_validator_root;
+    assert [output_ptr + 12] = output.execution.block_number;
+    assert [output_ptr + 13] = output.execution.header_hash.low;
+    assert [output_ptr + 14] = output.execution.header_hash.high;
+    assert [output_ptr + 15] = output.execution.justified_height;
+    assert [output_ptr + 16] = output.execution.finalized_height;
+    assert [output_ptr + 17] = output.execution.mmr_root_keccak.low;
+    assert [output_ptr + 18] = output.execution.mmr_root_keccak.high;
+    assert [output_ptr + 19] = output.execution.mmr_root_poseidon;
 
-    let output_ptr = output_ptr + 22;
+    let output_ptr = output_ptr + 20;
     return ();
 }

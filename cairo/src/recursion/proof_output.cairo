@@ -22,10 +22,8 @@ func compute_output_hash{range_check_ptr, poseidon_ptr: PoseidonBuiltin*}(
             previous_output.beacon.mmr_root_keccak.low,
             previous_output.beacon.mmr_root_keccak.high,
             previous_output.beacon.mmr_root_poseidon,
-            previous_output.beacon.current_committee_hash.low,
-            previous_output.beacon.current_committee_hash.high,
-            previous_output.beacon.next_committee_hash.low,
-            previous_output.beacon.next_committee_hash.high,
+            previous_output.beacon.current_validator_root,
+            previous_output.beacon.next_validator_root,
             previous_output.execution.block_number,
             previous_output.execution.header_hash.low,
             previous_output.execution.header_hash.high,
@@ -38,7 +36,7 @@ func compute_output_hash{range_check_ptr, poseidon_ptr: PoseidonBuiltin*}(
         felt*,
     );
 
-    let (output_hash: felt) = poseidon_hash_many(n=25, elements=output_elements);
+    let (output_hash: felt) = poseidon_hash_many(n=23, elements=output_elements);
 
     return (output_hash=output_hash);
 }

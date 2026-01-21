@@ -8,5 +8,5 @@ struct EpochUpdateOutput {
     n_signers: felt,
     execution_header_root: Uint256,
     execution_header_height: felt,
-    current_committee_hash: Uint256,
+    current_validator_root: felt,
 }

@@ -23,7 +23,7 @@ from cairo.src.debug.print import (
 from cairo.src.utils.ssz import SSZ, MerkleTree, MerkleUtils
 from cairo.src.utils.constants import g1_negative
 from cairo.src.utils.domain import Domain, Network
-from cairo.src.bls.signer import aggregate_signer_pubs
+from cairo.src.bls.signer import generate_block_signer_pub
 from cairo.src.utils.utils import pow2alloc128
 from cairo.src.io import (
     ExecutionHeaderProof,
@@ -66,39 +66,30 @@ func run_beacon_update{
     let (msg_point) = hash_to_curve(1, signing_root);
 
     // 4. Aggregate signer to get aggregate key that was used to sign the message
-    // ToDo: this is not secure, a sync committee memeber could collude with the prover to make invalid headers pass.
-    // Fix is ready, just needs to be applied.
-    let (committee_hash, agg_key, n_non_signers) = aggregate_signer_pubs(
-        consensus_inputs.signature
-    );
-    let n_signers = 512 - n_non_signers;
+    let (agg_key) = generate_block_signer_pub(consensus_inputs.signature);
+    let n_signers = consensus_inputs.signature.n_signers;
+    let validator_root = consensus_inputs.signature.validator_root;
 
     // 5. Verify signature
-    verify_signature(agg_key, msg_point, consensus_inputs.signature.signature_point);
+    verify_signature(agg_key, msg_point, consensus_inputs.signature_point);
     debug_string('beacon: signature verified');
 
-    local current_committee_hash: Uint256;
-    local next_committee_hash: Uint256;
+    local current_validator_root: felt;
+    local next_validator_root: felt;
 
-    // Assert the correct committee hash is used, in case of committee transition
+    // Assert the correct validator root is used, in case of committee transition
     if (is_committee_transition == 1) {
-        assert previous_output.beacon.next_committee_hash.low = committee_hash.low;
-        assert previous_output.beacon.next_committee_hash.high = committee_hash.high;
+        assert previous_output.beacon.next_validator_root = validator_root;
 
         // In transition, move the keys from the previous committee to the next committee
-        assert current_committee_hash.low = previous_output.beacon.next_committee_hash.low;
-        assert current_committee_hash.high = previous_output.beacon.next_committee_hash.high;
-        assert next_committee_hash.low = 0x0;
-        assert next_committee_hash.high = 0x0;
+        assert current_validator_root = previous_output.beacon.next_validator_root;
+        assert next_validator_root = 0x0;
     } else {
-        assert previous_output.beacon.current_committee_hash.low = committee_hash.low;
-        assert previous_output.beacon.current_committee_hash.high = committee_hash.high;
+        assert previous_output.beacon.current_validator_root = validator_root;
 
-        // In non-transition, use the current committee hash
-        assert current_committee_hash.low = previous_output.beacon.current_committee_hash.low;
-        assert current_committee_hash.high = previous_output.beacon.current_committee_hash.high;
-        assert next_committee_hash.low = previous_output.beacon.next_committee_hash.low;
-        assert next_committee_hash.high = previous_output.beacon.next_committee_hash.high;
+        // In non-transition, use the current validator root
+        assert current_validator_root = previous_output.beacon.current_validator_root;
+        assert next_validator_root = previous_output.beacon.next_validator_root;
     }
 
     let (
@@ -109,7 +100,7 @@ func run_beacon_update{
     assert last_header_root.low = header_root.low;
     assert last_header_root.high = header_root.high;
 
-    debug_string('beacon: committee hashes set');
+    debug_string('beacon: validator roots set');
     let output = BeaconClientOutput(
         slot_number=consensus_inputs.beacon_header.slot.low,
         header_root=header_root,
@@ -119,8 +110,8 @@ func run_beacon_update{
         num_signers=n_signers,
         mmr_root_keccak=new_keccak_root,
         mmr_root_poseidon=new_poseidon_root,
-        current_committee_hash=current_committee_hash,
-        next_committee_hash=next_committee_hash,
+        current_validator_root=current_validator_root,
+        next_validator_root=next_validator_root,
     );
 
     return (output=output, body_root=body_root);

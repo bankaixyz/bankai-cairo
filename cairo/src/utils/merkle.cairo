@@ -2,6 +2,7 @@ from starkware.cairo.common.builtin_poseidon.poseidon import poseidon_hash
 from starkware.cairo.common.cairo_builtins import PoseidonBuiltin
 from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.memcpy import memcpy
+from cairo.src.utils.utils import felt_divmod
 
 namespace PoseidonMerkleTree {
     func compute_root{range_check_ptr, poseidon_ptr: PoseidonBuiltin*, pow2_array: felt*}(
@@ -61,5 +62,41 @@ namespace PoseidonMerkleTree {
         return compute_merkle_root_inner_optimized(
             tree_ptr=new_tree_ptr, out_ptr=new_out_ptr, steps=steps - 1
         );
+    }
+
+    // Computes the Merkle root from a leaf, its sibling path and index
+    func hash_merkle_path_poseidon{
+        range_check_ptr, poseidon_ptr: PoseidonBuiltin*, pow2_array: felt*
+    }(path: felt*, path_len: felt, leaf: felt, index: felt) -> felt {
+        alloc_locals;
+
+        if (path_len == 0) {
+            return leaf;
+        }
+
+        let (new_index, r) = felt_divmod(index, 2);
+        if (r == 0) {
+            let (next_leaf) = poseidon_hash(leaf, [path]);
+            return hash_merkle_path_poseidon(
+                path=path + 1, path_len=path_len - 1, leaf=next_leaf, index=new_index
+            );
+        } else {
+            let (next_leaf) = poseidon_hash([path], leaf);
+            return hash_merkle_path_poseidon(
+                path=path + 1, path_len=path_len - 1, leaf=next_leaf, index=new_index
+            );
+        }
+    }
+
+    // Verifies a Merkle proof against an expected root
+    func verify_merkle_path_poseidon{
+        range_check_ptr, poseidon_ptr: PoseidonBuiltin*, pow2_array: felt*
+    }(path: felt*, path_len: felt, leaf: felt, index: felt, expected_root: felt) {
+        alloc_locals;
+        let root = hash_merkle_path_poseidon(
+            path=path, path_len=path_len, leaf=leaf, index=index
+        );
+        assert root = expected_root;
+        return ();
     }
 }

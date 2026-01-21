@@ -10,11 +10,13 @@ struct BeaconHeader {
     body_root: Uint256,
 }
 
-struct SyncCommitteeSignatureInput {
-    signature_point: G2Point,
-    aggregate_pub: G1Point,
-    non_signers: G1Point*,
-    n_non_signers: felt,
+struct SyncCommitteeSignerInput {
+    validator_root: felt,
+    signers: G1Point*,
+    indexes: felt*,
+    proofs: felt**,
+    proofs_len: felt,
+    n_signers: felt,
 }
 
 struct ExecutionHeaderProof {
@@ -26,15 +28,18 @@ struct ExecutionHeaderProof {
 }
 
 struct SyncCommitteeUpdateInputs {
+    slot: felt,
     path: felt**,
     path_len: felt,
-    next_committee_key: UInt384,
+    aggregate_committee_key: UInt384,
+    validator_pubs: UInt384*,
     committee_keys_root: felt*,
 }
 
 struct ConsensusInputs {
     beacon_header: BeaconHeader,
-    signature: SyncCommitteeSignatureInput,
+    signature_point: G2Point,
+    signature: SyncCommitteeSignerInput,
     execution_header_proof: ExecutionHeaderProof,
 }
 
@@ -45,8 +50,8 @@ struct CircuitOutput {
     n_signers: felt,
     execution_header_root: Uint256,
     execution_header_height: felt,
-    current_committee_hash: Uint256,
-    next_committee_hash: Uint256,
+    current_validator_root: felt,
+    next_validator_root: felt,
 }
 
 struct BeaconClientOutput {
@@ -58,8 +63,8 @@ struct BeaconClientOutput {
     num_signers: felt,
     mmr_root_keccak: Uint256,
     mmr_root_poseidon: felt,
-    current_committee_hash: Uint256,
-    next_committee_hash: Uint256,
+    current_validator_root: felt,
+    next_validator_root: felt,
 }
 
 struct ExecutionClientOutput {

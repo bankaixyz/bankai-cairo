@@ -89,8 +89,8 @@ pub struct BeaconClientOutputCairo {
     pub num_signers: Felt,
     pub mmr_root_keccak: Uint256,
     pub mmr_root_poseidon: Felt,
-    pub current_committee_hash: Uint256,
-    pub next_committee_hash: Uint256,
+    pub current_validator_root: Felt,
+    pub next_validator_root: Felt,
 }
 
 impl CairoType for BeaconClientOutputCairo {
@@ -111,8 +111,8 @@ impl CairoType for BeaconClientOutputCairo {
         current_ptr = self.num_signers.to_memory(vm, current_ptr)?;
         current_ptr = self.mmr_root_keccak.to_memory(vm, current_ptr)?;
         current_ptr = self.mmr_root_poseidon.to_memory(vm, current_ptr)?;
-        current_ptr = self.current_committee_hash.to_memory(vm, current_ptr)?;
-        current_ptr = self.next_committee_hash.to_memory(vm, current_ptr)?;
+        current_ptr = self.current_validator_root.to_memory(vm, current_ptr)?;
+        current_ptr = self.next_validator_root.to_memory(vm, current_ptr)?;
 
         Ok(current_ptr)
     }
@@ -130,13 +130,13 @@ impl CairoType for BeaconClientOutputCairo {
             num_signers: Felt::from_memory(vm, (address + 7)?)?,
             mmr_root_keccak: Uint256::from_memory(vm, (address + 8)?)?,
             mmr_root_poseidon: Felt::from_memory(vm, (address + 10)?)?,
-            current_committee_hash: Uint256::from_memory(vm, (address + 11)?)?,
-            next_committee_hash: Uint256::from_memory(vm, (address + 13)?)?,
+            current_validator_root: Felt::from_memory(vm, (address + 11)?)?,
+            next_validator_root: Felt::from_memory(vm, (address + 12)?)?,
         })
     }
 
     fn n_fields() -> usize {
-        Felt::n_fields() * 5 + Uint256::n_fields() * 5
+        Felt::n_fields() * 7 + Uint256::n_fields() * 3
     }
 }
 
@@ -191,9 +191,11 @@ impl CairoType for ExecutionClientOutputCairo {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SyncCommitteeSignerInputCairo {
-    pub signature_point: G2PointCairo,
-    pub aggregate_pub: G1PointCairo,
-    pub non_signers: Vec<G1PointCairo>,
+    pub validator_root: Felt,
+    pub signers: Vec<G1PointCairo>,
+    pub indexes: Vec<Felt>,
+    pub proofs: Vec<Vec<Felt>>,
+    pub proofs_len: Felt,
 }
 
 impl CairoWritable for SyncCommitteeSignerInputCairo {
@@ -207,22 +209,51 @@ impl CairoWritable for SyncCommitteeSignerInputCairo {
     > {
         let mut current_ptr = address;
 
-        current_ptr = self.signature_point.to_memory(vm, current_ptr)?;
-        current_ptr = self.aggregate_pub.to_memory(vm, current_ptr)?;
+        current_ptr = self.validator_root.to_memory(vm, current_ptr)?;
 
-        // Create segment for non-signers and store its pointer
-        let non_signers_segment = vm.add_memory_segment();
-        vm.insert_value(current_ptr, non_signers_segment)?;
+        // Create segment for signers and store its pointer
+        let signers_segment = vm.add_memory_segment();
+        vm.insert_value(current_ptr, signers_segment)?;
         current_ptr = (current_ptr + 1)?;
 
-        // Write all non-signers to the segment
-        let mut segment_ptr = non_signers_segment;
-        for non_signer in &self.non_signers {
-            segment_ptr = non_signer.to_memory(vm, segment_ptr)?;
+        // Write all signers to the segment
+        let mut signers_ptr = signers_segment;
+        for signer in &self.signers {
+            signers_ptr = signer.to_memory(vm, signers_ptr)?;
         }
 
-        // Store the length of non-signers
-        vm.insert_value(current_ptr, Felt252::from(self.non_signers.len() as u64))?;
+        // Create segment for indexes and store its pointer
+        let indexes_segment = vm.add_memory_segment();
+        vm.insert_value(current_ptr, indexes_segment)?;
+        current_ptr = (current_ptr + 1)?;
+
+        // Write all indexes to the segment
+        let mut indexes_ptr = indexes_segment;
+        for index in &self.indexes {
+            indexes_ptr = index.to_memory(vm, indexes_ptr)?;
+        }
+
+        // Create segment for proofs (array of pointers) and store its pointer
+        let proofs_segment = vm.add_memory_segment();
+        vm.insert_value(current_ptr, proofs_segment)?;
+        current_ptr = (current_ptr + 1)?;
+
+        // Write each proof path to its own segment and store pointers
+        let mut proofs_ptr = proofs_segment;
+        for proof in &self.proofs {
+            let proof_segment = vm.add_memory_segment();
+            vm.insert_value(proofs_ptr, proof_segment)?;
+            proofs_ptr = (proofs_ptr + 1)?;
+
+            let mut proof_segment_ptr = proof_segment;
+            for node in proof {
+                proof_segment_ptr = node.to_memory(vm, proof_segment_ptr)?;
+            }
+        }
+
+        current_ptr = self.proofs_len.to_memory(vm, current_ptr)?;
+        let n_signers = Felt252::from(self.signers.len() as u64);
+        vm.insert_value(current_ptr, n_signers)?;
         current_ptr = (current_ptr + 1)?;
 
         // Check that the memory layout is correct
@@ -237,7 +268,7 @@ impl CairoWritable for SyncCommitteeSignerInputCairo {
     }
 
     fn n_fields() -> usize {
-        G1PointCairo::n_fields() + G2PointCairo::n_fields() + 2
+        Felt::n_fields() * 6
     }
 }
 
@@ -349,6 +380,7 @@ impl CairoWritable for BeaconHeaderCairo {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ConsensusInputsCairo {
     pub beacon_header: BeaconHeaderCairo,
+    pub signature_point: G2PointCairo,
     pub signature: SyncCommitteeSignerInputCairo,
     pub execution_header_proof: ExecutionHeaderProofCairo,
 }
@@ -365,6 +397,7 @@ impl CairoWritable for ConsensusInputsCairo {
         let mut current_ptr = address;
 
         current_ptr = self.beacon_header.to_memory(vm, current_ptr)?;
+        current_ptr = self.signature_point.to_memory(vm, current_ptr)?;
         current_ptr = self.signature.to_memory(vm, current_ptr)?;
         current_ptr = self.execution_header_proof.to_memory(vm, current_ptr)?;
 
@@ -373,6 +406,7 @@ impl CairoWritable for ConsensusInputsCairo {
 
     fn n_fields() -> usize {
         BeaconHeaderCairo::n_fields()
+            + G2PointCairo::n_fields()
             + SyncCommitteeSignerInputCairo::n_fields()
             + ExecutionHeaderProofCairo::n_fields()
     }
@@ -380,8 +414,10 @@ impl CairoWritable for ConsensusInputsCairo {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SyncCommitteeUpdateProofCairo {
+    pub slot: Felt,
     pub path: Vec<Uint256Bits32>,
-    pub next_committee_key: UInt384,
+    pub aggregate_committee_key: UInt384,
+    pub validator_pubs: Vec<UInt384>,
     pub committee_keys_root: Uint256Bits32,
 }
 
@@ -395,6 +431,8 @@ impl CairoWritable for SyncCommitteeUpdateProofCairo {
         cairo_vm_base::vm::cairo_vm::vm::errors::hint_errors::HintError,
     > {
         let mut current_ptr = address;
+
+        current_ptr = self.slot.to_memory(vm, current_ptr)?;
         // Create segment for next sync committee branch and store its pointer
         let path_segment = vm.add_memory_segment();
         vm.insert_value(current_ptr, path_segment)?;
@@ -409,8 +447,26 @@ impl CairoWritable for SyncCommitteeUpdateProofCairo {
         vm.insert_value(current_ptr, Felt252::from(self.path.len() as u64))?;
         current_ptr = (current_ptr + 1)?;
 
-        current_ptr = self.next_committee_key.to_memory(vm, current_ptr)?;
-        current_ptr = self.committee_keys_root.to_memory(vm, current_ptr)?;
+        current_ptr = self.aggregate_committee_key.to_memory(vm, current_ptr)?;
+
+        // Create segment for validator pubs and store its pointer
+        let validator_pubs_segment = vm.add_memory_segment();
+        vm.insert_value(current_ptr, validator_pubs_segment)?;
+        current_ptr = (current_ptr + 1)?;
+
+        let mut validator_pubs_ptr = validator_pubs_segment;
+        for pubkey in &self.validator_pubs {
+            validator_pubs_ptr = pubkey.to_memory(vm, validator_pubs_ptr)?;
+        }
+
+        // Create segment for committee keys root and store its pointer
+        let committee_keys_root_segment = vm.add_memory_segment();
+        vm.insert_value(current_ptr, committee_keys_root_segment)?;
+        current_ptr = (current_ptr + 1)?;
+
+        let _ = self
+            .committee_keys_root
+            .to_memory(vm, committee_keys_root_segment)?;
 
         // Check that the memory layout is correct
         let expected_ptr = (address + Self::n_fields())?;
@@ -424,6 +480,6 @@ impl CairoWritable for SyncCommitteeUpdateProofCairo {
     }
 
     fn n_fields() -> usize {
-        Felt::n_fields() + 1 + UInt384::n_fields() + Uint256Bits32::n_fields()
+        Felt::n_fields() * 5 + UInt384::n_fields()
     }
 }
