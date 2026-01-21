@@ -70,12 +70,12 @@ namespace Network {
         }
 
         if (fork == Network.ALTAIR) {
-            let (_, altair_activation_slot) = get_fork_data(network_id, Network.ALTAIR);
+            let (fork_id, altair_activation_slot) = get_fork_data(network_id, Network.ALTAIR);
             let (_, bellatrix_activation_slot) = get_fork_data(network_id, Network.BELLATRIX);
             assert [range_check_ptr] = bellatrix_activation_slot - slot;
             assert [range_check_ptr + 1] = slot - altair_activation_slot;
             tempvar range_check_ptr = range_check_ptr + 2;
-            return fork;
+            return fork_id;
         }
 
         if (fork == Network.BELLATRIX) {
@@ -107,14 +107,15 @@ namespace Network {
 
         if (fork == Network.ELECTRA) {
             let (fork_id, electra_activation_slot) = get_fork_data(network_id, Network.ELECTRA);
-            assert [range_check_ptr] = electra_activation_slot - slot;
-            tempvar range_check_ptr = range_check_ptr + 1;
+            assert [range_check_ptr] = fulu_activation_slot - slot;
+            assert [range_check_ptr + 1] = slot - electra_activation_slot;
+            tempvar range_check_ptr = range_check_ptr + 2;
             return fork_id;
         }
 
         if (fork == Network.FULU) {
             let (fork_id, fulu_activation_slot) = get_fork_data(network_id, Network.FULU);
-            assert [range_check_ptr] = fulu_activation_slot - slot;
+            assert [range_check_ptr] = slot - fulu_activation_slot;
             tempvar range_check_ptr = range_check_ptr + 1;
             return fork_id;
         }
