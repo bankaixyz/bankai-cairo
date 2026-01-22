@@ -5,6 +5,12 @@
       "program": "cairo/build/test_block_signer.json",
       "fixture": "cairo/tests/fixtures/block_signer.json",
       "kind": "block_signer"
+    },
+    {
+      "name": "committee_update",
+      "program": "cairo/build/test_committee_update.json",
+      "fixture": "cairo/tests/fixtures/committee_update.json",
+      "kind": "committee_update"
     }
   ]
 }

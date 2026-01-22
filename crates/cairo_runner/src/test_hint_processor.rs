@@ -17,9 +17,12 @@ use cairo_vm_base::{
 };
 
 use crate::test_hints::{
-    write_block_signer_fixture, write_block_signer_fixtures_len,
-    HINT_WRITE_BLOCK_SIGNER_FIXTURE, HINT_WRITE_BLOCK_SIGNER_FIXTURES_LEN,
+    write_block_signer_fixture, write_block_signer_fixtures_len, write_committee_update_fixture,
+    write_committee_update_fixtures_len, HINT_WRITE_BLOCK_SIGNER_FIXTURE,
+    HINT_WRITE_BLOCK_SIGNER_FIXTURES_LEN, HINT_WRITE_COMMITTEE_UPDATE_FIXTURE,
+    HINT_WRITE_COMMITTEE_UPDATE_FIXTURES_LEN,
 };
+use bankai_hints::hints::get_hints as get_bankai_hints;
 use garaga_zero::hints::get_hints as get_garaga_zero_hints;
 
 pub struct TestHintProcessor {
@@ -44,6 +47,7 @@ impl TestHintProcessor {
     fn hints() -> HashMap<String, HintImpl> {
         let mut hints = default_hint_mapping();
         hints.extend(get_garaga_zero_hints());
+        hints.extend(get_bankai_hints());
         hints.insert(
             HINT_WRITE_BLOCK_SIGNER_FIXTURES_LEN.into(),
             write_block_signer_fixtures_len,
@@ -51,6 +55,14 @@ impl TestHintProcessor {
         hints.insert(
             HINT_WRITE_BLOCK_SIGNER_FIXTURE.into(),
             write_block_signer_fixture,
+        );
+        hints.insert(
+            HINT_WRITE_COMMITTEE_UPDATE_FIXTURES_LEN.into(),
+            write_committee_update_fixtures_len,
+        );
+        hints.insert(
+            HINT_WRITE_COMMITTEE_UPDATE_FIXTURE.into(),
+            write_committee_update_fixture,
         );
         hints
     }

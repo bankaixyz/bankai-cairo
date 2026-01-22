@@ -459,14 +459,7 @@ impl CairoWritable for SyncCommitteeUpdateProofCairo {
             validator_pubs_ptr = pubkey.to_memory(vm, validator_pubs_ptr)?;
         }
 
-        // Create segment for committee keys root and store its pointer
-        let committee_keys_root_segment = vm.add_memory_segment();
-        vm.insert_value(current_ptr, committee_keys_root_segment)?;
-        current_ptr = (current_ptr + 1)?;
-
-        let _ = self
-            .committee_keys_root
-            .to_memory(vm, committee_keys_root_segment)?;
+        current_ptr = self.committee_keys_root.to_memory(vm, current_ptr)?;
 
         // Check that the memory layout is correct
         let expected_ptr = (address + Self::n_fields())?;

@@ -85,7 +85,7 @@ func run_committee_update{
     state_root: Uint256, validator_root: felt
 ) {
     alloc_locals;
-    info_string('committee update');
+    debug_string('committee update');
 
     let fork = Network.get_fork_version(Network.SEPOLIA, committee_input.slot);
     local next_committee_index: felt;
@@ -109,7 +109,7 @@ func run_committee_update{
         index=next_committee_index,
     );
     let validator_root = build_validator_tree(committee_input.validator_pubs);
-    info_string('committee update ok');
+    debug_string('committee update ok');
 
     return (state_root, validator_root);
 }
