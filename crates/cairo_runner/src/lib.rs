@@ -1,6 +1,8 @@
 #![allow(clippy::result_large_err)]
 pub mod error;
 pub mod hint_processor;
+pub mod test_hint_processor;
+pub mod test_hints;
 
 use crate::{error::Error, hint_processor::CustomHintProcessor};
 use bankai_hints::types::CircuitRunDataCairo;

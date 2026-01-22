@@ -1,0 +1,10 @@
+{
+  "tests": [
+    {
+      "name": "block_signer",
+      "program": "cairo/build/test_block_signer.json",
+      "fixture": "cairo/tests/fixtures/block_signer.json",
+      "kind": "block_signer"
+    }
+  ]
+}

@@ -15,3 +15,9 @@ get-program-hash:
 	# @make build
 	@echo "BankaiStoneProgramHash:"
 	@cairo-hash-program --program cairo/build/bankai_stone.json
+
+test-block-signer:
+	bash ./scripts/test_block_signer.sh
+
+test-fixtures:
+	bash ./scripts/run_fixture_tests.sh

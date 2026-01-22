@@ -255,8 +255,8 @@ func handle_genesis_case{
 }(consensus_inputs: ConsensusInputs) -> (circuit_output: CircuitOutput2) {
     alloc_locals;
 
-    // For the genesis case, hardcode the previous proof values.
-    tempvar expected_genesis_validator_root = 0x02d9146e7362978e985649a4104e76396d77e1fd69335b6713dc531285ac0976;
+    // For the genesis case, hardcode the previous proof values. Sepolia epoch 293888
+    tempvar expected_genesis_validator_root = 0x02e93bd4b4aff8bfc81c9f5f468e74c6c86a8dc4d368bcfe9874bc8742e06880;
 
     let genesis_output = CircuitOutput2(
         block_number=0,

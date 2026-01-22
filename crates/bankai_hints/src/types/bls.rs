@@ -17,6 +17,12 @@ pub struct G2PointCairo {
     y1: UInt384,
 }
 
+impl G1PointCairo {
+    pub fn new(x: UInt384, y: UInt384) -> Self {
+        Self { x, y }
+    }
+}
+
 impl CairoWritable for G1PointCairo {
     fn to_memory(
         &self,
