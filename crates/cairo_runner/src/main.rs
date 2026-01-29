@@ -2,7 +2,10 @@
 use bankai_hints::types::CircuitRunDataCairo;
 use cairo_runner::{run, run_stwo};
 use clap::Parser;
+use serde_json::json;
 use std::{path::Path, path::PathBuf};
+use std::{fs::OpenOptions, io::Write};
+use std::time::{SystemTime, UNIX_EPOCH};
 use tracing::Level;
 use tracing_subscriber::fmt::format::FmtSpan;
 use tracing_subscriber::FmtSubscriber;
@@ -51,8 +54,8 @@ fn main() {
             output_dir,
             args.prove,
             args.pie,
-        )
-        .unwrap();
+        );
+        let result = result.unwrap();
         if let Some(pie) = result {
             pie.write_zip_file(&Path::new(output_dir).join("pie.zip"), true)
                 .unwrap();
@@ -60,7 +63,8 @@ fn main() {
         }
     } else {
         let program_path = "cairo/build/bankai_stone.json";
-        let pie = run(program_path, input, log_level).unwrap();
+        let result = run(program_path, input, log_level);
+        let pie = result.unwrap();
         pie.write_zip_file(&Path::new(output_dir).join("pie.zip"), true)
             .unwrap();
         println!("Pie generated successfully");

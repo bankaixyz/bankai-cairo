@@ -28,18 +28,4 @@ fi
 VENV_SITE_PACKAGES="$PROJECT_ROOT/venv/lib/python3.10/site-packages"
 export PYTHONPATH="$PYTHONPATH:$VENV_SITE_PACKAGES"
 
-# Ensure embedded Python can locate the stdlib when PyO3 initializes.
-if [ -z "${PYTHONHOME:-}" ]; then
-    if [ -x "$PROJECT_ROOT/venv/bin/python3.10" ]; then
-        PYTHONHOME="$("$PROJECT_ROOT/venv/bin/python3.10" -c 'import sys; print(sys.base_prefix)')"
-    elif [ -x "$PROJECT_ROOT/venv/bin/python3" ]; then
-        PYTHONHOME="$("$PROJECT_ROOT/venv/bin/python3" -c 'import sys; print(sys.base_prefix)')"
-    elif [ -x "$PROJECT_ROOT/venv/bin/python" ]; then
-        PYTHONHOME="$("$PROJECT_ROOT/venv/bin/python" -c 'import sys; print(sys.base_prefix)')"
-    fi
-    if [ -n "${PYTHONHOME:-}" ]; then
-        export PYTHONHOME
-    fi
-fi
-
 echo "Virtual environment activated and PYTHONPATH updated."
