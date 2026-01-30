@@ -52,9 +52,9 @@ impl CairoType for BankaiBlockCairo {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct BankaiBlockInputsCairo {
-    pub proof_data: MockRecursionCairo,
+    pub recursion: MockRecursionCairo,
     pub prev: BankaiBlockCairo,
     pub ethereum: EthereumInputsCairo,
 }

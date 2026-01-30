@@ -30,6 +30,7 @@ namespace Fork {
         // We can then use the loaded data within the hint to derive the correct fork id
         // The enables us to reuse the same schedule between rust and cairo
         let (fork_schedule) = get_fork_schedule(network_id);
+        let n_hardforks = Hardforks.N;
         %{ check_fork_version() %}
 
         // We now validate the hint using range checks

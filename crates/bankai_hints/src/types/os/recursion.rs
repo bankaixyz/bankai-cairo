@@ -1,8 +1,6 @@
 
 // use cairo_vm_base::cairo_type::{CairoType, CairoWritable};
-use cairo_vm_base::types::{
-    felt::Felt
-};
+use cairo_vm_base::{cairo_type::CairoType, types::felt::Felt};
 use serde::{Deserialize, Serialize};
 
 
@@ -10,6 +8,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub struct MockRecursionCairo {
     pub program_hash: Felt,
+    pub proof_data: Option<serde_json::Value>,
 }
 
 impl CairoType for MockRecursionCairo {
@@ -32,6 +31,7 @@ impl CairoType for MockRecursionCairo {
     ) -> Result<Self, cairo_vm_base::vm::cairo_vm::vm::errors::hint_errors::HintError> {
         Ok(Self {
             program_hash: Felt::from_memory(vm, address)?,
+            proof_data: None,
         })
     }
 

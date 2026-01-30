@@ -2,24 +2,38 @@ use std::collections::HashMap;
 
 use cairo_vm_base::default_hints::HintImpl;
 
-pub mod input;
-pub mod output;
-pub mod utils;
+pub mod os;
+pub mod ethereum;
 
 pub fn get_hints() -> HashMap<String, HintImpl> {
     let mut hints = HashMap::<String, HintImpl>::new();
     hints.insert(
-        utils::HINT_CHECK_FORK_VERSION.into(),
-        utils::hint_check_fork_version,
+        ethereum::HINT_CHECK_FORK_VERSION.into(),
+        ethereum::hint_check_fork_version,
     );
     hints.insert(
-        utils::HINT_SET_NEXT_POWER_OF_2.into(),
-        utils::set_next_power_of_2,
+        ethereum::HINT_WRITE_CONSENSUS_INPUTS.into(),
+        ethereum::write_consensus_inputs,
     );
     hints.insert(
-        utils::HINT_COMPUTE_EPOCH_FROM_SLOT.into(),
-        utils::compute_epoch_from_slot,
+        ethereum::HINT_WRITE_COMMITTEE_UPDATE_INPUTS.into(),
+        ethereum::write_committee_update_inputs,
     );
-
+    hints.insert(
+        os::HINT_WRITE_INIT_DATA.into(),
+        os::write_init_data,
+    );
+    hints.insert(
+        os::HINT_PREVIOUS_BLOCK.into(),
+        os::write_previous_block,
+    );
+    hints.insert(
+        os::HINT_WRITE_MOCK_RECURSION_INPUTS.into(),
+        os::write_mock_recursion_inputs,
+    );
+    hints.insert(
+        os::HINT_VERIFY_BLOCK_RESULT.into(),
+        os::verify_block_result,
+    );
     hints
 }

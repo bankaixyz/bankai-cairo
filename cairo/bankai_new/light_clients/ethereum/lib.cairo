@@ -29,18 +29,15 @@ func run{
     mul_mod_ptr: ModBuiltin*,
     sha256_ptr: felt*,
     pow2_array: felt*,
-}(prev: EthereumClientOutput, network_id: felt) -> (output: EthereumClientOutput) {
+}(prev: EthereumClientOutput, network_id: felt, is_genesis: felt) -> (output: EthereumClientOutput) {
     alloc_locals;
 
     let config = get_config(network_id);
 
     local consensus_inputs: ConsensusInputs;
-    local is_genesis: felt;
     local is_committee_update: felt;
     %{ write_consensus_inputs() %}
 
-    debug_string('is_genesis');
-    debug_felt_hex(is_genesis);
     debug_string('is_committee_update');
     debug_felt_hex(is_committee_update);
 

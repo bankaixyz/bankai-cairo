@@ -67,7 +67,7 @@ func handle_genesis_case{
     let (prev) = get_genesis_block(config, program_hash);
 
     // Run Ethereum Light Client
-    let (eth_output) = run_ethereum(prev.ethereum, config.network_id);
+    let (eth_output) = run_ethereum(prev.ethereum, config.network_id, 1);
 
     let block = BankaiBlock(
         version=config.version,
@@ -95,7 +95,7 @@ func handle_recursive_case{
     alloc_locals;
 
     local prev: BankaiBlock;
-    %{ load_previous_block() %}
+    %{ write_previous_block() %}
 
     // Mock Verify Proof
     let (derived_program_hash) = mock_verify_proof(block=prev);
@@ -103,7 +103,7 @@ func handle_recursive_case{
     assert derived_program_hash = prev.program_hash;
 
     // Run Ethereum Light Client
-    let (eth_output) = run_ethereum(prev.ethereum, config.network_id);
+    let (eth_output) = run_ethereum(prev.ethereum, config.network_id, 0);
 
     let block = BankaiBlock(
         version=config.version,

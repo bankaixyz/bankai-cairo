@@ -16,6 +16,8 @@ func read_block(block_felts: felt*) -> (parsed: BankaiBlock) {
 }
 
 func write_block{output_ptr: felt*}(block: BankaiBlock) {
+    // ensure we computed the expected block correctly
+    %{ verify_block_result() %}
     // Cast the output buffer to a BankaiBlock pointer
     let block_ptr = cast(output_ptr, BankaiBlock*);
     // Write the block struct into the output buffer
