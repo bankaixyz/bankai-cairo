@@ -1,13 +1,18 @@
-use std::collections::HashMap;
-use cairo_vm_base::{cairo_type::CairoWritable, vm::cairo_vm::{
-    Felt252, hint_processor::builtin_hint_processor::{
-        builtin_hint_processor_definition::HintProcessorData,
-        hint_utils::{
-            get_integer_from_var_name, get_ptr_from_var_name, get_relocatable_from_var_name,
+use cairo_vm_base::{
+    cairo_type::CairoWritable,
+    vm::cairo_vm::{
+        hint_processor::builtin_hint_processor::{
+            builtin_hint_processor_definition::HintProcessorData,
+            hint_utils::{
+                get_integer_from_var_name, get_ptr_from_var_name, get_relocatable_from_var_name,
+            },
         },
-    }, types::exec_scope::ExecutionScopes, vm::{errors::hint_errors::HintError, vm_core::VirtualMachine}
-}};
-
+        types::exec_scope::ExecutionScopes,
+        vm::{errors::hint_errors::HintError, vm_core::VirtualMachine},
+        Felt252,
+    },
+};
+use std::collections::HashMap;
 
 use crate::types::os::BankaiBlockInputsCairo;
 
@@ -31,7 +36,9 @@ pub fn write_consensus_inputs(
         &hint_data.ap_tracking,
     )?;
 
-    ethereum_inputs.consensus_data.to_memory(vm, consensus_data_ptr)?;
+    ethereum_inputs
+        .consensus_data
+        .to_memory(vm, consensus_data_ptr)?;
 
     let is_committee_update_ptr = get_relocatable_from_var_name(
         "is_committee_update",
@@ -44,7 +51,6 @@ pub fn write_consensus_inputs(
         None => 0,
     };
     vm.insert_value(is_committee_update_ptr, Felt252::from(is_committee_update))?;
-
 
     Ok(())
 }
@@ -79,14 +85,6 @@ pub fn hint_check_fork_version(
     _constants: &HashMap<String, Felt252>,
 ) -> Result<(), HintError> {
     let slot = get_integer_from_var_name("slot", vm, &hint_data.ids_data, &hint_data.ap_tracking)?;
-    let network_id: usize = get_integer_from_var_name(
-        "network_id",
-        vm,
-        &hint_data.ids_data,
-        &hint_data.ap_tracking,
-    )?
-    .try_into()
-    .unwrap();
 
     // Get the fork_data label address from Cairo memory
     let fork_schedule_ptr = get_ptr_from_var_name(
@@ -127,4 +125,3 @@ pub fn hint_check_fork_version(
 
     Ok(())
 }
-

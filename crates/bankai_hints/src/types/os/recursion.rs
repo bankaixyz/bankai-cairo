@@ -1,8 +1,6 @@
-
 // use cairo_vm_base::cairo_type::{CairoType, CairoWritable};
 use cairo_vm_base::{cairo_type::CairoType, types::felt::Felt};
 use serde::{Deserialize, Serialize};
-
 
 // This is a fully mocked type, so we dont pass any proof data
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
@@ -37,5 +35,5 @@ impl CairoType for MockRecursionCairo {
 
     fn n_fields() -> usize {
         Felt::n_fields()
-    }   
+    }
 }

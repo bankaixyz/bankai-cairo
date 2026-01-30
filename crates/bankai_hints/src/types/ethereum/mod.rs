@@ -14,7 +14,6 @@ pub use mmr_header_accumulator_hints::types::{
     ExecutionMmrUpdateCairo, LastLeafProofCairo, MmrSnapshotCairo,
 };
 
-
 #[derive(Debug, Serialize, Deserialize)]
 pub struct EthereumInputsCairo {
     pub consensus_data: ConsensusInputsCairo,

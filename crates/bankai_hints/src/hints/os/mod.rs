@@ -8,7 +8,6 @@ use cairo_vm_base::vm::cairo_vm::vm::errors::hint_errors::HintError;
 use cairo_vm_base::vm::cairo_vm::types::exec_scope::ExecutionScopes;
 use cairo_vm_base::vm::cairo_vm::Felt252;
 
-
 use crate::types::os::{BankaiBlockCairo, BankaiBlockInputsCairo};
 
 pub const HINT_WRITE_INIT_DATA: &str = r#"write_init_data()"#;
@@ -22,7 +21,6 @@ pub fn write_init_data(
     hint_data: &HintProcessorData,
     _constants: &HashMap<String, Felt252>,
 ) -> Result<(), HintError> {
-
     let inputs = exec_scopes.get_ref::<BankaiBlockInputsCairo>("input")?;
 
     let is_genesis_ptr = get_relocatable_from_var_name(
@@ -61,12 +59,8 @@ pub fn write_previous_block(
 ) -> Result<(), HintError> {
     let inputs = exec_scopes.get_ref::<BankaiBlockInputsCairo>("input")?;
     let prev = &inputs.prev;
-    let prev_ptr = get_relocatable_from_var_name(
-        "prev",
-        vm,
-        &hint_data.ids_data,
-        &hint_data.ap_tracking,
-    )?;
+    let prev_ptr =
+        get_relocatable_from_var_name("prev", vm, &hint_data.ids_data, &hint_data.ap_tracking)?;
 
     prev.to_memory(vm, prev_ptr)?;
     Ok(())
@@ -98,19 +92,17 @@ pub fn verify_block_result(
     _constants: &HashMap<String, Felt252>,
 ) -> Result<(), HintError> {
     let exp_block = exec_scopes.get_ref::<BankaiBlockCairo>("output")?;
-    let block_ptr = get_relocatable_from_var_name(
-        "block",
-        vm,
-        &hint_data.ids_data,
-        &hint_data.ap_tracking,
-    )?;
+    let block_ptr =
+        get_relocatable_from_var_name("block", vm, &hint_data.ids_data, &hint_data.ap_tracking)?;
     let block = BankaiBlockCairo::from_memory(vm, block_ptr)?;
 
     if block != *exp_block {
         println!("Output mismatch:");
         println!("Block output: {block:#?}");
         println!("Expected block: {exp_block:#?}");
-        return Err(HintError::CustomHint(format!("Block mismatch: {block:#?} != {exp_block:#?}").into()));
+        return Err(HintError::CustomHint(
+            format!("Block mismatch: {block:#?} != {exp_block:#?}").into(),
+        ));
     }
 
     Ok(())

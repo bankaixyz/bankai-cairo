@@ -1,14 +1,11 @@
 pub mod recursion;
 
 use cairo_vm_base::cairo_type::CairoType;
-use cairo_vm_base::types::{
-    felt::Felt
-};
+use cairo_vm_base::types::felt::Felt;
 use serde::{Deserialize, Serialize};
 
 use crate::types::ethereum::{EthereumClientOutputCairo, EthereumInputsCairo};
 use crate::types::os::recursion::MockRecursionCairo;
-
 
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub struct BankaiBlockCairo {
@@ -66,4 +63,3 @@ pub struct BankaiBlockBundleCairo {
     // the expected output of the next block
     pub output: BankaiBlockCairo,
 }
-
