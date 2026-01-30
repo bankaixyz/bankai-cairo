@@ -8,6 +8,9 @@ activate:
 build-stwo:
 	./scripts/cairo_compile.sh cairo/src/bankai_stwo.cairo
 
+build-ethereum:
+	./scripts/cairo_compile.sh cairo/bankai_new/light_clients/ethereum/main.cairo
+
 build-stone:
 	./scripts/cairo_compile.sh cairo/src/bankai_stone.cairo
 

@@ -107,6 +107,7 @@ namespace Network {
 
         if (fork == Network.ELECTRA) {
             let (fork_id, electra_activation_slot) = get_fork_data(network_id, Network.ELECTRA);
+            let (_, fulu_activation_slot) = get_fork_data(network_id, Network.FULU);
             assert [range_check_ptr] = fulu_activation_slot - slot;
             assert [range_check_ptr + 1] = slot - electra_activation_slot;
             tempvar range_check_ptr = range_check_ptr + 2;
