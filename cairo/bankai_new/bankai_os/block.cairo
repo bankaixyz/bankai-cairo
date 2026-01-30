@@ -1,7 +1,10 @@
-from bankai_new.light_clients.ethereum.types import EthereumClientOutput, empty_ethereum_output
+from cairo.bankai_new.light_clients.ethereum.types import EthereumClientOutput, get_ethereum_genesis
+from cairo.bankai_new.bankai_os.config.types import BankaiOSConfig
+from cairo.bankai_new.light_clients.ethereum.config.config import get_config
 
 struct BankaiBlock {
     version: felt,
+    program_hash: felt,
     block_number: felt,
     ethereum: EthereumClientOutput,
 }
@@ -23,12 +26,15 @@ func write_block{output_ptr: felt*}(block: BankaiBlock) {
 }
 
 
-func get_genesis_block(config: BankaiOSConfig) -> (block: BankaiBlock) {
-    let (ethereum_genesis) = get_ethereum_genesis(config);
+func get_genesis_block(config: BankaiOSConfig, program_hash: felt) -> (block: BankaiBlock) {
+
+    let eth_config = get_config(config.network_id);
+    let (ethereum_genesis) = get_ethereum_genesis(eth_config.genesis_validator_root);
     let block = BankaiBlock(
-        version=BANKAI_VERSION,
+        version=config.version,
+        program_hash=program_hash,
         block_number=0,
-        ethereum=ethereum,
+        ethereum=ethereum_genesis,
     );
     return (block=block);
 }

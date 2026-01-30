@@ -1,18 +1,15 @@
-from cairo.bankai_new.bankai_os.config.sepolia import get_sepolia_config
-from cairo.bankai_new.bankai_os.config.types import BankaiOSConfig
+from cairo.bankai_new.bankai_os.config.testnet import get_testnet_config
+from cairo.bankai_new.bankai_os.config.types import BankaiOSConfig, Networks
 
-namespace Networks {
-    const MAINNET = 0;
-    const TESTNET = 1;
-}
-
-func get_config{network_id: felt}() -> (config: BankaiOSConfig) {
-    if (network_id == EthereumNetwork.MAINNET) {
+func get_config(network_id: felt) -> (config: BankaiOSConfig) {
+    if (network_id == Networks.MAINNET) {
         // ToDo: Add mainnet config
         assert 1 = 0;
 
-        return (config=get_sepolia_config());
+        let (config) = get_testnet_config();
+        return (config=config);
     } else {
-        return (config=get_sepolia_config());
+        let (config) = get_testnet_config();
+        return (config=config);
     }
 }
