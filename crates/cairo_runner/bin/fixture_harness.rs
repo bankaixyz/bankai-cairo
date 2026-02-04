@@ -1,8 +1,8 @@
 use std::{fs, path::PathBuf};
 
+use bankai_hints::types::SyncCommitteeUpdateProofCairo;
 use cairo_runner::test_hint_processor::TestHintProcessor;
 use cairo_runner::test_hints::BlockSignerFixture;
-use bankai_hints::types::SyncCommitteeUpdateProofCairo;
 use cairo_vm_base::vm::cairo_vm::{
     cairo_run::{self, cairo_run_program_with_initial_scope},
     types::{exec_scope::ExecutionScopes, layout_name::LayoutName, program::Program},
@@ -153,4 +153,3 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("\nAll fixture tests passed.");
     Ok(())
 }
-

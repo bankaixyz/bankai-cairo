@@ -1,4 +1,4 @@
-use bankai_hints::types::CircuitRunDataCairo;
+use bankai_hints::types::os::BankaiBlockBundleCairo;
 use cairo_runner::{run, run_stwo};
 use clap::Parser;
 use rayon::ThreadPoolBuilder;
@@ -91,7 +91,7 @@ async fn main() {
 }
 
 async fn handle_generate_pie(
-    input: CircuitRunDataCairo,
+    input: BankaiBlockBundleCairo,
     is_docker: Arc<bool>,
 ) -> Result<Box<dyn Reply>, Rejection> {
     // Set a 5-minute timeout for the operation
@@ -142,7 +142,7 @@ async fn handle_generate_pie(
 }
 
 async fn generate_pie_internal(
-    input: CircuitRunDataCairo,
+    input: BankaiBlockBundleCairo,
     is_docker: bool,
 ) -> Result<Vec<u8>, Box<dyn std::error::Error + Send + Sync>> {
     let (program_path, output_dir, log_level) = if is_docker {
@@ -175,7 +175,7 @@ async fn generate_pie_internal(
 }
 
 async fn handle_generate_proof(
-    input: CircuitRunDataCairo,
+    input: BankaiBlockBundleCairo,
     is_docker: Arc<bool>,
 ) -> Result<Box<dyn Reply>, Rejection> {
     info!("Generating STWO trace and proof...");
@@ -250,13 +250,13 @@ async fn handle_generate_proof(
 }
 
 async fn generate_proof_internal(
-    input: CircuitRunDataCairo,
+    input: BankaiBlockBundleCairo,
     is_docker: bool,
 ) -> Result<Vec<u8>, Box<dyn std::error::Error + Send + Sync>> {
     let (program_path, base_output_dir, log_level) = if is_docker {
-        ("/app/cairo/build/bankai_stwo.json", "/app/output/", "info")
+        ("/app/cairo/build/main.json", "/app/output/", "info")
     } else {
-        ("cairo/build/bankai_stwo.json", "output/", "debug")
+        ("cairo/build/main.json", "output/", "debug")
     };
 
     // Unique per-request directory to avoid collisions, and allow cleanup
@@ -269,6 +269,11 @@ async fn generate_proof_internal(
         .to_str()
         .ok_or("Invalid output directory path")?
         .to_string();
+
+    // Persist the block bundle for debugging/repro.
+    let input_path = output_dir_path.join("block_bundle.json");
+    let input_json = serde_json::to_string_pretty(&input)?;
+    std::fs::write(&input_path, input_json)?;
 
     // Run the STWO flow in a blocking task
     tokio::task::spawn_blocking(move || {

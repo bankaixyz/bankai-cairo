@@ -20,7 +20,7 @@ build-stone:
 get-program-hash:
 	# @make build
 	@echo "BankaiStoneProgramHash:"
-	@cairo-hash-program --program cairo/build/bankai_stone.json
+	@cairo-hash-program --program cairo/build/main.json
 
 test-block-signer:
 	bash ./scripts/test_block_signer.sh

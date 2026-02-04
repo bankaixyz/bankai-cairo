@@ -84,7 +84,10 @@ impl CairoType for EthereumClientOutputCairo {
     ) -> Result<Self, cairo_vm_base::vm::cairo_vm::vm::errors::hint_errors::HintError> {
         Ok(Self {
             beacon: BeaconClientOutputCairo::from_memory(vm, address)?,
-            execution: ExecutionClientOutputCairo::from_memory(vm, (address + 1)?)?,
+            execution: ExecutionClientOutputCairo::from_memory(
+                vm,
+                (address + BeaconClientOutputCairo::n_fields())?,
+            )?,
         })
     }
 

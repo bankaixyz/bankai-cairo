@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use cairo_vm_base::cairo_type::CairoType;
+use cairo_vm_base::{cairo_type::CairoType, types::felt::Felt};
 use cairo_vm_base::vm::cairo_vm::hint_processor::builtin_hint_processor::builtin_hint_processor_definition::HintProcessorData;
 use cairo_vm_base::vm::cairo_vm::hint_processor::builtin_hint_processor::hint_utils::get_relocatable_from_var_name;
 use cairo_vm_base::vm::cairo_vm::vm::vm_core::VirtualMachine;
@@ -30,10 +30,8 @@ pub fn write_init_data(
         &hint_data.ap_tracking,
     )?;
 
-    let is_genesis = match &inputs.recursion.proof_data {
-        Some(_) => 0,
-        None => 1,
-    };
+    let is_genesis = if inputs.prev.block_number == Felt(Felt252::from(0)) { 1 } else { 0 };
+    
     vm.insert_value(is_genesis_ptr, Felt252::from(is_genesis))?;
 
     let program_hash_ptr = get_relocatable_from_var_name(
@@ -42,11 +40,8 @@ pub fn write_init_data(
         &hint_data.ids_data,
         &hint_data.ap_tracking,
     )?;
-    let program_hash = Felt252::from_hex_unchecked(
-        "0x13b99c4febbce601fadb03261d9cea3a81c6e3aecd61002986a9476667870dd",
-    );
 
-    vm.insert_value(program_hash_ptr, program_hash)?;
+    inputs.recursion.program_hash.to_memory(vm, program_hash_ptr)?;
 
     Ok(())
 }
