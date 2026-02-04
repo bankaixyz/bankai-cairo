@@ -1,18 +1,22 @@
 # Bankai
 
-This repository contains the Cairo implementation of Bankai, a recursive light client for Ethereum. Bankai uses STARKs to provide trustless access to Ethereum's state through a Rust-based runtime with integrated STWO prover support.
+This repository contains the Cairo implementation of Bankai OS, a recursive light-client OS that orchestrates modular light clients (currently Ethereum). Bankai OS composes light-client outputs into a Bankai block, verifies recursion (mock verifier for now), and is designed to compress long blockchain histories into compact STARK proofs.
 
 ## Current Features
 
 This Cairo implementation currently supports:
 
-- **Beacon chain sync committee verification logic** - Validates BLS signatures from the sync committee for each consensus epoch
-- **Decommit execution chain headers** - Processes and validates execution chain header data
-- **Build MMR tree for beacon headers** - Constructs Merkle Mountain Range trees for beacon chain data
-- **Build MMR tree for execution headers** - Constructs Merkle Mountain Range trees for execution chain data
-- **Output generation** - All verification results and commitments are written to the output
+- **Bankai OS block execution** - Runs light clients and outputs a new Bankai block each step
+- **Ethereum light client** - Sync committee BLS verification, beacon/execution header validation
+- **MMR tree construction** - Builds Merkle Mountain Range trees for beacon and execution headers
+- **Standalone light client entrypoint** - Ethereum client can run independently of Bankai OS
 
-The core logic validates the progression of the Ethereum blockchain by verifying BLS signatures from the sync committee for each consensus epoch. The program then grows the MMR (Merkle Mountain Range) tree and writes the commitments to the output. This process will eventually allow the validity of a large portion of Ethereum's history to be compressed into a single, compact STARK proof.
+## Architecture (brief)
+
+- **Bankai OS core** lives in `cairo/src/bankai_os/` and defines the block format, configuration, and recursion hook
+- **Light clients** live in `cairo/src/light_clients/` and each expose a `run(prev, network_id, is_genesis)` entrypoint with their own state
+- **Ethereum configs** live in `cairo/src/light_clients/ethereum/config/` and select per-network fork schedule and domains
+- **MMR utilities** live in `cairo/packages/mmr_header_accumulator`
 
 ## Components
 
@@ -20,11 +24,11 @@ The repository is structured into several key components:
 
 ### Cairo Code
 
-The Cairo source files, located in `cairo/`, implement the core logic of the light client. Key functionalities include:
--   **BLS Signature Verification**: Logic for verifying BLS signatures from the sync committee can be found in `cairo/src/bls/`.
--   **Recursive Proof Verification**: The recursion logic, which combines multiple epoch proofs, is located in `cairo/src/recursion/`. This is currently only working with the Stone prover.
--   **MMR Tree Construction**: The MMR tree construction logic is located in `cairo/packages/mmr_header_accumulator`.
--   **Main Programs**: The main entry points are `cairo/src/bankai_stone.cairo` for Stone prover and `cairo/src/bankai_stwo.cairo` for STWO prover.
+The Cairo source files, located in `cairo/`, implement the core logic of Bankai OS and its light clients:
+-   **Bankai OS core**: `cairo/src/bankai_os/` (main program, block format, config, recursion hook)
+-   **Light clients**: `cairo/src/light_clients/` (Ethereum client and its state/types)
+-   **MMR Tree Construction**: `cairo/packages/mmr_header_accumulator`
+-   **Main Programs**: `cairo/src/bankai_os/main.cairo` (Bankai OS) and `cairo/src/light_clients/ethereum/main.cairo` (standalone Ethereum client)
 
 ### Rust Crates
 
@@ -39,7 +43,7 @@ The `cairo_runner` crate also includes a web server that exposes an API for gene
 
 #### Bankai Hints
 
-The `crates/bankai_hints/` crate provides the custom hints required by the Cairo programs to be executed by the Rust Cairo VM. These hints are used to inject inputs and handle complex computations that are not efficiently expressed in Cairo. The crate also contains Rust type definitions that mirror the Cairo structs, facilitating seamless interaction between the two languages.
+The `crates/bankai_hints/` crate provides the custom hints required by the Cairo programs to be executed by the Rust Cairo VM. It includes Bankai OS and light-client hints for loading inputs and mirrors Cairo structs in Rust types.
 
 #### Stone Verifier Hints
 
@@ -55,9 +59,9 @@ This crate, located at `crates/stone_verifier_hints/`, provides the necessary hi
    source scripts/activate.sh
    ```
 
-2. **Build STWO components:**
+2. **Build Bankai components:**
    ```sh
-   make build-stwo
+   make build-bankai
    ```
 
 ### Running with STWO Prover
@@ -67,18 +71,23 @@ STWO is now working and fully integrated. To run the Cairo programs locally:
 1. **Prepare your input file:**
    - Create or use an existing `input.json` file with the required input data
    - Place it in the project root directory
+   - Compile the desired entrypoint (Bankai OS or standalone light client) before running
 
 2. **Run with local proving:**
    ```sh
-   cargo run -r --bin cairo-runner -- --input-path input.json --stwo --prove
+   cargo run -r --bin cairo-runner -- --input-path input.json --prove
    ```
 
 3. **Run without local proving (generate trace only):**
    ```sh
-   cargo run -r --bin cairo-runner -- --input-path input.json --stwo
+   cargo run -r --bin cairo-runner -- --input-path input.json
    ```
 
 The `--prove` flag enables local proving with the integrated STWO prover. Without this flag, the runner will only generate a PIE (Proof-Integrated Execution) file that can be sent to an external prover.
+
+Entry points:
+- Bankai OS: `cairo/src/bankai_os/main.cairo`
+- Standalone Ethereum light client: `cairo/src/light_clients/ethereum/main.cairo`
 
 ### API Server
 
