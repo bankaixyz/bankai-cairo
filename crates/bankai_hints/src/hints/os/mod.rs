@@ -30,8 +30,12 @@ pub fn write_init_data(
         &hint_data.ap_tracking,
     )?;
 
-    let is_genesis = if inputs.prev.block_number == Felt(Felt252::from(0)) { 1 } else { 0 };
-    
+    let is_genesis = if inputs.prev.block_number == Felt(Felt252::from(0)) {
+        1
+    } else {
+        0
+    };
+
     vm.insert_value(is_genesis_ptr, Felt252::from(is_genesis))?;
 
     let program_hash_ptr = get_relocatable_from_var_name(
@@ -41,7 +45,10 @@ pub fn write_init_data(
         &hint_data.ap_tracking,
     )?;
 
-    inputs.recursion.program_hash.to_memory(vm, program_hash_ptr)?;
+    inputs
+        .recursion
+        .program_hash
+        .to_memory(vm, program_hash_ptr)?;
 
     Ok(())
 }
