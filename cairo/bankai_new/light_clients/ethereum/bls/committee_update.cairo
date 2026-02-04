@@ -88,7 +88,7 @@ func run_committee_update{
     alloc_locals;
     debug_string('committee update');
 
-    let fork = Fork.get_id(Networks.SEPOLIA, committee_input.slot);
+    let (_, fork) = Fork.get_id(Networks.SEPOLIA, committee_input.slot);
     local next_committee_index: felt;
     let old_index = is_le(fork, Hardforks.DENEB);
     if (old_index == 1) {

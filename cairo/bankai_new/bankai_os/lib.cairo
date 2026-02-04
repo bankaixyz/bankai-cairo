@@ -13,7 +13,6 @@ from cairo.bankai_new.bankai_os.config.types import BankaiOSConfig
 from cairo.bankai_new.light_clients.ethereum.bls.verify_epoch import run_beacon_update, run_execution_update
 from cairo.bankai_new.light_clients.ethereum.types import EthereumClientOutput
 
-
 func run_bankai_os{
     output_ptr: felt*,
     pedersen_ptr: HashBuiltin*,

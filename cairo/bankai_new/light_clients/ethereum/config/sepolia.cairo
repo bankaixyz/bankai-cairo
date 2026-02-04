@@ -2,11 +2,13 @@ from starkware.cairo.common.registers import get_label_location
 from starkware.cairo.common.uint256 import Uint256
 from cairo.bankai_new.light_clients.ethereum.config.types import EthereumConfig, Hardforks
 
+from cairo.bankai_new.debug.print import info_string, info_felt_hex
+
 func get_config_sepolia() -> EthereumConfig {
     let config = EthereumConfig(
         network_id=1,
         sync_committee_period=8192,
-        genesis_validator_root=0x02e93bd4b4aff8bfc81c9f5f468e74c6c86a8dc4d368bcfe9874bc8742e06880,
+        genesis_validator_root=0x19c80d8a5de5427e66d4cb600f6ac995061f73156996c9a7fca2285ae90169f,
     );
     return config;
 }
@@ -52,12 +54,12 @@ func get_fork_schedule_sepolia() -> (felt*) {
     dw 8724480;  // FULU_ACTIVATION_SLOT (272640 * 32)
 }
 
-func get_fork_domain_sepolia(fork_id: felt) -> Uint256 {
+func get_fork_domain_sepolia(fork: felt) -> Uint256 {
     alloc_locals;
 
     let (data_address) = get_label_location(domain_data_sepolia);
-    let low = [data_address + fork_id * 2];
-    let high = [data_address + fork_id * 2 + 1];
+    local low = [data_address + (fork * 2)];
+    local high = [data_address + (fork * 2 + 1)];
     return (Uint256(low=low, high=high));
 
     domain_data_sepolia:

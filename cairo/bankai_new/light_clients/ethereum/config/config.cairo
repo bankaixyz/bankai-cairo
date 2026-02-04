@@ -3,7 +3,7 @@ from starkware.cairo.common.uint256 import Uint256
 from cairo.bankai_new.light_clients.ethereum.config.mainnet import get_config_mainnet, get_fork_data_mainnet, get_fork_domain_mainnet, get_fork_schedule_mainnet
 from cairo.bankai_new.light_clients.ethereum.config.sepolia import get_config_sepolia, get_fork_data_sepolia, get_fork_domain_sepolia, get_fork_schedule_sepolia
 from cairo.bankai_new.light_clients.ethereum.config.types import EthereumConfig, Networks
-
+from cairo.bankai_new.debug.print import info_string, info_felt_hex
 func get_config(network_id: felt) -> EthereumConfig {
     if (network_id == Networks.MAINNET) {
         let config = get_config_mainnet();

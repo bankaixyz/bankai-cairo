@@ -2,7 +2,7 @@ from starkware.cairo.common.cairo_builtins import KeccakBuiltin, BitwiseBuiltin
 from starkware.cairo.common.registers import get_label_location
 from starkware.cairo.common.uint256 import Uint256
 
-from debug import print_string, print_felt_hex
+from cairo.bankai_new.debug.print import info_string, info_felt_hex
 
 from cairo.bankai_new.light_clients.ethereum.utils.ssz import SSZ
 from cairo.bankai_new.utils.utils import felt_divmod
@@ -22,7 +22,7 @@ namespace Fork {
         return root;
     }
 
-    func get_id{range_check_ptr}(network_id: felt, slot: felt) -> felt {
+    func get_id{range_check_ptr}(network_id: felt, slot: felt) -> (felt, felt) {
         alloc_locals;
 
         local fork: felt;
@@ -39,7 +39,7 @@ namespace Fork {
             let (_, altair_activation_slot) = get_fork_data(network_id, Hardforks.ALTAIR);
             assert [range_check_ptr] = altair_activation_slot - slot;
             tempvar range_check_ptr = range_check_ptr + 1;
-            return fork_id;
+            return (fork_id, fork);
         }
 
         if (fork == Hardforks.ALTAIR) {
@@ -48,7 +48,7 @@ namespace Fork {
             assert [range_check_ptr] = bellatrix_activation_slot - slot;
             assert [range_check_ptr + 1] = slot - altair_activation_slot;
             tempvar range_check_ptr = range_check_ptr + 2;
-            return fork_id;
+            return (fork_id, fork);
         }
 
         if (fork == Hardforks.BELLATRIX) {
@@ -57,7 +57,7 @@ namespace Fork {
             assert [range_check_ptr] = capella_activation_slot - slot;
             assert [range_check_ptr + 1] = slot - bellatrix_activation_slot;
             tempvar range_check_ptr = range_check_ptr + 2;
-            return fork_id;
+            return (fork_id, fork);
         }
 
         if (fork == Hardforks.CAPELLA) {
@@ -66,7 +66,7 @@ namespace Fork {
             assert [range_check_ptr] = deneb_activation_slot - slot;
             assert [range_check_ptr + 1] = slot - capella_activation_slot;
             tempvar range_check_ptr = range_check_ptr + 2;
-            return fork_id;
+            return (fork_id, fork);
         }
 
         if (fork == Hardforks.DENEB) {
@@ -75,7 +75,7 @@ namespace Fork {
             assert [range_check_ptr] = electra_activation_slot - slot;
             assert [range_check_ptr + 1] = slot - deneb_activation_slot;
             tempvar range_check_ptr = range_check_ptr + 2;
-            return fork_id;
+            return (fork_id, fork);
         }
 
         if (fork == Hardforks.ELECTRA) {
@@ -84,18 +84,18 @@ namespace Fork {
             assert [range_check_ptr] = fulu_activation_slot - slot;
             assert [range_check_ptr + 1] = slot - electra_activation_slot;
             tempvar range_check_ptr = range_check_ptr + 2;
-            return fork_id;
+            return (fork_id, fork);
         }
 
         if (fork == Hardforks.FULU) {
             let (fork_id, fulu_activation_slot) = get_fork_data(network_id, Hardforks.FULU);
             assert [range_check_ptr] = slot - fulu_activation_slot;
             tempvar range_check_ptr = range_check_ptr + 1;
-            return fork_id;
+            return (fork_id, fork);
         }
 
         assert 1 = 0;
-        return 0xFFFFFFFFFFFFFFFF;
+        return (0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF);
     }
 }
 
@@ -115,7 +115,7 @@ namespace Domain {
     func get_domain{range_check_ptr}(network_id: felt, slot: felt) -> Uint256 {
         alloc_locals;
 
-        let fork = Fork.get_id(network_id, slot);
+        let (fork_id, fork) = Fork.get_id(network_id, slot);
         let fork_domain = get_fork_domain(network_id, fork);
         return fork_domain;
     }
