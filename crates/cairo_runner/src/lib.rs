@@ -1,9 +1,11 @@
 #![allow(clippy::result_large_err)]
 pub mod error;
 pub mod hint_processor;
+pub mod test_hint_processor;
+pub mod test_hints;
 
 use crate::{error::Error, hint_processor::CustomHintProcessor};
-use bankai_hints::types::CircuitRunDataCairo;
+use bankai_hints::types::os::BankaiBlockBundleCairo;
 use cairo_vm_base::stwo_utils::FileWriter;
 use cairo_vm_base::vm::cairo_vm::{
     cairo_run::{
@@ -41,7 +43,7 @@ fn load_program(path: &str) -> Result<Program, Error> {
 
 pub fn run_stwo(
     path: &str,
-    input: CircuitRunDataCairo,
+    input: BankaiBlockBundleCairo,
     log_level: &'static str,
     output_dir: &str,
     prove: bool,
@@ -73,11 +75,11 @@ pub fn run_stwo(
         }
     };
 
-    let beacon_mmr_update = input.input.beacon_mmr_update.clone();
-    let execution_mmr_update = input.input.execution_mmr_update.clone();
+    let beacon_mmr_update = input.inputs.ethereum.beacon_mmr_update.clone();
+    let execution_mmr_update = input.inputs.ethereum.execution_mmr_update.clone();
     let mut hint_processor = CustomHintProcessor::new();
     let mut exec_scopes = ExecutionScopes::new();
-    exec_scopes.insert_value("input", input.input);
+    exec_scopes.insert_value("input", input.inputs);
     exec_scopes.insert_value("beacon_mmr_update", beacon_mmr_update);
     exec_scopes.insert_value("execution_mmr_update", execution_mmr_update);
     exec_scopes.insert_value("output", input.output);
@@ -125,7 +127,7 @@ pub fn run_stwo(
 
 pub fn run(
     path: &str,
-    input: CircuitRunDataCairo,
+    input: BankaiBlockBundleCairo,
     log_level: &'static str,
 ) -> Result<CairoPie, Error> {
     let program = load_program(path)?;
@@ -134,10 +136,10 @@ pub fn run(
         layout: LayoutName::all_cairo,
         ..Default::default()
     };
-    let beacon_mmr_update = input.input.beacon_mmr_update.clone();
+    let beacon_mmr_update = input.inputs.ethereum.beacon_mmr_update.clone();
     let mut hint_processor = CustomHintProcessor::new();
     let mut exec_scopes = ExecutionScopes::new();
-    exec_scopes.insert_value("input", input.input);
+    exec_scopes.insert_value("input", input.inputs);
     exec_scopes.insert_value("beacon_mmr_update", beacon_mmr_update);
     exec_scopes.insert_value("output", input.output);
     exec_scopes.insert_value("program_object", program.clone());

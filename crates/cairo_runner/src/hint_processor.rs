@@ -1,10 +1,13 @@
-use bankai_hints::hints::get_hints as get_bankai_hints;
-use bankai_hints::hints::input::{
-    write_committee_update_inputs, write_consensus_inputs, write_expected_proof_output,
-    write_stone_proof_inputs, HINT_WRITE_COMMITTEE_UPDATE_INPUTS, HINT_WRITE_CONSENSUS_INPUTS,
-    HINT_WRITE_EXPECTED_PROOF_OUTPUT, HINT_WRITE_STONE_PROOF_INPUTS,
+use bankai_hints::hints::ethereum::{
+    write_committee_update_inputs, write_consensus_inputs, HINT_WRITE_COMMITTEE_UPDATE_INPUTS,
+    HINT_WRITE_CONSENSUS_INPUTS,
 };
-use bankai_hints::hints::output::{assert_output, HINT_ASSERT_OUTPUT};
+use bankai_hints::hints::get_hints as get_bankai_hints;
+use bankai_hints::hints::os::{
+    verify_block_result, write_init_data, write_mock_recursion_inputs, write_previous_block,
+    HINT_PREVIOUS_BLOCK, HINT_VERIFY_BLOCK_RESULT, HINT_WRITE_INIT_DATA,
+    HINT_WRITE_MOCK_RECURSION_INPUTS,
+};
 use cairo_vm_base::default_hints::{default_hint_mapping, HintImpl};
 use cairo_vm_base::vm::cairo_vm::{
     hint_processor::{
@@ -84,16 +87,15 @@ impl HintProcessorLogic for CustomHintProcessor {
                 HINT_WRITE_CONSENSUS_INPUTS => {
                     write_consensus_inputs(vm, exec_scopes, hpd, constants)
                 }
-                HINT_WRITE_STONE_PROOF_INPUTS => {
-                    write_stone_proof_inputs(vm, exec_scopes, hpd, constants)
-                }
                 HINT_WRITE_COMMITTEE_UPDATE_INPUTS => {
                     write_committee_update_inputs(vm, exec_scopes, hpd, constants)
                 }
-                HINT_WRITE_EXPECTED_PROOF_OUTPUT => {
-                    write_expected_proof_output(vm, exec_scopes, hpd, constants)
+                HINT_WRITE_INIT_DATA => write_init_data(vm, exec_scopes, hpd, constants),
+                HINT_PREVIOUS_BLOCK => write_previous_block(vm, exec_scopes, hpd, constants),
+                HINT_WRITE_MOCK_RECURSION_INPUTS => {
+                    write_mock_recursion_inputs(vm, exec_scopes, hpd, constants)
                 }
-                HINT_ASSERT_OUTPUT => assert_output(vm, exec_scopes, hpd, constants),
+                HINT_VERIFY_BLOCK_RESULT => verify_block_result(vm, exec_scopes, hpd, constants),
                 HINT_WRITE_BEACON_INPUT => write_beacon_input(vm, exec_scopes, hpd, constants),
                 HINT_WRITE_EXECUTION_INPUT => {
                     write_execution_input(vm, exec_scopes, hpd, constants)
