@@ -5,17 +5,11 @@ activate:
 	@echo "Please source the virtual environment activation script:"
 	@echo "  source scripts/activate.sh"
 
-build-stwo:
-	./scripts/cairo_compile.sh cairo/src/bankai_stwo.cairo
-
 build-ethereum:
 	./scripts/cairo_compile.sh cairo/src/light_clients/ethereum/main.cairo
 
-build-bankai-os:
+build-bankai:
 	./scripts/cairo_compile.sh cairo/src/bankai_os/main.cairo
-
-build-stone:
-	./scripts/cairo_compile.sh cairo/src/bankai_stone.cairo
 
 get-program-hash:
 	# @make build

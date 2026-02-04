@@ -5,8 +5,8 @@ from definitions import G1Point
 from ec_ops import add_ec_points
 from sha import SHA256
 from cairo.src.utils.utils import pow2alloc128
-from cairo.src.io import SyncCommitteeSignerInput
-from cairo.src.bls.signer import generate_block_signer_pub
+from cairo.src.light_clients.ethereum.types import SyncCommitteeSignerInput
+from cairo.src.light_clients.ethereum.bls.signer import generate_block_signer_pub
 
 func main{
     range_check_ptr,

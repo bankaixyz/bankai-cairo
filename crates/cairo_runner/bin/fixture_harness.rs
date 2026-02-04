@@ -1,6 +1,6 @@
 use std::{fs, path::PathBuf};
 
-use bankai_hints::types::SyncCommitteeUpdateProofCairo;
+use bankai_hints::types::ethereum::SyncCommitteeUpdateProofCairo;
 use cairo_runner::test_hint_processor::TestHintProcessor;
 use cairo_runner::test_hints::BlockSignerFixture;
 use cairo_vm_base::vm::cairo_vm::{

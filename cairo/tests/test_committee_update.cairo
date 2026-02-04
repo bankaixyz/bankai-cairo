@@ -4,8 +4,8 @@ from starkware.cairo.common.cairo_builtins import BitwiseBuiltin, ModBuiltin, Po
 from definitions import UInt384
 from sha import SHA256
 from cairo.src.utils.utils import pow2alloc128
-from cairo.src.io import SyncCommitteeUpdateInputs
-from cairo.src.bls.committee_update import run_committee_update
+from cairo.src.light_clients.ethereum.types import SyncCommitteeUpdateInputs
+from cairo.src.light_clients.ethereum.bls.committee_update import run_committee_update
 
 func main{
     range_check_ptr,

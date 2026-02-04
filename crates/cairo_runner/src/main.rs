@@ -1,6 +1,6 @@
 #![allow(clippy::result_large_err)]
 use bankai_hints::types::os::BankaiBlockBundleCairo;
-use cairo_runner::{run, run_stwo};
+use cairo_runner::run_stwo;
 use clap::Parser;
 use std::{path::Path, path::PathBuf};
 use tracing::Level;
@@ -13,16 +13,10 @@ struct Args {
     #[arg(short, long)]
     input_path: PathBuf,
 
-    #[arg(long, conflicts_with = "stone", required_unless_present = "stone")]
-    stwo: bool,
-
-    #[arg(long, conflicts_with = "stwo", required_unless_present = "stwo")]
-    stone: bool,
-
-    #[arg(long, requires = "stwo", conflicts_with = "pie")]
+    #[arg(long, conflicts_with = "pie")]
     prove: bool,
 
-    #[arg(long, requires = "stwo", conflicts_with = "prove")]
+    #[arg(long, conflicts_with = "prove")]
     pie: bool,
 }
 
@@ -42,26 +36,17 @@ fn main() {
     let output_dir: &'static str = "output/";
     let log_level: &'static str = "debug";
 
-    if args.stwo {
-        let program_path = "cairo/build/bankai_stwo.json";
-        let result = run_stwo(
-            program_path,
-            input,
-            log_level,
-            output_dir,
-            args.prove,
-            args.pie,
-        );
-        let result = result.unwrap();
-        if let Some(pie) = result {
-            pie.write_zip_file(&Path::new(output_dir).join("pie.zip"), true)
-                .unwrap();
-            println!("Pie generated successfully");
-        }
-    } else {
-        let program_path = "cairo/build/bankai_stone.json";
-        let result = run(program_path, input, log_level);
-        let pie = result.unwrap();
+    let program_path = "cairo/build/main.json";
+    let result = run_stwo(
+        program_path,
+        input,
+        log_level,
+        output_dir,
+        args.prove,
+        args.pie,
+    );
+    let result = result.unwrap();
+    if let Some(pie) = result {
         pie.write_zip_file(&Path::new(output_dir).join("pie.zip"), true)
             .unwrap();
         println!("Pie generated successfully");
