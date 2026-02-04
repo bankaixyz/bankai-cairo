@@ -22,21 +22,16 @@ func write_block{output_ptr: felt*}(block: BankaiBlock) {
     let block_ptr = cast(output_ptr, BankaiBlock*);
     // Write the block struct into the output buffer
     assert [block_ptr] = block;
-    
+
     let output_ptr = output_ptr + BankaiBlock.SIZE;
     return ();
 }
 
-
 func get_genesis_block(config: BankaiOSConfig, program_hash: felt) -> (block: BankaiBlock) {
-
     let eth_config = get_config(config.network_id);
     let (ethereum_genesis) = get_ethereum_genesis(eth_config.genesis_validator_root);
     let block = BankaiBlock(
-        version=config.version,
-        program_hash=program_hash,
-        block_number=0,
-        ethereum=ethereum_genesis,
+        version=config.version, program_hash=program_hash, block_number=0, ethereum=ethereum_genesis
     );
     return (block=block);
 }

@@ -26,7 +26,7 @@ func get_fork_data_sepolia{range_check_ptr}(fork_id: felt) -> (version: felt, sl
     return (version, slot);
 }
 
-func get_fork_schedule_sepolia() -> (felt*) {
+func get_fork_schedule_sepolia() -> (felt*,) {
     return get_label_location(fork_schedule);
 
     fork_schedule:

@@ -33,7 +33,7 @@ func main{
     let (keccak_felt_ptr: felt*) = alloc();
     let start_keccak_felt_ptr = keccak_felt_ptr;
     let (sha256_ptr, sha256_ptr_start) = SHA256.init();
-    
+
     let network_id = Networks.SEPOLIA;
     let config = get_config(network_id=network_id);
 

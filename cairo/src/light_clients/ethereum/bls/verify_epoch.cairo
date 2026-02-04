@@ -47,11 +47,9 @@ func run_beacon_update{
     mul_mod_ptr: ModBuiltin*,
     pow2_array: felt*,
     sha256_ptr: felt*,
-}(
-    consensus_inputs: ConsensusInputs,
-    is_committee_transition: felt,
-    prev: BeaconClientOutput,
-) -> (output: BeaconClientOutput, body_root: Uint256) {
+}(consensus_inputs: ConsensusInputs, is_committee_transition: felt, prev: BeaconClientOutput) -> (
+    output: BeaconClientOutput, body_root: Uint256
+) {
     alloc_locals;
 
     // 1. Hash beacon header
@@ -128,9 +126,7 @@ func run_execution_update{
     pow2_array: felt*,
     sha256_ptr: felt*,
 }(
-    body_root: Uint256,
-    execution_header_proof: ExecutionHeaderProof,
-    prev: ExecutionClientOutput,
+    body_root: Uint256, execution_header_proof: ExecutionHeaderProof, prev: ExecutionClientOutput
 ) -> (output: ExecutionClientOutput) {
     alloc_locals;
 

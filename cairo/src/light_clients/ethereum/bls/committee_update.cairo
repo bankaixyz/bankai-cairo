@@ -82,9 +82,7 @@ func run_committee_update{
     mul_mod_ptr: ModBuiltin*,
     pow2_array: felt*,
     sha256_ptr: felt*,
-}(committee_input: SyncCommitteeUpdateInputs) -> (
-    state_root: Uint256, validator_root: felt
-) {
+}(committee_input: SyncCommitteeUpdateInputs) -> (state_root: Uint256, validator_root: felt) {
     alloc_locals;
     debug_string('committee update');
 
@@ -101,7 +99,9 @@ func run_committee_update{
 
     let committee_root = compute_committee_root(committee_input.validator_pubs);
     let committee_root_chunks = MerkleUtils.chunk_uint256(committee_root);
-    let leaf_hash = compute_leaf_hash(committee_root_chunks, committee_input.aggregate_committee_key);
+    let leaf_hash = compute_leaf_hash(
+        committee_root_chunks, committee_input.aggregate_committee_key
+    );
 
     let state_root = MerkleTree.hash_merkle_path(
         path=committee_input.path,
@@ -116,9 +116,9 @@ func run_committee_update{
 }
 
 // In this function, we pass the compressed validator pubs and hash them using sha256, according to the SSZ spec
-func compute_committee_root{range_check_ptr, bitwise_ptr: BitwiseBuiltin*, pow2_array: felt*, sha256_ptr: felt*}(
-    committee_keys: UInt384*
-) -> Uint256 {
+func compute_committee_root{
+    range_check_ptr, bitwise_ptr: BitwiseBuiltin*, pow2_array: felt*, sha256_ptr: felt*
+}(committee_keys: UInt384*) -> Uint256 {
     alloc_locals;
 
     let (ssz_leafs: Uint256*) = alloc();
@@ -155,7 +155,7 @@ func build_validator_tree{
     poseidon_ptr: PoseidonBuiltin*,
     add_mod_ptr: ModBuiltin*,
     mul_mod_ptr: ModBuiltin*,
-    pow2_array: felt*
+    pow2_array: felt*,
 }(pubs: UInt384*) -> felt {
     alloc_locals;
 
@@ -174,7 +174,7 @@ func compute_validator_pub_commitments{
     poseidon_ptr: PoseidonBuiltin*,
     add_mod_ptr: ModBuiltin*,
     mul_mod_ptr: ModBuiltin*,
-    pow2_array: felt*
+    pow2_array: felt*,
 }(pubs: UInt384*, counter: felt, result: felt*) {
     alloc_locals;
 

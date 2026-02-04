@@ -1,10 +1,10 @@
-from starkware.cairo.common.cairo_builtins import BitwiseBuiltin, ModBuiltin, PoseidonBuiltin, HashBuiltin
-from cairo.src.debug.print import (
-    debug_felt_hex,
-    debug_string,
-    info_felt,
-    info_string,
+from starkware.cairo.common.cairo_builtins import (
+    BitwiseBuiltin,
+    ModBuiltin,
+    PoseidonBuiltin,
+    HashBuiltin,
 )
+from cairo.src.debug.print import debug_felt_hex, debug_string, info_felt, info_string
 from cairo.src.utils.utils import felt_divmod
 from cairo.src.light_clients.ethereum.types import (
     ConsensusInputs,
@@ -13,7 +13,10 @@ from cairo.src.light_clients.ethereum.types import (
     get_ethereum_genesis,
 )
 from cairo.src.light_clients.ethereum.types import EthereumClientOutput
-from cairo.src.light_clients.ethereum.bls.verify_epoch import run_beacon_update, run_execution_update
+from cairo.src.light_clients.ethereum.bls.verify_epoch import (
+    run_beacon_update,
+    run_execution_update,
+)
 from cairo.src.light_clients.ethereum.bls.committee_update import run_committee_update
 from cairo.src.light_clients.ethereum.config.config import get_config, EthereumConfig
 
@@ -29,7 +32,9 @@ func run{
     mul_mod_ptr: ModBuiltin*,
     sha256_ptr: felt*,
     pow2_array: felt*,
-}(prev: EthereumClientOutput, network_id: felt, is_genesis: felt) -> (output: EthereumClientOutput) {
+}(prev: EthereumClientOutput, network_id: felt, is_genesis: felt) -> (
+    output: EthereumClientOutput
+) {
     alloc_locals;
 
     let config = get_config(network_id);
@@ -49,7 +54,6 @@ func run{
         assert is_committee_update = 0;
         return (output=output);
     } else {
-
         with pow2_array, sha256_ptr, config {
             let (output) = handle_recursive_case(consensus_inputs, prev);
         }
@@ -78,9 +82,7 @@ func handle_recursive_case{
     sha256_ptr: felt*,
     pow2_array: felt*,
     config: EthereumConfig,
-}(
-    consensus_inputs: ConsensusInputs, prev: EthereumClientOutput
-) -> (output: EthereumClientOutput) {
+}(consensus_inputs: ConsensusInputs, prev: EthereumClientOutput) -> (output: EthereumClientOutput) {
     alloc_locals;
 
     let (old_committee_term, _) = felt_divmod(

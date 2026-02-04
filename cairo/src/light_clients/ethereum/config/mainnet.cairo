@@ -25,7 +25,7 @@ func get_fork_data_mainnet{range_check_ptr}(fork_id: felt) -> (version: felt, sl
     return (version, slot);
 }
 
-func get_fork_schedule_mainnet() -> (felt*) {
+func get_fork_schedule_mainnet() -> (felt*,) {
     return get_label_location(fork_schedule);
 
     fork_schedule:

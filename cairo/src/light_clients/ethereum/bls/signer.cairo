@@ -27,10 +27,7 @@ func generate_block_signer_pub{
 }
 
 func assert_signers_inclusion{
-    range_check_ptr,
-    pow2_array: felt*,
-    poseidon_ptr: PoseidonBuiltin*,
-    sha256_ptr: felt*,
+    range_check_ptr, pow2_array: felt*, poseidon_ptr: PoseidonBuiltin*, sha256_ptr: felt*
 }(signer_data: SyncCommitteeSignerInput, counter: felt) {
     alloc_locals;
 
@@ -44,7 +41,7 @@ func assert_signers_inclusion{
         path_len=signer_data.proofs_len,
         leaf=commitment,
         index=signer_data.indexes[counter],
-        expected_root=signer_data.validator_root
+        expected_root=signer_data.validator_root,
     );
 
     return assert_signers_inclusion(signer_data, counter + 1);
@@ -79,9 +76,9 @@ func commit_committee_key{range_check_ptr, sha256_ptr: felt*, pow2_array: felt*}
     return committee_point_hash;
 }
 
-func validator_commitment{range_check_ptr, poseidon_ptr: PoseidonBuiltin*}(
-    point: G1Point
-) -> (commitment: felt) {
+func validator_commitment{range_check_ptr, poseidon_ptr: PoseidonBuiltin*}(point: G1Point) -> (
+    commitment: felt
+) {
     alloc_locals;
 
     let (chunks: felt*) = alloc();

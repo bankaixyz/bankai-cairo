@@ -43,7 +43,6 @@ struct ConsensusInputs {
     execution_header_proof: ExecutionHeaderProof,
 }
 
-
 struct BeaconClientOutput {
     slot_number: felt,
     header_root: Uint256,

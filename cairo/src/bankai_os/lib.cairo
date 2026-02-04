@@ -10,7 +10,10 @@ from cairo.src.light_clients.ethereum.lib import run as run_ethereum
 from cairo.src.bankai_os.config.config import get_config, Networks
 from cairo.src.bankai_os.recursion.mock import mock_verify_proof
 from cairo.src.bankai_os.config.types import BankaiOSConfig
-from cairo.src.light_clients.ethereum.bls.verify_epoch import run_beacon_update, run_execution_update
+from cairo.src.light_clients.ethereum.bls.verify_epoch import (
+    run_beacon_update,
+    run_execution_update,
+)
 from cairo.src.light_clients.ethereum.types import EthereumClientOutput
 
 func run_bankai_os{
@@ -32,14 +35,13 @@ func run_bankai_os{
 
     local is_genesis: felt;
     local program_hash: felt;
-    %{ write_init_data() %} // ToDo: create new hint
+    %{ write_init_data() %}  // ToDo: create new hint
 
     if (is_genesis == 1) {
         let (block) = handle_genesis_case(config, program_hash);
 
         write_block(block=block);
         return ();
-
     } else {
         let (block) = handle_recursive_case(config);
 
@@ -69,10 +71,7 @@ func handle_genesis_case{
     let (eth_output) = run_ethereum(prev.ethereum, config.network_id, 1);
 
     let block = BankaiBlock(
-        version=config.version,
-        program_hash=prev.program_hash,
-        block_number=1,
-        ethereum=eth_output,
+        version=config.version, program_hash=prev.program_hash, block_number=1, ethereum=eth_output
     );
 
     return (block=block);
@@ -111,5 +110,5 @@ func handle_recursive_case{
         ethereum=eth_output,
     );
 
-    return (block=block);    
+    return (block=block);
 }

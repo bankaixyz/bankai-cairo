@@ -93,9 +93,7 @@ namespace PoseidonMerkleTree {
         range_check_ptr, poseidon_ptr: PoseidonBuiltin*, pow2_array: felt*
     }(path: felt*, path_len: felt, leaf: felt, index: felt, expected_root: felt) {
         alloc_locals;
-        let root = hash_merkle_path_poseidon(
-            path=path, path_len=path_len, leaf=leaf, index=index
-        );
+        let root = hash_merkle_path_poseidon(path=path, path_len=path_len, leaf=leaf, index=index);
         assert root = expected_root;
         return ();
     }

@@ -14,5 +14,4 @@ func mock_verify_proof(block: BankaiBlock) -> (program_hash: felt) {
     assert recursion.program_hash = block.program_hash;
 
     return (program_hash=recursion.program_hash);
-
 }

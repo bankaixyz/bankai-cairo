@@ -7,7 +7,12 @@ from cairo.src.debug.print import info_string, info_felt_hex
 from cairo.src.light_clients.ethereum.utils.ssz import SSZ
 from cairo.src.utils.utils import felt_divmod
 
-from cairo.src.light_clients.ethereum.config.config import get_fork_schedule, get_genesis_validator_root, get_fork_data, get_fork_domain
+from cairo.src.light_clients.ethereum.config.config import (
+    get_fork_schedule,
+    get_genesis_validator_root,
+    get_fork_data,
+    get_fork_domain,
+)
 from cairo.src.light_clients.ethereum.config.types import Hardforks, Networks
 
 namespace Fork {
@@ -52,7 +57,9 @@ namespace Fork {
         }
 
         if (fork == Hardforks.BELLATRIX) {
-            let (fork_id, bellatrix_activation_slot) = get_fork_data(network_id, Hardforks.BELLATRIX);
+            let (fork_id, bellatrix_activation_slot) = get_fork_data(
+                network_id, Hardforks.BELLATRIX
+            );
             let (_, capella_activation_slot) = get_fork_data(network_id, Hardforks.CAPELLA);
             assert [range_check_ptr] = capella_activation_slot - slot;
             assert [range_check_ptr + 1] = slot - bellatrix_activation_slot;
@@ -105,8 +112,6 @@ namespace Domain {
     func compute_signing_root{
         range_check_ptr, bitwise_ptr: BitwiseBuiltin*, pow2_array: felt*, sha256_ptr: felt*
     }(network_id: felt, message: Uint256, slot: felt) -> Uint256 {
-
-
         let domain = get_domain(network_id, slot);
         let root = SSZ.hash_pair_container(message, domain);
         return root;
