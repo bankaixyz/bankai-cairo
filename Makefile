@@ -9,10 +9,10 @@ build-stwo:
 	./scripts/cairo_compile.sh cairo/src/bankai_stwo.cairo
 
 build-ethereum:
-	./scripts/cairo_compile.sh cairo/bankai_new/light_clients/ethereum/main.cairo
+	./scripts/cairo_compile.sh cairo/src/light_clients/ethereum/main.cairo
 
 build-bankai-os:
-	./scripts/cairo_compile.sh cairo/bankai_new/bankai_os/main.cairo
+	./scripts/cairo_compile.sh cairo/src/bankai_os/main.cairo
 
 build-stone:
 	./scripts/cairo_compile.sh cairo/src/bankai_stone.cairo
