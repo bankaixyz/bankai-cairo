@@ -46,7 +46,7 @@ if ! python3.10 -m venv venv; then
 fi
 
 echo 'export PYTHONPATH="$PWD:$PWD/cairo/packages/garaga_zero:$PYTHONPATH"' >> venv/bin/activate
-echo 'unset PYTHONHOME' >> venv/bin/activate
+# echo 'unset PYTHONHOME' >> venv/bin/activate
 source venv/bin/activate
 
 pip install uv
