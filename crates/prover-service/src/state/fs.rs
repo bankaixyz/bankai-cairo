@@ -55,8 +55,27 @@ impl Fs {
         self.job_dir(request_id).join("work")
     }
 
-    pub fn job_work_proof_path(&self, request_id: &str) -> PathBuf {
+    pub fn job_work_legacy_json_proof_path(&self, request_id: &str) -> PathBuf {
         self.job_work_dir(request_id).join("proof.json")
+    }
+
+    pub fn job_work_proof_path(&self, request_id: &str) -> PathBuf {
+        self.job_work_dir(request_id).join("proof.bin")
+    }
+
+    pub fn find_job_work_proof_path(&self, request_id: &str) -> Option<PathBuf> {
+        let proof_bin = self.job_work_proof_path(request_id);
+        if proof_bin.exists() {
+            return Some(proof_bin);
+        }
+
+        // Backward compatibility for proofs generated before binary output support.
+        let proof_json = self.job_work_legacy_json_proof_path(request_id);
+        if proof_json.exists() {
+            return Some(proof_json);
+        }
+
+        None
     }
 
     pub fn proof_index_dir(&self, request_id: &str) -> PathBuf {
@@ -131,7 +150,7 @@ impl Fs {
         let idx_dir = self.proof_index_dir(&job.request_id);
         tokio::fs::create_dir_all(&idx_dir).await?;
 
-        let proof_dst = idx_dir.join("proof.json");
+        let proof_dst = idx_dir.join("proof.bin");
         crate::state::atomic::copy_atomic(proof_path, &proof_dst).await?;
 
         let meta = serde_json::json!({
@@ -197,7 +216,7 @@ impl Fs {
 
             if matches!(job.status, JobStatus::Queued | JobStatus::Running) {
                 let proof = self.job_work_proof_path(&job.request_id);
-                if proof.exists() {
+                if proof.exists() || self.job_work_legacy_json_proof_path(&job.request_id).exists() {
                     job.status = JobStatus::Succeeded;
                     job.stage = JobStage::Done;
                     job.updated_at_ms = now_ms();

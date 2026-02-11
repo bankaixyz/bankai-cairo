@@ -15,7 +15,8 @@ path = "bin/fixture_harness.rs"
 garaga-zero = { path = "../../cairo/packages/garaga_zero" }
 bankai-stwo-prover = { path = "../stwo_prover" }
 bankai-hints = { path = "../bankai_hints" }
-mmr-header-accumulator-hints.workspace = true
+mmr-header-accumulator-hints.workspace = true   
+cairo-air.workspace = true
 cairo-vm-base.workspace = true
 thiserror.workspace = true
 serde.workspace = true

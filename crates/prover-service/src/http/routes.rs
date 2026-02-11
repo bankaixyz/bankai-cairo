@@ -254,10 +254,10 @@ async fn handle_proof(
         )));
     }
 
-    let proof_path = state.fs.job_work_proof_path(&request_id);
-    if !proof_path.exists() {
-        return Err(errors::not_found("proof artifact missing on disk"));
-    }
+    let proof_path = state
+        .fs
+        .find_job_work_proof_path(&request_id)
+        .ok_or_else(|| errors::not_found("proof artifact missing on disk"))?;
 
-    Ok(crate::http::files::json_file(proof_path).await)
+    Ok(crate::http::files::proof_file(proof_path).await)
 }

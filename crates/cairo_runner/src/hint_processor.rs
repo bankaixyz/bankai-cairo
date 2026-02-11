@@ -30,7 +30,6 @@ use mmr_header_accumulator_hints::hints::input::{
 };
 use std::any::Any;
 use std::collections::HashMap;
-use stone_verifier_hints::hints::get_hints as get_stone_verifier_hints;
 
 pub struct CustomHintProcessor {
     hints: HashMap<String, HintImpl>,
@@ -53,7 +52,6 @@ impl CustomHintProcessor {
 
     fn hints() -> HashMap<String, HintImpl> {
         let mut hints = default_hint_mapping();
-        hints.extend(get_stone_verifier_hints());
         hints.extend(get_garaga_zero_hints());
         hints.extend(get_bankai_hints());
         hints.extend(get_mmr_header_accumulator_hints());

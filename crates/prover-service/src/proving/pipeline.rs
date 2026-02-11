@@ -4,6 +4,7 @@ use crate::types::{JobRecord, JobStage, JobStatus, SUPPORTED_PAYLOAD_TYPE};
 use bankai_hints::types::os::BankaiBlockBundleCairo;
 use std::path::PathBuf;
 use std::time::Instant;
+use cairo_air::utils::ProofFormat;
 use tracing::{error, info, instrument};
 
 const JOB_STACK_BYTES: usize = 64 * 1024 * 1024;
@@ -271,7 +272,7 @@ async fn prove(_state: &AppState, work_dir: &PathBuf) -> Result<PathBuf, String>
                     &pub_json2,
                     &priv_json2,
                     Some(false),
-                    Some(bankai_stwo_prover::ProofFormat::Json),
+                    Some(ProofFormat::Binary),
                 )
             })
             .map_err(|e| format!("failed to spawn proving thread: {e}"))?;
