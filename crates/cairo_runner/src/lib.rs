@@ -108,7 +108,7 @@ pub fn run_stwo(
             &Path::new(output_dir).join("pub.json"),
             &Path::new(output_dir).join("priv.json"),
             Some(true),
-            Some(ProofFormat::CairoSerde),      
+            Some(ProofFormat::CairoSerde),
         )?;
         info!(
             "Proof generated successfully in {:.1?}: {:?}",

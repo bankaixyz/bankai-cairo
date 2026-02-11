@@ -9,7 +9,7 @@ pub(crate) fn sanitize_request_id_for_path(k: &str) -> String {
             out.push(c);
         } else {
             out.push('%');
-            out.push_str(&format!("{:02X}", b));
+            out.push_str(&format!("{b:02X}"));
         }
     }
     out

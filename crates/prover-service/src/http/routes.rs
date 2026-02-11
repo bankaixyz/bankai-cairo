@@ -12,8 +12,9 @@ use tracing::{info, instrument, warn};
 use warp::http::StatusCode;
 use warp::{Filter, Reply};
 
-pub fn routes(state: AppState) -> impl Filter<Extract = (impl Reply,), Error = warp::Rejection> + Clone
-{
+pub fn routes(
+    state: AppState,
+) -> impl Filter<Extract = (impl Reply,), Error = warp::Rejection> + Clone {
     let v1 = warp::path("v1");
 
     let submit = v1
@@ -49,56 +50,65 @@ pub fn routes(state: AppState) -> impl Filter<Extract = (impl Reply,), Error = w
         .and(warp::ws())
         .and(with_state(ws_state.clone()))
         .and(auth_ws(ws_state))
-        .map(|ws: warp::ws::Ws, state: AppState| ws.on_upgrade(move |socket| ws::handle_ws(socket, state)));
+        .map(|ws: warp::ws::Ws, state: AppState| {
+            ws.on_upgrade(move |socket| ws::handle_ws(socket, state))
+        });
 
     submit.or(status).or(proof).or(ws_route)
 }
 
-fn with_state(
-    state: AppState,
-) -> impl Filter<Extract = (AppState,), Error = Infallible> + Clone {
+fn with_state(state: AppState) -> impl Filter<Extract = (AppState,), Error = Infallible> + Clone {
     warp::any().map(move || state.clone())
 }
 
 fn auth(state: AppState) -> impl Filter<Extract = (), Error = warp::Rejection> + Clone {
-    warp::header::optional::<String>("authorization").and_then(move |auth: Option<String>| {
-        let state = state.clone();
-        async move {
-            if let Some(expected) = &state.config.auth_token {
-                let provided = auth.ok_or_else(|| errors::unauthorized("missing authorization header"))?;
-                let provided = provided
-                    .strip_prefix("Bearer ")
-                    .ok_or_else(|| errors::unauthorized("expected 'Authorization: Bearer <token>'"))?;
-                if provided != expected {
-                    return Err(errors::unauthorized("invalid bearer token"));
+    warp::header::optional::<String>("authorization")
+        .and_then(move |auth: Option<String>| {
+            let state = state.clone();
+            async move {
+                if let Some(expected) = &state.config.auth_token {
+                    let provided =
+                        auth.ok_or_else(|| errors::unauthorized("missing authorization header"))?;
+                    let provided = provided.strip_prefix("Bearer ").ok_or_else(|| {
+                        errors::unauthorized("expected 'Authorization: Bearer <token>'")
+                    })?;
+                    if provided != expected {
+                        return Err(errors::unauthorized("invalid bearer token"));
+                    }
                 }
+                Ok::<(), warp::Rejection>(())
             }
-            Ok::<(), warp::Rejection>(())
-        }
-    }).untuple_one()
+        })
+        .untuple_one()
 }
 
 fn auth_ws(state: AppState) -> impl Filter<Extract = (), Error = warp::Rejection> + Clone {
     // Warp's ws() filter doesn't give us the request after upgrade, so we authenticate before upgrade.
-    warp::header::optional::<String>("authorization").and_then(move |auth: Option<String>| {
-        let state = state.clone();
-        async move {
-            if let Some(expected) = &state.config.auth_token {
-                let provided = auth.ok_or_else(|| errors::unauthorized("missing authorization header"))?;
-                let provided = provided
-                    .strip_prefix("Bearer ")
-                    .ok_or_else(|| errors::unauthorized("expected 'Authorization: Bearer <token>'"))?;
-                if provided != expected {
-                    return Err(errors::unauthorized("invalid bearer token"));
+    warp::header::optional::<String>("authorization")
+        .and_then(move |auth: Option<String>| {
+            let state = state.clone();
+            async move {
+                if let Some(expected) = &state.config.auth_token {
+                    let provided =
+                        auth.ok_or_else(|| errors::unauthorized("missing authorization header"))?;
+                    let provided = provided.strip_prefix("Bearer ").ok_or_else(|| {
+                        errors::unauthorized("expected 'Authorization: Bearer <token>'")
+                    })?;
+                    if provided != expected {
+                        return Err(errors::unauthorized("invalid bearer token"));
+                    }
                 }
+                Ok::<(), warp::Rejection>(())
             }
-            Ok::<(), warp::Rejection>(())
-        }
-    }).untuple_one()
+        })
+        .untuple_one()
 }
 
 #[instrument(skip_all, fields(request_id = %req.request_id, idempotency_key = %req.idempotency_key))]
-async fn handle_submit(state: AppState, req: SubmitProofRequest) -> Result<impl Reply, warp::Rejection> {
+async fn handle_submit(
+    state: AppState,
+    req: SubmitProofRequest,
+) -> Result<impl Reply, warp::Rejection> {
     validate_submit(&req)?;
 
     if let Some(job) = state
@@ -214,10 +224,7 @@ fn submit_response(job: &JobRecord) -> SubmitProofResponse {
 }
 
 #[instrument(skip_all, fields(request_id = %request_id))]
-async fn handle_status(
-    request_id: String,
-    state: AppState,
-) -> Result<impl Reply, warp::Rejection> {
+async fn handle_status(request_id: String, state: AppState) -> Result<impl Reply, warp::Rejection> {
     let job = state
         .fs
         .read_job(&request_id)
@@ -236,10 +243,7 @@ async fn handle_status(
 }
 
 #[instrument(skip_all, fields(request_id = %request_id))]
-async fn handle_proof(
-    request_id: String,
-    state: AppState,
-) -> Result<impl Reply, warp::Rejection> {
+async fn handle_proof(request_id: String, state: AppState) -> Result<impl Reply, warp::Rejection> {
     let job = state
         .fs
         .read_job(&request_id)

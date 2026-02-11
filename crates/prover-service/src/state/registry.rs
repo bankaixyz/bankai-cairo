@@ -31,4 +31,3 @@ impl Registry {
         self.ensure(request_id).await.subscribe()
     }
 }
-

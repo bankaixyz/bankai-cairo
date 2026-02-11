@@ -34,8 +34,9 @@ async fn test_state(tmp: &tempfile::TempDir) -> AppState {
     })
 }
 
-fn test_filter(state: AppState) -> impl Filter<Extract = (impl warp::Reply,), Error = std::convert::Infallible> + Clone
-{
+fn test_filter(
+    state: AppState,
+) -> impl Filter<Extract = (impl warp::Reply,), Error = std::convert::Infallible> + Clone {
     routes::routes(state).recover(errors::recover)
 }
 
@@ -233,7 +234,9 @@ async fn ws_reports_decoding_failure_with_stage() {
         if status == JobStatus::Failed {
             assert_eq!(stage, JobStage::Decoding);
             assert!(error_code.unwrap().contains("PROVER_DECODING_FAILED"));
-            assert!(error_message.unwrap().contains("payload_json decoding failed"));
+            assert!(error_message
+                .unwrap()
+                .contains("payload_json decoding failed"));
             break;
         }
     }

@@ -48,8 +48,8 @@ pub fn generate_proof(
         true,
         proof_path.clone(),
         ProofFormat::Binary,
-        None
+        None,
     )?;
-    
+
     Ok(proof_path)
 }

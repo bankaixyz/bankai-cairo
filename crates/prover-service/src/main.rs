@@ -57,8 +57,7 @@ fn init_tracing(config: &Config) {
         .with_max_level(max_level)
         .with_target(false)
         .finish();
-    tracing::subscriber::set_global_default(subscriber)
-        .expect("setting default subscriber failed");
+    tracing::subscriber::set_global_default(subscriber).expect("setting default subscriber failed");
 }
 
 fn init_rayon() {

@@ -2,9 +2,9 @@ use crate::app::{now_ms, AppState};
 use crate::errors::{ProverError, ProverErrorCode};
 use crate::types::{JobRecord, JobStage, JobStatus, SUPPORTED_PAYLOAD_TYPE};
 use bankai_hints::types::os::BankaiBlockBundleCairo;
-use std::path::PathBuf;
-use std::time::Instant;
 use cairo_air::utils::ProofFormat;
+use std::path::{Path, PathBuf};
+use std::time::Instant;
 use tracing::{error, info, instrument};
 
 const JOB_STACK_BYTES: usize = 64 * 1024 * 1024;
@@ -34,7 +34,15 @@ pub async fn run_job(state: AppState, request_id: String) -> Result<(), String> 
         .await
         .map_err(|e| format!("failed to create work dir: {e}"))?;
 
-    update_job(&state, &mut job, JobStatus::Running, JobStage::Decoding, None, None).await;
+    update_job(
+        &state,
+        &mut job,
+        JobStatus::Running,
+        JobStage::Decoding,
+        None,
+        None,
+    )
+    .await;
 
     let req = match state.fs.read_request(&request_id).await {
         Ok(Some(r)) => r,
@@ -102,7 +110,15 @@ pub async fn run_job(state: AppState, request_id: String) -> Result<(), String> 
     };
 
     let trace_gen_started_at = Instant::now();
-    update_job(&state, &mut job, JobStatus::Running, JobStage::TraceGen, None, None).await;
+    update_job(
+        &state,
+        &mut job,
+        JobStatus::Running,
+        JobStage::TraceGen,
+        None,
+        None,
+    )
+    .await;
     if let Err(e) = trace_gen(&state, bundle, &work_dir).await {
         job.trace_gen_ms = Some(elapsed_ms(&trace_gen_started_at));
         set_end_to_end_ms(&mut job, &run_started_at);
@@ -125,7 +141,15 @@ pub async fn run_job(state: AppState, request_id: String) -> Result<(), String> 
         "trace generation done; starting proving"
     );
     let proving_started_at = Instant::now();
-    update_job(&state, &mut job, JobStatus::Running, JobStage::Proving, None, None).await;
+    update_job(
+        &state,
+        &mut job,
+        JobStatus::Running,
+        JobStage::Proving,
+        None,
+        None,
+    )
+    .await;
     let proof_path = match prove(&state, &work_dir).await {
         Ok(path) => path,
         Err(e) => {
@@ -215,7 +239,11 @@ pub async fn run_job(state: AppState, request_id: String) -> Result<(), String> 
     Ok(())
 }
 
-async fn trace_gen(state: &AppState, bundle: BankaiBlockBundleCairo, work_dir: &PathBuf) -> Result<(), String> {
+async fn trace_gen(
+    state: &AppState,
+    bundle: BankaiBlockBundleCairo,
+    work_dir: &Path,
+) -> Result<(), String> {
     let program = state.config.program_path.clone();
     let cairo_log_level = state.config.cairo_log_level_str();
     let work_dir_str = work_dir
@@ -256,7 +284,7 @@ async fn trace_gen(state: &AppState, bundle: BankaiBlockBundleCairo, work_dir: &
     // The blocking task returns `Result<(), String>`; propagate it directly.
 }
 
-async fn prove(_state: &AppState, work_dir: &PathBuf) -> Result<PathBuf, String> {
+async fn prove(_state: &AppState, work_dir: &Path) -> Result<PathBuf, String> {
     let pub_json = work_dir.join("pub.json");
     let priv_json = work_dir.join("priv.json");
     let pub_json2 = pub_json.clone();
@@ -280,7 +308,6 @@ async fn prove(_state: &AppState, work_dir: &PathBuf) -> Result<PathBuf, String>
         handle
             .join()
             .map_err(|_| "proving thread panicked".to_string())?
-            .map(|proof_path| proof_path)
             .map_err(|e| format!("proving failed: {e}"))
     })
     .await

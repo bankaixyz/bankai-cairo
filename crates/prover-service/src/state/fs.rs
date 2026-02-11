@@ -142,11 +142,7 @@ impl Fs {
         }
     }
 
-    pub async fn publish_proof(
-        &self,
-        job: &JobRecord,
-        proof_path: &Path,
-    ) -> Result<(), FsError> {
+    pub async fn publish_proof(&self, job: &JobRecord, proof_path: &Path) -> Result<(), FsError> {
         let idx_dir = self.proof_index_dir(&job.request_id);
         tokio::fs::create_dir_all(&idx_dir).await?;
 
@@ -216,7 +212,11 @@ impl Fs {
 
             if matches!(job.status, JobStatus::Queued | JobStatus::Running) {
                 let proof = self.job_work_proof_path(&job.request_id);
-                if proof.exists() || self.job_work_legacy_json_proof_path(&job.request_id).exists() {
+                if proof.exists()
+                    || self
+                        .job_work_legacy_json_proof_path(&job.request_id)
+                        .exists()
+                {
                     job.status = JobStatus::Succeeded;
                     job.stage = JobStage::Done;
                     job.updated_at_ms = now_ms();

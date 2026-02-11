@@ -21,9 +21,7 @@ pub async fn handle_ws(ws: WebSocket, state: AppState) {
     let request_id = match parse_subscribe(first) {
         Ok(r) => r,
         Err(msg) => {
-            let _ = tx
-                .send(Message::text(msg))
-                .await;
+            let _ = tx.send(Message::text(msg)).await;
             return;
         }
     };
@@ -106,7 +104,10 @@ fn parse_subscribe(first: Message) -> Result<String, String> {
     }
 }
 
-async fn send_status(tx: &mut (impl futures_util::Sink<Message, Error = warp::Error> + Unpin), msg: ServerWsMessage) {
+async fn send_status(
+    tx: &mut (impl futures_util::Sink<Message, Error = warp::Error> + Unpin),
+    msg: ServerWsMessage,
+) {
     match serde_json::to_string(&msg) {
         Ok(s) => {
             let _ = tx.send(Message::text(s)).await;

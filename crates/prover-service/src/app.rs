@@ -22,7 +22,9 @@ pub struct App {
 impl App {
     pub async fn new(config: Config) -> Self {
         let fs = Fs::new(config.data_dir.clone());
-        fs.ensure_base_dirs().await.expect("failed to create base dirs");
+        fs.ensure_base_dirs()
+            .await
+            .expect("failed to create base dirs");
         let registry = Registry::new();
         // No internal queueing: the service runs at most one proving job at a time.
         let semaphore = Arc::new(Semaphore::new(1));
