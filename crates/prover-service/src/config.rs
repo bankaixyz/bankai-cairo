@@ -17,7 +17,8 @@ pub struct Config {
     #[arg(long, default_value = "cairo/build/main.json")]
     pub program_path: PathBuf,
 
-    /// If set, require `Authorization: Bearer <token>`.
+    /// If set, require `Authorization: Bearer <token>`..
+    
     #[arg(long)]
     pub auth_token: Option<String>,
 

@@ -26,16 +26,12 @@ WORKDIR /app
 COPY Cargo.toml Cargo.lock rust-toolchain.toml ./
 
 COPY crates/bankai_hints/Cargo.toml ./crates/bankai_hints/Cargo.toml
-COPY crates/stone_verifier_hints/Cargo.toml ./crates/stone_verifier_hints/Cargo.toml
 COPY crates/cairo_runner/Cargo.toml ./crates/cairo_runner/Cargo.toml
 COPY crates/stwo_prover/Cargo.toml ./crates/stwo_prover/Cargo.toml
 COPY crates/prover-service/Cargo.toml ./crates/prover-service/Cargo.toml
 
 RUN mkdir -p crates/bankai_hints/src && touch crates/bankai_hints/src/lib.rs && \
-    mkdir -p crates/stone_verifier_hints/src && touch crates/stone_verifier_hints/src/lib.rs && \
     mkdir -p crates/cairo_runner/src && touch crates/cairo_runner/src/lib.rs && \
-    mkdir -p crates/cairo_runner/bin && touch crates/cairo_runner/bin/api.rs && \
-    touch crates/cairo_runner/bin/fixture_harness.rs && \
     mkdir -p crates/stwo_prover/src && touch crates/stwo_prover/src/lib.rs && \
     mkdir -p crates/prover-service/src && touch crates/prover-service/src/main.rs
 
