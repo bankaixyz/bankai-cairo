@@ -1,0 +1,17 @@
+services:
+  prover-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.prover-service
+      args:
+        PYTHON_VERSION: "3.10-slim"
+    image: bankai/prover-service:local
+    container_name: bankai-prover-service
+    ports:
+      - "3031:3031"
+    volumes:
+      - prover_data:/app/prover-data
+    restart: unless-stopped
+
+volumes:
+  prover_data:

@@ -3,6 +3,7 @@ pub mod error;
 pub mod hint_processor;
 pub mod test_hint_processor;
 pub mod test_hints;
+use cairo_air::utils::ProofFormat;
 
 use crate::{error::Error, hint_processor::CustomHintProcessor};
 use bankai_hints::types::os::BankaiBlockBundleCairo;
@@ -101,21 +102,29 @@ pub fn run_stwo(
         files_start.elapsed()
     );
     if prove {
+        info!("Starting STWO proving from generated artifacts");
         let prove_start = std::time::Instant::now();
         let res = bankai_stwo_prover::generate_proof(
             &Path::new(output_dir).join("pub.json"),
             &Path::new(output_dir).join("priv.json"),
             Some(true),
-            Some(bankai_stwo_prover::ProofFormat::CairoSerde),
+            Some(ProofFormat::CairoSerde),
         )?;
         info!(
             "Proof generated successfully in {:.1?}: {:?}",
             prove_start.elapsed(),
             res
         );
+        info!(
+            "STWO end-to-end (trace + prove) took: {:.1?}",
+            overall_start.elapsed()
+        );
+    } else {
+        info!(
+            "STWO trace generation end-to-end took: {:.1?}",
+            overall_start.elapsed()
+        );
     }
-
-    info!("STWO end-to-end took: {:.1?}", overall_start.elapsed());
 
     if pie {
         let pie = cairo_runner.get_cairo_pie()?;

@@ -1,0 +1,28 @@
+[package]
+name = "prover-service"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+warp.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+clap.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+rayon.workspace = true
+num_cpus.workspace = true
+
+# local crates
+bankai-hints = { path = "../bankai_hints" }
+cairo-runner = { path = "../cairo_runner" }
+bankai-stwo-prover = { path = "../stwo_prover" }
+cairo-air.workspace = true
+# utilities
+tokio-util = { version = "0.7", features = ["io"] }
+futures-util = "0.3"
+
+[dev-dependencies]
+tempfile = "3"

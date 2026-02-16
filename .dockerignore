@@ -59,6 +59,8 @@ docs/
 tests/
 **/test_*
 **/*_test.rs
+!crates/cairo_runner/src/test_hint_processor.rs
+!crates/cairo_runner/src/test_hints.rs
 
 # Output files
 output/

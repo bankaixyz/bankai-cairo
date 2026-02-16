@@ -135,3 +135,29 @@ For a local image without pushing (loads into your local Docker):
 docker buildx build -f Dockerfile.api --platform linux/amd64 \
   -t bankai-runner:amd64 --load .
 ```
+
+## Prover Service with Docker Compose
+
+Run the prover service with a persisted Docker volume for `prover-data`:
+
+```sh
+docker compose -f docker-compose.prover-service.yml up --build -d
+```
+
+Check logs:
+
+```sh
+docker compose -f docker-compose.prover-service.yml logs -f prover-service
+```
+
+Stop and remove container (keep volume):
+
+```sh
+docker compose -f docker-compose.prover-service.yml down
+```
+
+Stop and remove container + volume:
+
+```sh
+docker compose -f docker-compose.prover-service.yml down -v
+```
