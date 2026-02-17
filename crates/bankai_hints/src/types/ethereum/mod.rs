@@ -10,8 +10,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::types::ethereum::bls::{G1PointCairo, G2PointCairo};
 pub use mmr_header_accumulator_hints::types::{
-    BeaconHeaderCairo as MmrBeaconHeaderCairo, BeaconMmrUpdateCairo, ExecutionHeaderCairo,
-    ExecutionMmrUpdateCairo, LastLeafProofCairo, MmrSnapshotCairo,
+    BankaiMmrUpdateCairo, BeaconHeaderCairo as MmrBeaconHeaderCairo, BeaconMmrUpdateCairo,
+    ExecutionHeaderCairo, ExecutionMmrUpdateCairo, LastLeafProofCairo, MmrSnapshotCairo,
 };
 
 #[derive(Debug, Serialize, Deserialize)]

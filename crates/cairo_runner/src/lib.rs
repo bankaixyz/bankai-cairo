@@ -78,11 +78,13 @@ pub fn run_stwo(
 
     let beacon_mmr_update = input.inputs.ethereum.beacon_mmr_update.clone();
     let execution_mmr_update = input.inputs.ethereum.execution_mmr_update.clone();
+    let bankai_mmr_update = input.inputs.bankai_mmr_update.clone();
     let mut hint_processor = CustomHintProcessor::new();
     let mut exec_scopes = ExecutionScopes::new();
     exec_scopes.insert_value("input", input.inputs);
     exec_scopes.insert_value("beacon_mmr_update", beacon_mmr_update);
     exec_scopes.insert_value("execution_mmr_update", execution_mmr_update);
+    exec_scopes.insert_value("bankai_mmr_update", bankai_mmr_update);
     exec_scopes.insert_value("output", input.output);
     exec_scopes.insert_value("program_object", program.clone());
     exec_scopes.insert_value("LOG_LEVEL_CAIRO", log_level);
@@ -146,10 +148,14 @@ pub fn run(
         ..Default::default()
     };
     let beacon_mmr_update = input.inputs.ethereum.beacon_mmr_update.clone();
+    let execution_mmr_update = input.inputs.ethereum.execution_mmr_update.clone();
+    let bankai_mmr_update = input.inputs.bankai_mmr_update.clone();
     let mut hint_processor = CustomHintProcessor::new();
     let mut exec_scopes = ExecutionScopes::new();
     exec_scopes.insert_value("input", input.inputs);
     exec_scopes.insert_value("beacon_mmr_update", beacon_mmr_update);
+    exec_scopes.insert_value("execution_mmr_update", execution_mmr_update);
+    exec_scopes.insert_value("bankai_mmr_update", bankai_mmr_update);
     exec_scopes.insert_value("output", input.output);
     exec_scopes.insert_value("program_object", program.clone());
     exec_scopes.insert_value("LOG_LEVEL_CAIRO", log_level);

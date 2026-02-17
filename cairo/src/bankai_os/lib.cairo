@@ -4,8 +4,9 @@ from starkware.cairo.common.cairo_builtins import (
     BitwiseBuiltin,
     HashBuiltin,
 )
+from starkware.cairo.common.uint256 import Uint256
 
-from cairo.src.bankai_os.block import BankaiBlock, write_block, get_genesis_block
+from cairo.src.bankai_os.block import BankaiBlock, compute_block_hash, write_block, get_genesis_block
 from cairo.src.light_clients.ethereum.lib import run as run_ethereum
 from cairo.src.bankai_os.config.config import get_config, Networks
 from cairo.src.bankai_os.recursion.mock import mock_verify_proof
@@ -15,6 +16,7 @@ from cairo.src.light_clients.ethereum.bls.verify_epoch import (
     run_execution_update,
 )
 from cairo.src.light_clients.ethereum.types import EthereumClientOutput
+from src.bankai.lib import run_bankai_mmr_update
 
 func run_bankai_os{
     output_ptr: felt*,
@@ -69,9 +71,16 @@ func handle_genesis_case{
 
     // Run Ethereum Light Client
     let (eth_output) = run_ethereum(prev.ethereum, config.network_id, 1);
+    let zero_u256 = Uint256(low=0, high=0);
 
     let block = BankaiBlock(
-        version=config.version, program_hash=prev.program_hash, block_number=1, ethereum=eth_output
+        version=config.version,
+        program_hash=prev.program_hash,
+        prev_block_hash=zero_u256,
+        bankai_mmr_root_poseidon=0,
+        bankai_mmr_root_keccak=zero_u256,
+        block_number=1,
+        ethereum=eth_output,
     );
 
     return (block=block);
@@ -100,12 +109,20 @@ func handle_recursive_case{
     // Ensure proof program hash is consistent
     assert derived_program_hash = prev.program_hash;
 
+    let (prev_block_hash) = compute_block_hash(block=prev);
+    let (bankai_mmr_root_keccak, bankai_mmr_root_poseidon, _) = run_bankai_mmr_update(
+        leaf=prev_block_hash
+    );
+
     // Run Ethereum Light Client
     let (eth_output) = run_ethereum(prev.ethereum, config.network_id, 0);
 
     let block = BankaiBlock(
         version=config.version,
         program_hash=prev.program_hash,
+        prev_block_hash=prev_block_hash,
+        bankai_mmr_root_poseidon=bankai_mmr_root_poseidon,
+        bankai_mmr_root_keccak=bankai_mmr_root_keccak,
         block_number=prev.block_number + 1,
         ethereum=eth_output,
     );

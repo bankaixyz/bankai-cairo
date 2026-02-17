@@ -26,7 +26,8 @@ use cairo_vm_base::vm::cairo_vm::{
 use garaga_zero::hints::get_hints as get_garaga_zero_hints;
 use mmr_header_accumulator_hints::hints::get_hints as get_mmr_header_accumulator_hints;
 use mmr_header_accumulator_hints::hints::input::{
-    write_beacon_input, write_execution_input, HINT_WRITE_BEACON_INPUT, HINT_WRITE_EXECUTION_INPUT,
+    write_bankai_input, write_beacon_input, write_execution_input, HINT_WRITE_BANKAI_INPUT,
+    HINT_WRITE_BEACON_INPUT, HINT_WRITE_EXECUTION_INPUT,
 };
 use std::any::Any;
 use std::collections::HashMap;
@@ -98,6 +99,7 @@ impl HintProcessorLogic for CustomHintProcessor {
                 HINT_WRITE_EXECUTION_INPUT => {
                     write_execution_input(vm, exec_scopes, hpd, constants)
                 }
+                HINT_WRITE_BANKAI_INPUT => write_bankai_input(vm, exec_scopes, hpd, constants),
                 _ => Err(HintError::UnknownHint(
                     hint_code.to_string().into_boxed_str(),
                 )),

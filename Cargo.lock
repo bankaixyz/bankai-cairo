@@ -586,6 +586,7 @@ dependencies = [
 name = "bankai-hints"
 version = "0.1.0"
 dependencies = [
+ "alloy-primitives 1.3.1",
  "cairo-vm-base",
  "hex",
  "mmr-header-accumulator-hints",
@@ -3593,7 +3594,7 @@ dependencies = [
 [[package]]
 name = "mmr-header-accumulator-hints"
 version = "0.1.0"
-source = "git+https://github.com/bankaixyz/mmr-header-accumulator#0a77ab94d767c2a910c3246c5d5dcb9d2617f779"
+source = "git+https://github.com/bankaixyz/mmr-header-accumulator?rev=a8ec5af#a8ec5afc5dfc7c30ab2314bd748382d1d91ec7ea"
 dependencies = [
  "alloy-primitives 0.8.25",
  "bincode 2.0.1",
