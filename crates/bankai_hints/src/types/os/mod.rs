@@ -1,3 +1,4 @@
+pub mod hash;
 pub mod recursion;
 
 use cairo_vm_base::cairo_type::CairoType;
