@@ -81,6 +81,7 @@ func handle_genesis_case{
         bankai_mmr_root_keccak=zero_u256,
         block_number=1,
         ethereum=eth_output,
+        op_chains=prev.op_chains,
     );
 
     return (block=block);
@@ -125,6 +126,7 @@ func handle_recursive_case{
         bankai_mmr_root_keccak=bankai_mmr_root_keccak,
         block_number=prev.block_number + 1,
         ethereum=eth_output,
+        op_chains=prev.op_chains,
     );
 
     return (block=block);

@@ -20,7 +20,7 @@ pub struct BankaiBlockCairo {
     pub bankai_mmr_root_keccak: Uint256,
     pub block_number: Felt,
     pub ethereum: EthereumClientOutputCairo,
-    pub op_chains: OpChainsOutputCairo,
+    pub op_stack: OpChainsOutputCairo,
 }
 
 impl CairoType for BankaiBlockCairo {
@@ -40,7 +40,7 @@ impl CairoType for BankaiBlockCairo {
         current_ptr = self.bankai_mmr_root_keccak.to_memory(vm, current_ptr)?;
         current_ptr = self.block_number.to_memory(vm, current_ptr)?;
         current_ptr = self.ethereum.to_memory(vm, current_ptr)?;
-        current_ptr = self.op_chains.to_memory(vm, current_ptr)?;
+        current_ptr = self.op_stack.to_memory(vm, current_ptr)?;
         Ok(current_ptr)
     }
 
@@ -56,7 +56,7 @@ impl CairoType for BankaiBlockCairo {
             bankai_mmr_root_keccak: Uint256::from_memory(vm, (address + 5)?)?,
             block_number: Felt::from_memory(vm, (address + 7)?)?,
             ethereum: EthereumClientOutputCairo::from_memory(vm, (address + 8)?)?,
-            op_chains: OpChainsOutputCairo::from_memory(
+            op_stack: OpChainsOutputCairo::from_memory(
                 vm,
                 (address + (8 + EthereumClientOutputCairo::n_fields()))?,
             )?,
@@ -77,7 +77,7 @@ pub struct BankaiBlockInputsCairo {
     pub prev: BankaiBlockCairo,
     pub ethereum: EthereumInputsCairo,
     pub bankai_mmr_update: BankaiMmrUpdateCairo,
-    pub op_chains_input: OpChainsInputCairo,
+    pub op_stack: OpChainsInputCairo,
 }
 
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]

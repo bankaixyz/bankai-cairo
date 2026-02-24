@@ -4,7 +4,7 @@ use num_bigint::BigUint;
 
 use super::BankaiBlockCairo;
 
-const BANKAI_BLOCK_HASH_WORDS: usize = 22;
+const BANKAI_BLOCK_HASH_WORDS: usize = 24;
 
 fn felt_to_uint256(value: &Felt) -> Uint256 {
     let value_big = BigUint::from_bytes_be(&value.0.to_bytes_be());
@@ -48,6 +48,8 @@ pub fn compute_block_hash_keccak(block: &BankaiBlockCairo) -> Uint256 {
         felt_to_uint256(&execution.finalized_height),
         execution.mmr_root_keccak.clone(),
         felt_to_uint256(&execution.mmr_root_poseidon),
+        block.op_stack.root.clone(),
+        felt_to_uint256(&block.op_stack.n_clients),
     ];
 
     let mut preimage = Vec::with_capacity(BANKAI_BLOCK_HASH_WORDS * 32);
