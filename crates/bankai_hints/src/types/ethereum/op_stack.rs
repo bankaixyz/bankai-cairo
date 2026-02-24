@@ -31,7 +31,7 @@ impl CairoType for OpChainsOutputCairo {
     ) -> Result<Self, cairo_vm_base::vm::cairo_vm::vm::errors::hint_errors::HintError> {
         Ok(Self {
             root: Uint256::from_memory(vm, address)?,
-            n_clients: Felt::from_memory(vm, (address + 1)?)?,
+            n_clients: Felt::from_memory(vm, (address + 2)?)?,
         })
     }
 

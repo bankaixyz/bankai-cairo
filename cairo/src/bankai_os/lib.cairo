@@ -16,6 +16,7 @@ from cairo.src.light_clients.ethereum.bls.verify_epoch import (
     run_execution_update,
 )
 from cairo.src.light_clients.ethereum.types import EthereumClientOutput
+from cairo.src.light_clients.op_stack.lib import run as run_op_stack
 from src.bankai.lib import run_bankai_mmr_update
 
 func run_bankai_os{
@@ -81,7 +82,7 @@ func handle_genesis_case{
         bankai_mmr_root_keccak=zero_u256,
         block_number=1,
         ethereum=eth_output,
-        op_chains=prev.op_chains,
+        op_stack=prev.op_stack,
     );
 
     return (block=block);
@@ -118,6 +119,9 @@ func handle_recursive_case{
     // Run Ethereum Light Client
     let (eth_output) = run_ethereum(prev.ethereum, config.network_id, 0);
 
+    // Run Op Stack Light Client
+    let (op_stack_output) = run_op_stack(prev.op_stack);
+
     let block = BankaiBlock(
         version=config.version,
         program_hash=prev.program_hash,
@@ -126,7 +130,7 @@ func handle_recursive_case{
         bankai_mmr_root_keccak=bankai_mmr_root_keccak,
         block_number=prev.block_number + 1,
         ethereum=eth_output,
-        op_chains=prev.op_chains,
+        op_stack=op_stack_output,
     );
 
     return (block=block);

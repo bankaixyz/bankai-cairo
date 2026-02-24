@@ -16,7 +16,7 @@ struct BankaiBlock {
     bankai_mmr_root_keccak: Uint256,
     block_number: felt,
     ethereum: EthereumClientOutput,
-    op_chains: OpChainsOutput,
+    op_stack: OpChainsOutput,
 }
 
 func read_block(block_felts: felt*) -> (parsed: BankaiBlock) {
@@ -66,7 +66,7 @@ func compute_block_hash{range_check_ptr, bitwise_ptr: BitwiseBuiltin*, keccak_pt
     let (execution_mmr_root_poseidon_u256) = felt_to_uint256(
         value=block.ethereum.execution.mmr_root_poseidon
     );
-    let (op_chains_n_clients_u256) = felt_to_uint256(value=block.op_chains.n_clients);
+    let (op_stack_n_clients_u256) = felt_to_uint256(value=block.op_stack.n_clients);
 
     assert fields[0] = version_u256;
     assert fields[1] = program_hash_u256;
@@ -92,8 +92,8 @@ func compute_block_hash{range_check_ptr, bitwise_ptr: BitwiseBuiltin*, keccak_pt
     assert fields[19] = execution_finalized_height_u256;
     assert fields[20] = block.ethereum.execution.mmr_root_keccak;
     assert fields[21] = execution_mmr_root_poseidon_u256;
-    assert fields[22] = block.op_chains.root;
-    assert fields[23] = op_chains_n_clients_u256;
+    assert fields[22] = block.op_stack.root;
+    assert fields[23] = op_stack_n_clients_u256;
 
     let (hash) = keccak_uint256s_bigend(n_leafs=24, leafs=fields);
     return (hash=hash);
@@ -124,7 +124,7 @@ func get_genesis_block(config: BankaiOSConfig, program_hash: felt) -> (block: Ba
         bankai_mmr_root_keccak=zero_u256,
         block_number=0,
         ethereum=ethereum_genesis,
-        op_chains=OpChainsOutput(root=zero_u256, n_clients=0),
+        op_stack=OpChainsOutput(root=zero_u256, n_clients=0),
     );
     return (block=block);
 }
