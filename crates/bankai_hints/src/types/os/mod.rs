@@ -5,7 +5,10 @@ use cairo_vm_base::cairo_type::CairoType;
 use cairo_vm_base::types::{felt::Felt, uint256::Uint256};
 use serde::{Deserialize, Serialize};
 
-use crate::types::ethereum::{BankaiMmrUpdateCairo, EthereumClientOutputCairo, EthereumInputsCairo};
+use crate::types::ethereum::op_stack::{OpChainsInputCairo, OpChainsOutputCairo};
+use crate::types::ethereum::{
+    BankaiMmrUpdateCairo, EthereumClientOutputCairo, EthereumInputsCairo,
+};
 use crate::types::os::recursion::MockRecursionCairo;
 
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
@@ -17,6 +20,7 @@ pub struct BankaiBlockCairo {
     pub bankai_mmr_root_keccak: Uint256,
     pub block_number: Felt,
     pub ethereum: EthereumClientOutputCairo,
+    pub op_chains: OpChainsOutputCairo,
 }
 
 impl CairoType for BankaiBlockCairo {
@@ -36,6 +40,7 @@ impl CairoType for BankaiBlockCairo {
         current_ptr = self.bankai_mmr_root_keccak.to_memory(vm, current_ptr)?;
         current_ptr = self.block_number.to_memory(vm, current_ptr)?;
         current_ptr = self.ethereum.to_memory(vm, current_ptr)?;
+        current_ptr = self.op_chains.to_memory(vm, current_ptr)?;
         Ok(current_ptr)
     }
 
@@ -51,11 +56,18 @@ impl CairoType for BankaiBlockCairo {
             bankai_mmr_root_keccak: Uint256::from_memory(vm, (address + 5)?)?,
             block_number: Felt::from_memory(vm, (address + 7)?)?,
             ethereum: EthereumClientOutputCairo::from_memory(vm, (address + 8)?)?,
+            op_chains: OpChainsOutputCairo::from_memory(
+                vm,
+                (address + (8 + EthereumClientOutputCairo::n_fields()))?,
+            )?,
         })
     }
 
     fn n_fields() -> usize {
-        Felt::n_fields() * 4 + Uint256::n_fields() * 2 + EthereumClientOutputCairo::n_fields()
+        Felt::n_fields() * 4
+            + Uint256::n_fields() * 2
+            + EthereumClientOutputCairo::n_fields()
+            + OpChainsOutputCairo::n_fields()
     }
 }
 
@@ -65,6 +77,7 @@ pub struct BankaiBlockInputsCairo {
     pub prev: BankaiBlockCairo,
     pub ethereum: EthereumInputsCairo,
     pub bankai_mmr_update: BankaiMmrUpdateCairo,
+    pub op_chains_input: OpChainsInputCairo,
 }
 
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]

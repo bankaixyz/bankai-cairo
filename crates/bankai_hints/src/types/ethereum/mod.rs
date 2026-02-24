@@ -1,5 +1,6 @@
 pub mod bls;
 pub mod header;
+pub mod op_stack;
 
 use cairo_vm_base::cairo_type::{CairoType, CairoWritable};
 use cairo_vm_base::types::{

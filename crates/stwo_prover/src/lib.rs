@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 
-use cairo_air::{utils::ProofFormat, PreProcessedTraceVariant};
 use cairo_air::verifier::CairoVerificationError;
+use cairo_air::{utils::ProofFormat, PreProcessedTraceVariant};
 use stwo::prover::ProvingError;
 use stwo_cairo_adapter::vm_import::{adapt_vm_output, VmImportError};
 use stwo_cairo_adapter::{log_prover_input, ProverInput};

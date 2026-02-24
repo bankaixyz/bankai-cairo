@@ -135,10 +135,7 @@ pub fn verify_block_result(
         println!("Block hash output: {block_hash:#?}");
         println!("Computed hash from output block: {computed_block_hash:#?}");
         return Err(HintError::CustomHint(
-            format!(
-                "Computed hash mismatch: {block_hash:#?} != {computed_block_hash:#?}"
-            )
-            .into(),
+            format!("Computed hash mismatch: {block_hash:#?} != {computed_block_hash:#?}").into(),
         ));
     }
 
@@ -147,10 +144,8 @@ pub fn verify_block_result(
         println!("Expected block hash: {exp_block_hash:#?}");
         println!("Computed hash from expected block: {computed_expected_hash:#?}");
         return Err(HintError::CustomHint(
-            format!(
-                "Expected hash mismatch: {exp_block_hash:#?} != {computed_expected_hash:#?}"
-            )
-            .into(),
+            format!("Expected hash mismatch: {exp_block_hash:#?} != {computed_expected_hash:#?}")
+                .into(),
         ));
     }
 

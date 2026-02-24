@@ -18,7 +18,7 @@ pub struct Config {
     pub program_path: PathBuf,
 
     /// If set, require `Authorization: Bearer <token>`..
-    
+
     #[arg(long)]
     pub auth_token: Option<String>,
 
