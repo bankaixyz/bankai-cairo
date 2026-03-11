@@ -1,5 +1,8 @@
 use bankai_hints::hints::ethereum::{
-    HINT_UNSAFE_WRITE_OP_STACK_EXPECTED_OUTPUT, HINT_WRITE_COMMITTEE_UPDATE_INPUTS, HINT_WRITE_CONSENSUS_INPUTS, unsafe_write_op_stack_expected_output, write_committee_update_inputs, write_consensus_inputs
+    HINT_UNSAFE_WRITE_OP_STACK_EXPECTED_OUTPUT, HINT_WRITE_COMMITTEE_UPDATE_INPUTS,
+    HINT_WRITE_CONSENSUS_INPUTS, HINT_WRITE_OP_STACK_INPUTS,
+    unsafe_write_op_stack_expected_output, write_committee_update_inputs, write_consensus_inputs,
+    write_op_stack_inputs,
 };
 use bankai_hints::hints::get_hints as get_bankai_hints;
 use bankai_hints::hints::os::{
@@ -87,6 +90,9 @@ impl HintProcessorLogic for CustomHintProcessor {
                 }
                 HINT_WRITE_COMMITTEE_UPDATE_INPUTS => {
                     write_committee_update_inputs(vm, exec_scopes, hpd, constants)
+                }
+                HINT_WRITE_OP_STACK_INPUTS => {
+                    write_op_stack_inputs(vm, exec_scopes, hpd, constants)
                 }
                 HINT_WRITE_INIT_DATA => write_init_data(vm, exec_scopes, hpd, constants),
                 HINT_PREVIOUS_BLOCK => write_previous_block(vm, exec_scopes, hpd, constants),

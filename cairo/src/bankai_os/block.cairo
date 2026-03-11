@@ -5,6 +5,7 @@ from starkware.cairo.common.uint256 import Uint256
 from cairo.src.light_clients.ethereum.types import EthereumClientOutput, get_ethereum_genesis
 from cairo.src.bankai_os.config.types import BankaiOSConfig
 from cairo.src.light_clients.ethereum.config.config import get_config
+from cairo.src.light_clients.op_stack.lib import get_empty_op_chains_root
 from src.core.keccak import keccak_uint256s_bigend
 from cairo.src.light_clients.op_stack.types import OpChainsOutput
 
@@ -116,6 +117,7 @@ func get_genesis_block(config: BankaiOSConfig, program_hash: felt) -> (block: Ba
     let eth_config = get_config(config.network_id);
     let (ethereum_genesis) = get_ethereum_genesis(eth_config.genesis_validator_root);
     let zero_u256 = Uint256(low=0, high=0);
+    let (op_stack_root) = get_empty_op_chains_root();
     let block = BankaiBlock(
         version=config.version,
         program_hash=program_hash,
@@ -124,7 +126,7 @@ func get_genesis_block(config: BankaiOSConfig, program_hash: felt) -> (block: Ba
         bankai_mmr_root_keccak=zero_u256,
         block_number=0,
         ethereum=ethereum_genesis,
-        op_stack=OpChainsOutput(root=zero_u256, n_clients=0),
+        op_stack=OpChainsOutput(root=op_stack_root, n_clients=0),
     );
     return (block=block);
 }

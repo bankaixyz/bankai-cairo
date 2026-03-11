@@ -4,7 +4,7 @@ use cairo_vm_base::{
 };
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq)]
 pub struct OpChainsOutputCairo {
     pub root: Uint256,   // this is the merkle root of all op clients
     pub n_clients: Felt, // number of op clients
@@ -40,7 +40,7 @@ impl CairoType for OpChainsOutputCairo {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq)]
 pub struct OpChainsInputCairo {
     pub prev_root: Uint256,              // prev root of all clients
     pub n_updates: Felt,                 // number of updates
@@ -68,6 +68,17 @@ impl CairoWritable for OpChainsInputCairo {
         for update in &self.updates {
             updates_ptr = update.to_memory(vm, updates_ptr)?;
         }
+
+        let expected_ptr = (address + Self::n_fields())?;
+        if current_ptr != expected_ptr {
+            return Err(cairo_vm_base::vm::cairo_vm::vm::errors::hint_errors::HintError::CustomHint(
+                format!(
+                    "Memory layout mismatch for OpChainsInputCairo: expected pointer at {expected_ptr}, but got {current_ptr}"
+                )
+                .into(),
+            ));
+        }
+
         Ok(current_ptr)
     }
 
@@ -76,7 +87,7 @@ impl CairoWritable for OpChainsInputCairo {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq)]
 pub struct OpChainInputCairo {
     pub client_index: Felt,               // index of a client in the merkle tree
     pub prev_merkle_path: Vec<Uint256>,   // merkle path to the prev client
@@ -97,11 +108,11 @@ impl CairoWritable for OpChainInputCairo {
         let mut current_ptr = address;
         current_ptr = self.client_index.to_memory(vm, current_ptr)?;
 
-        current_ptr = self.prev_merkle_path_len.to_memory(vm, current_ptr)?;
         // Store Uint256* pointer, then write path elements into that segment.
         let prev_merkle_path_segment = vm.add_memory_segment();
         vm.insert_value(current_ptr, prev_merkle_path_segment)?;
         current_ptr = (current_ptr + 1)?;
+        current_ptr = self.prev_merkle_path_len.to_memory(vm, current_ptr)?;
 
         let mut prev_merkle_path_ptr = prev_merkle_path_segment;
         for path_element in &self.prev_merkle_path {
@@ -110,6 +121,17 @@ impl CairoWritable for OpChainInputCairo {
 
         current_ptr = self.prev_output.to_memory(vm, current_ptr)?;
         current_ptr = self.output.to_memory(vm, current_ptr)?;
+
+        let expected_ptr = (address + Self::n_fields())?;
+        if current_ptr != expected_ptr {
+            return Err(cairo_vm_base::vm::cairo_vm::vm::errors::hint_errors::HintError::CustomHint(
+                format!(
+                    "Memory layout mismatch for OpChainInputCairo: expected pointer at {expected_ptr}, but got {current_ptr}"
+                )
+                .into(),
+            ));
+        }
+
         Ok(current_ptr)
     }
 
@@ -118,7 +140,7 @@ impl CairoWritable for OpChainInputCairo {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq)]
 pub struct OpClientOutputCairo {
     pub chain_id: Felt,
     pub block_number: Felt,
@@ -144,6 +166,17 @@ impl CairoType for OpClientOutputCairo {
         current_ptr = self.l1_submission_block.to_memory(vm, current_ptr)?;
         current_ptr = self.mmr_root_keccak.to_memory(vm, current_ptr)?;
         current_ptr = self.mmr_root_poseidon.to_memory(vm, current_ptr)?;
+
+        let expected_ptr = (address + Self::n_fields())?;
+        if current_ptr != expected_ptr {
+            return Err(cairo_vm_base::vm::cairo_vm::vm::errors::hint_errors::HintError::CustomHint(
+                format!(
+                    "Memory layout mismatch for OpClientOutputCairo: expected pointer at {expected_ptr}, but got {current_ptr}"
+                )
+                .into(),
+            ));
+        }
+
         Ok(current_ptr)
     }
 
@@ -156,12 +189,13 @@ impl CairoType for OpClientOutputCairo {
             block_number: Felt::from_memory(vm, (address + 1)?)?,
             header_hash: Uint256::from_memory(vm, (address + 2)?)?,
             l1_submission_block: Felt::from_memory(vm, (address + 4)?)?,
-            mmr_root_keccak: Uint256::from_memory(vm, (address + 6)?)?,
-            mmr_root_poseidon: Felt::from_memory(vm, (address + 8)?)?,
+            mmr_root_keccak: Uint256::from_memory(vm, (address + 5)?)?,
+            mmr_root_poseidon: Felt::from_memory(vm, (address + 7)?)?,
         })
     }
 
     fn n_fields() -> usize {
-        Felt::n_fields() * 6 + Uint256::n_fields() * 2
+        Felt::n_fields() * 4 + Uint256::n_fields() * 2
     }
 }
+
