@@ -1,5 +1,5 @@
 use crate::config::Config;
-use crate::state::{Fs, Registry};
+use crate::state::{fs::DEFAULT_RETENTION_MS, Fs, Registry};
 use crate::types::{JobRecord, ServerWsMessage};
 use std::sync::Arc;
 use tokio::sync::Semaphore;
@@ -42,7 +42,12 @@ impl App {
             .bootstrap_fail_unfinished(state.clone())
             .await
             .expect("bootstrap failed");
-        info!(failed_unfinished, "bootstrap complete");
+        let pruned_jobs = state
+            .fs
+            .prune_jobs_older_than(DEFAULT_RETENTION_MS, now_ms())
+            .await
+            .expect("retention pruning failed");
+        info!(failed_unfinished, pruned_jobs, "bootstrap complete");
 
         Self { state }
     }

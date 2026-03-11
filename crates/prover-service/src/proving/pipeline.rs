@@ -218,6 +218,7 @@ pub async fn run_job(state: AppState, request_id: String) -> Result<(), String> 
         return Ok(());
     }
     info!("proof publish done");
+    cleanup_work_dir(&state, &job.request_id).await;
 
     set_end_to_end_ms(&mut job, &run_started_at);
     update_job(
@@ -354,6 +355,17 @@ async fn fail_job(state: &AppState, job: &mut JobRecord, err: ProverError) {
         Some(err.message.clone()),
     )
     .await;
+    cleanup_work_dir(state, &job.request_id).await;
+}
+
+async fn cleanup_work_dir(state: &AppState, request_id: &str) {
+    if let Err(e) = state.fs.delete_job_work_dir(request_id).await {
+        error!(
+            request_id,
+            error = %e,
+            "failed to remove job work dir"
+        );
+    }
 }
 
 fn elapsed_ms(started_at: &Instant) -> u64 {

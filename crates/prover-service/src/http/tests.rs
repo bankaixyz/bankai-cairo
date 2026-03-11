@@ -3,7 +3,9 @@ use crate::config::{CairoLogLevel, Config};
 use crate::errors;
 use crate::http::routes;
 use crate::state::{Fs, Registry};
-use crate::types::{JobStage, JobStatus, ServerWsMessage};
+use crate::types::{
+    JobRecord, JobStage, JobStatus, ServerWsMessage, SubmitMetadata, SubmitProofRequest,
+};
 use serde_json::json;
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use std::path::PathBuf;
@@ -38,6 +40,20 @@ fn test_filter(
     state: AppState,
 ) -> impl Filter<Extract = (impl warp::Reply,), Error = std::convert::Infallible> + Clone {
     routes::routes(state).recover(errors::recover)
+}
+
+fn sample_request(request_id: &str) -> SubmitProofRequest {
+    SubmitProofRequest {
+        request_id: request_id.to_string(),
+        idempotency_key: format!("block:{request_id}"),
+        payload_type: crate::types::SUPPORTED_PAYLOAD_TYPE.to_string(),
+        payload_json: json!({}),
+        metadata: SubmitMetadata {
+            producer_id: "test".to_string(),
+            producer_attempt: Some(0),
+            max_primary_attempts: Some(1),
+        },
+    }
 }
 
 #[tokio::test]
@@ -173,6 +189,61 @@ async fn proof_before_ready_is_409() {
         .reply(&api)
         .await;
     assert_eq!(resp2.status(), 409);
+}
+
+#[tokio::test]
+async fn proof_download_uses_published_copy_after_work_cleanup() {
+    let tmp = tempfile::tempdir().unwrap();
+    let state = test_state(&tmp).await;
+    let api = test_filter(state.clone());
+
+    let job = JobRecord {
+        request_id: "published-proof".to_string(),
+        idempotency_key: "block:published-proof".to_string(),
+        status: JobStatus::Succeeded,
+        stage: JobStage::Done,
+        error_code: None,
+        error_message: None,
+        created_at_ms: 1,
+        updated_at_ms: 1,
+        end_to_end_ms: None,
+        trace_gen_ms: None,
+        proving_ms: None,
+    };
+    state
+        .fs
+        .persist_new_job(&job, &sample_request("published-proof"))
+        .await
+        .unwrap();
+    tokio::fs::write(
+        state.fs.job_work_proof_path("published-proof"),
+        b"work-proof",
+    )
+    .await
+    .unwrap();
+    tokio::fs::create_dir_all(state.fs.proof_index_dir("published-proof"))
+        .await
+        .unwrap();
+    tokio::fs::write(
+        state.fs.proof_index_proof_path("published-proof"),
+        b"published-proof",
+    )
+    .await
+    .unwrap();
+    state
+        .fs
+        .delete_job_work_dir("published-proof")
+        .await
+        .unwrap();
+
+    let resp = warp::test::request()
+        .method("GET")
+        .path("/v1/proofs/published-proof/proof")
+        .reply(&api)
+        .await;
+
+    assert_eq!(resp.status(), 200);
+    assert_eq!(resp.body().as_ref(), b"published-proof");
 }
 
 #[tokio::test]

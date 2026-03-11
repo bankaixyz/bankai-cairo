@@ -260,7 +260,7 @@ async fn handle_proof(request_id: String, state: AppState) -> Result<impl Reply,
 
     let proof_path = state
         .fs
-        .find_job_work_proof_path(&request_id)
+        .find_download_proof_path(&request_id)
         .ok_or_else(|| errors::not_found("proof artifact missing on disk"))?;
 
     Ok(crate::http::files::proof_file(proof_path).await)
