@@ -7,3 +7,6 @@ build
 sqlite_state/sqlite_state/*.db
 output
 prover-data
+.cargo/
+.codex/
+.cursor/
