@@ -91,7 +91,7 @@ impl CairoWritable for OpChainsInputCairo {
 pub struct OpChainInputCairo {
     pub client_index: Felt,               // index of a client in the merkle tree
     pub prev_merkle_path: Vec<Uint256>,   // merkle path to the prev client
-    pub prev_merkle_path_len: Felt,      // length of the merkle path
+    pub prev_merkle_path_len: Felt,       // length of the merkle path
     pub prev_output: OpClientOutputCairo, // prev output of the client we need to decommmit
     pub output: OpClientOutputCairo,      // new output of the client we need to commit
 }
@@ -198,4 +198,3 @@ impl CairoType for OpClientOutputCairo {
         Felt::n_fields() * 4 + Uint256::n_fields() * 2
     }
 }
-

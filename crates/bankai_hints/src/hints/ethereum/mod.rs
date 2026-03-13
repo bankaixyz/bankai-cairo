@@ -1,23 +1,25 @@
 use cairo_vm_base::{
-    cairo_type::{CairoType, CairoWritable},
+    cairo_type::CairoWritable,
     vm::cairo_vm::{
-        Felt252, hint_processor::builtin_hint_processor::{
+        hint_processor::builtin_hint_processor::{
             builtin_hint_processor_definition::HintProcessorData,
             hint_utils::{
                 get_integer_from_var_name, get_ptr_from_var_name, get_relocatable_from_var_name,
             },
-        }, types::exec_scope::ExecutionScopes, vm::{errors::hint_errors::HintError, vm_core::VirtualMachine}
+        },
+        types::exec_scope::ExecutionScopes,
+        vm::{errors::hint_errors::HintError, vm_core::VirtualMachine},
+        Felt252,
     },
 };
 use std::collections::HashMap;
 
-use crate::types::os::{BankaiBlockInputsCairo, BankaiBlockOutputCairo};
+use crate::types::os::BankaiBlockInputsCairo;
 
 pub const HINT_WRITE_CONSENSUS_INPUTS: &str = r#"write_consensus_inputs()"#;
 pub const HINT_WRITE_COMMITTEE_UPDATE_INPUTS: &str = r#"write_committee_update_inputs()"#;
 pub const HINT_CHECK_FORK_VERSION: &str = r#"check_fork_version()"#;
 pub const HINT_WRITE_OP_STACK_INPUTS: &str = r#"write_op_stack_inputs()"#;
-pub const HINT_UNSAFE_WRITE_OP_STACK_EXPECTED_OUTPUT: &str = r#"unsafe_write_op_stack_expected_output()"#;
 
 pub fn write_consensus_inputs(
     vm: &mut VirtualMachine,
@@ -142,25 +144,5 @@ pub fn write_op_stack_inputs(
     )?;
     op_stack_inputs.to_memory(vm, op_stack_inputs_ptr)?;
 
-    Ok(())
-}
-
-
-pub fn unsafe_write_op_stack_expected_output(
-    vm: &mut VirtualMachine,
-    exec_scopes: &mut ExecutionScopes,
-    hint_data: &HintProcessorData,
-    _constants: &HashMap<String, Felt252>,
-) -> Result<(), HintError> {
-    println!("Unsafe write op stack expected output");
-    let outputs = exec_scopes.get_ref::<BankaiBlockOutputCairo>("output")?;
-    let op_stack_outputs = &outputs.block.op_stack;
-    let op_stack_outputs_ptr = get_relocatable_from_var_name(
-        "expected_output",
-        vm,
-        &hint_data.ids_data,
-        &hint_data.ap_tracking,
-    )?;
-    op_stack_outputs.to_memory(vm, op_stack_outputs_ptr)?;
     Ok(())
 }
