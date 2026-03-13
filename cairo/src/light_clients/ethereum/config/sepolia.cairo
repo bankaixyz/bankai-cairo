@@ -8,7 +8,7 @@ func get_config_sepolia() -> EthereumConfig {
     let config = EthereumConfig(
         network_id=1,
         sync_committee_period=8192,
-        genesis_validator_root=0x19c80d8a5de5427e66d4cb600f6ac995061f73156996c9a7fca2285ae90169f,
+        genesis_validator_root=0x03aaaf5f00163dba0a916befd3cfaa26e50b41c32b7a42a593003cb2b9737440,
     );
     return config;
 }

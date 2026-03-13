@@ -3,6 +3,7 @@ pub mod error;
 pub mod hint_processor;
 pub mod test_hint_processor;
 pub mod test_hints;
+use cairo_air::utils::ProofFormat;
 
 use crate::{error::Error, hint_processor::CustomHintProcessor};
 use bankai_hints::types::os::BankaiBlockBundleCairo;
@@ -77,11 +78,13 @@ pub fn run_stwo(
 
     let beacon_mmr_update = input.inputs.ethereum.beacon_mmr_update.clone();
     let execution_mmr_update = input.inputs.ethereum.execution_mmr_update.clone();
+    let bankai_mmr_update = input.inputs.bankai_mmr_update.clone();
     let mut hint_processor = CustomHintProcessor::new();
     let mut exec_scopes = ExecutionScopes::new();
     exec_scopes.insert_value("input", input.inputs);
     exec_scopes.insert_value("beacon_mmr_update", beacon_mmr_update);
     exec_scopes.insert_value("execution_mmr_update", execution_mmr_update);
+    exec_scopes.insert_value("bankai_mmr_update", bankai_mmr_update);
     exec_scopes.insert_value("output", input.output);
     exec_scopes.insert_value("program_object", program.clone());
     exec_scopes.insert_value("LOG_LEVEL_CAIRO", log_level);
@@ -101,21 +104,29 @@ pub fn run_stwo(
         files_start.elapsed()
     );
     if prove {
+        info!("Starting STWO proving from generated artifacts");
         let prove_start = std::time::Instant::now();
         let res = bankai_stwo_prover::generate_proof(
             &Path::new(output_dir).join("pub.json"),
             &Path::new(output_dir).join("priv.json"),
             Some(true),
-            Some(bankai_stwo_prover::ProofFormat::CairoSerde),
+            Some(ProofFormat::CairoSerde),
         )?;
         info!(
             "Proof generated successfully in {:.1?}: {:?}",
             prove_start.elapsed(),
             res
         );
+        info!(
+            "STWO end-to-end (trace + prove) took: {:.1?}",
+            overall_start.elapsed()
+        );
+    } else {
+        info!(
+            "STWO trace generation end-to-end took: {:.1?}",
+            overall_start.elapsed()
+        );
     }
-
-    info!("STWO end-to-end took: {:.1?}", overall_start.elapsed());
 
     if pie {
         let pie = cairo_runner.get_cairo_pie()?;
@@ -137,10 +148,14 @@ pub fn run(
         ..Default::default()
     };
     let beacon_mmr_update = input.inputs.ethereum.beacon_mmr_update.clone();
+    let execution_mmr_update = input.inputs.ethereum.execution_mmr_update.clone();
+    let bankai_mmr_update = input.inputs.bankai_mmr_update.clone();
     let mut hint_processor = CustomHintProcessor::new();
     let mut exec_scopes = ExecutionScopes::new();
     exec_scopes.insert_value("input", input.inputs);
     exec_scopes.insert_value("beacon_mmr_update", beacon_mmr_update);
+    exec_scopes.insert_value("execution_mmr_update", execution_mmr_update);
+    exec_scopes.insert_value("bankai_mmr_update", bankai_mmr_update);
     exec_scopes.insert_value("output", input.output);
     exec_scopes.insert_value("program_object", program.clone());
     exec_scopes.insert_value("LOG_LEVEL_CAIRO", log_level);

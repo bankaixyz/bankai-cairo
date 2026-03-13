@@ -1,0 +1,103 @@
+# Declare the Python version build argument globally.
+ARG PYTHON_VERSION=3.10-slim
+
+# Stage 1: Build prover-service with Rust.
+FROM python:${PYTHON_VERSION} AS builder
+
+RUN apt-get update && apt-get install -y \
+    --no-install-recommends \
+    pkg-config \
+    libssl-dev \
+    curl \
+    build-essential \
+    && ln -s /usr/bin/python3 /usr/bin/python \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Rust.
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+ENV PATH="/root/.cargo/bin:${PATH}"
+
+# Install cargo-chef for dependency layer caching.
+RUN cargo install cargo-chef --locked
+
+ENV PYO3_PYTHON=python3
+WORKDIR /app
+
+# Layer 1: Prepare dependency recipe.
+COPY Cargo.toml Cargo.lock rust-toolchain.toml ./
+
+COPY crates/bankai_hints/Cargo.toml ./crates/bankai_hints/Cargo.toml
+COPY crates/cairo_runner/Cargo.toml ./crates/cairo_runner/Cargo.toml
+COPY crates/stwo_prover/Cargo.toml ./crates/stwo_prover/Cargo.toml
+COPY crates/prover-service/Cargo.toml ./crates/prover-service/Cargo.toml
+
+RUN mkdir -p crates/bankai_hints/src && touch crates/bankai_hints/src/lib.rs && \
+    mkdir -p crates/cairo_runner/src && touch crates/cairo_runner/src/lib.rs && \
+    mkdir -p crates/stwo_prover/src && touch crates/stwo_prover/src/lib.rs && \
+    mkdir -p crates/prover-service/src && touch crates/prover-service/src/main.rs
+
+COPY cairo/packages/garaga_zero/Cargo.toml ./cairo/packages/garaga_zero/Cargo.toml
+RUN mkdir -p cairo/packages/garaga_zero/hints/rust-vm/src && \
+    touch cairo/packages/garaga_zero/hints/rust-vm/src/lib.rs
+
+RUN cargo chef prepare --recipe-path recipe.json
+
+# Layer 2: Build dependencies.
+RUN cargo chef cook --release --recipe-path recipe.json -p prover-service
+
+# Layer 3: Build binary.
+COPY crates/ ./crates/
+COPY cairo/packages/garaga_zero/ ./cairo/packages/garaga_zero/
+RUN cargo build --release -p prover-service --bin prover-service && \
+    strip /app/target/release/prover-service
+
+# Stage 2: Build Python runtime dependencies.
+FROM python:${PYTHON_VERSION} AS python-deps
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y \
+    --no-install-recommends \
+    pkg-config \
+    libssl-dev \
+    build-essential \
+    gcc \
+    libgmp-dev \
+    && python3 -m pip install --no-cache-dir --upgrade pip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install only the Python packages required at runtime.
+RUN python3 -m pip install --no-cache-dir --no-compile --target /opt/python \
+    garaga==0.18.2 \
+    cairo-lang==0.13.5 \
+    protobuf==3.20.3 \
+    py_ecc
+
+# Stage 3: Runtime image.
+FROM python:${PYTHON_VERSION}
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y \
+    --no-install-recommends \
+    libssl3 \
+    libgmp10 \
+    && ln -s /usr/bin/python3 /usr/bin/python \
+    && rm -rf /var/lib/apt/lists/*
+
+# Runtime files required by prover.
+RUN mkdir -p /app/cairo/build
+COPY --from=python-deps /opt/python /opt/python
+COPY cairo/build/main.json /app/cairo/build/main.json
+COPY cairo/packages/garaga_zero/ ./cairo/packages/garaga_zero/
+
+ENV PYO3_PYTHON=python3
+ENV PYTHONPATH=/app/cairo/packages/garaga_zero:/opt/python
+
+COPY --from=builder /app/target/release/prover-service /app/bin/prover-service
+RUN chmod +x /app/bin/prover-service
+
+RUN mkdir -p /app/prover-data
+
+EXPOSE 3031
+
+ENTRYPOINT ["/app/bin/prover-service"]
+CMD ["--bind", "0.0.0.0:3031", "--data-dir", "/app/prover-data", "--program-path", "/app/cairo/build/main.json"]

@@ -15,3 +15,4 @@ thiserror.workspace = true
 tracing.workspace = true
 sonic-rs.workspace = true
 starknet-ff.workspace = true
+anyhow = "1.0.101"

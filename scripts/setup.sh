@@ -45,8 +45,19 @@ if ! python3.10 -m venv venv; then
     exit 1
 fi
 
-echo 'export PYTHONPATH="$PWD:$PWD/cairo/packages/garaga_zero:$PYTHONPATH"' >> venv/bin/activate
-echo 'unset PYTHONHOME' >> venv/bin/activate
+if ! grep -q "BANKAI_CAIRO_ENV" venv/bin/activate; then
+    cat <<'EOF' >> venv/bin/activate
+# BANKAI_CAIRO_ENV
+export PYTHONPATH="$PWD:$PWD/cairo/packages/garaga_zero:$PYTHONPATH"
+if [ -z "${PYTHONHOME:-}" ]; then
+    _BANKAI_PYHOME="$(python -c 'import sys; print(sys.base_prefix)' 2>/dev/null)"
+    if [ -n "$_BANKAI_PYHOME" ]; then
+        export PYTHONHOME="$_BANKAI_PYHOME"
+    fi
+    unset _BANKAI_PYHOME
+fi
+EOF
+fi
 source venv/bin/activate
 
 pip install uv

@@ -1,6 +1,6 @@
 use bankai_hints::hints::ethereum::{
-    write_committee_update_inputs, write_consensus_inputs, HINT_WRITE_COMMITTEE_UPDATE_INPUTS,
-    HINT_WRITE_CONSENSUS_INPUTS,
+    write_committee_update_inputs, write_consensus_inputs, write_op_stack_inputs,
+    HINT_WRITE_COMMITTEE_UPDATE_INPUTS, HINT_WRITE_CONSENSUS_INPUTS, HINT_WRITE_OP_STACK_INPUTS,
 };
 use bankai_hints::hints::get_hints as get_bankai_hints;
 use bankai_hints::hints::os::{
@@ -26,11 +26,11 @@ use cairo_vm_base::vm::cairo_vm::{
 use garaga_zero::hints::get_hints as get_garaga_zero_hints;
 use mmr_header_accumulator_hints::hints::get_hints as get_mmr_header_accumulator_hints;
 use mmr_header_accumulator_hints::hints::input::{
-    write_beacon_input, write_execution_input, HINT_WRITE_BEACON_INPUT, HINT_WRITE_EXECUTION_INPUT,
+    write_bankai_input, write_beacon_input, write_execution_input, HINT_WRITE_BANKAI_INPUT,
+    HINT_WRITE_BEACON_INPUT, HINT_WRITE_EXECUTION_INPUT,
 };
 use std::any::Any;
 use std::collections::HashMap;
-use stone_verifier_hints::hints::get_hints as get_stone_verifier_hints;
 
 pub struct CustomHintProcessor {
     hints: HashMap<String, HintImpl>,
@@ -53,7 +53,6 @@ impl CustomHintProcessor {
 
     fn hints() -> HashMap<String, HintImpl> {
         let mut hints = default_hint_mapping();
-        hints.extend(get_stone_verifier_hints());
         hints.extend(get_garaga_zero_hints());
         hints.extend(get_bankai_hints());
         hints.extend(get_mmr_header_accumulator_hints());
@@ -90,6 +89,9 @@ impl HintProcessorLogic for CustomHintProcessor {
                 HINT_WRITE_COMMITTEE_UPDATE_INPUTS => {
                     write_committee_update_inputs(vm, exec_scopes, hpd, constants)
                 }
+                HINT_WRITE_OP_STACK_INPUTS => {
+                    write_op_stack_inputs(vm, exec_scopes, hpd, constants)
+                }
                 HINT_WRITE_INIT_DATA => write_init_data(vm, exec_scopes, hpd, constants),
                 HINT_PREVIOUS_BLOCK => write_previous_block(vm, exec_scopes, hpd, constants),
                 HINT_WRITE_MOCK_RECURSION_INPUTS => {
@@ -100,6 +102,7 @@ impl HintProcessorLogic for CustomHintProcessor {
                 HINT_WRITE_EXECUTION_INPUT => {
                     write_execution_input(vm, exec_scopes, hpd, constants)
                 }
+                HINT_WRITE_BANKAI_INPUT => write_bankai_input(vm, exec_scopes, hpd, constants),
                 _ => Err(HintError::UnknownHint(
                     hint_code.to_string().into_boxed_str(),
                 )),

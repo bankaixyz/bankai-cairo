@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use cairo_vm_base::{cairo_type::CairoType, types::felt::Felt};
+use cairo_vm_base::types::uint256::Uint256;
 use cairo_vm_base::vm::cairo_vm::hint_processor::builtin_hint_processor::builtin_hint_processor_definition::HintProcessorData;
 use cairo_vm_base::vm::cairo_vm::hint_processor::builtin_hint_processor::hint_utils::get_relocatable_from_var_name;
 use cairo_vm_base::vm::cairo_vm::vm::vm_core::VirtualMachine;
@@ -8,7 +9,8 @@ use cairo_vm_base::vm::cairo_vm::vm::errors::hint_errors::HintError;
 use cairo_vm_base::vm::cairo_vm::types::exec_scope::ExecutionScopes;
 use cairo_vm_base::vm::cairo_vm::Felt252;
 
-use crate::types::os::{BankaiBlockCairo, BankaiBlockInputsCairo};
+use crate::types::os::hash::compute_block_hash_keccak;
+use crate::types::os::{BankaiBlockCairo, BankaiBlockInputsCairo, BankaiBlockOutputCairo};
 
 pub const HINT_WRITE_INIT_DATA: &str = r#"write_init_data()"#;
 pub const HINT_PREVIOUS_BLOCK: &str = r#"write_previous_block()"#;
@@ -93,10 +95,22 @@ pub fn verify_block_result(
     hint_data: &HintProcessorData,
     _constants: &HashMap<String, Felt252>,
 ) -> Result<(), HintError> {
-    let exp_block = exec_scopes.get_ref::<BankaiBlockCairo>("output")?;
+    let exp_output = exec_scopes.get_ref::<BankaiBlockOutputCairo>("output")?;
+    let exp_block = &exp_output.block;
+    let exp_block_hash = &exp_output.block_hash;
+
     let block_ptr =
         get_relocatable_from_var_name("block", vm, &hint_data.ids_data, &hint_data.ap_tracking)?;
     let block = BankaiBlockCairo::from_memory(vm, block_ptr)?;
+    let block_hash_ptr = get_relocatable_from_var_name(
+        "block_hash",
+        vm,
+        &hint_data.ids_data,
+        &hint_data.ap_tracking,
+    )?;
+    let block_hash = Uint256::from_memory(vm, block_hash_ptr)?;
+    let computed_block_hash = compute_block_hash_keccak(&block);
+    let computed_expected_hash = compute_block_hash_keccak(exp_block);
 
     if block != *exp_block {
         println!("Output mismatch:");
@@ -104,6 +118,34 @@ pub fn verify_block_result(
         println!("Expected block: {exp_block:#?}");
         return Err(HintError::CustomHint(
             format!("Block mismatch: {block:#?} != {exp_block:#?}").into(),
+        ));
+    }
+
+    if block_hash != *exp_block_hash {
+        println!("Block hash output mismatch:");
+        println!("Block hash output: {block_hash:#?}");
+        println!("Expected block hash: {exp_block_hash:#?}");
+        return Err(HintError::CustomHint(
+            format!("Block hash mismatch: {block_hash:#?} != {exp_block_hash:#?}").into(),
+        ));
+    }
+
+    if block_hash != computed_block_hash {
+        println!("Computed block hash mismatch:");
+        println!("Block hash output: {block_hash:#?}");
+        println!("Computed hash from output block: {computed_block_hash:#?}");
+        return Err(HintError::CustomHint(
+            format!("Computed hash mismatch: {block_hash:#?} != {computed_block_hash:#?}").into(),
+        ));
+    }
+
+    if *exp_block_hash != computed_expected_hash {
+        println!("Expected block hash is inconsistent with expected block:");
+        println!("Expected block hash: {exp_block_hash:#?}");
+        println!("Computed hash from expected block: {computed_expected_hash:#?}");
+        return Err(HintError::CustomHint(
+            format!("Expected hash mismatch: {exp_block_hash:#?} != {computed_expected_hash:#?}")
+                .into(),
         ));
     }
 
