@@ -6,7 +6,12 @@ from starkware.cairo.common.cairo_builtins import (
 )
 from starkware.cairo.common.uint256 import Uint256
 
-from cairo.src.bankai_os.block import BankaiBlock, compute_block_hash, write_block, get_genesis_block
+from cairo.src.bankai_os.block import (
+    BankaiBlock,
+    compute_block_hash,
+    write_block,
+    get_genesis_block,
+)
 from cairo.src.light_clients.ethereum.lib import run as run_ethereum
 from cairo.src.bankai_os.config.config import get_config, Networks
 from cairo.src.bankai_os.recursion.mock import mock_verify_proof

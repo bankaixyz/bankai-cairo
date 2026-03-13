@@ -20,10 +20,7 @@ func get_empty_op_chains_root() -> (root: Uint256) {
 }
 
 func apply_updates{range_check_ptr, bitwise_ptr: BitwiseBuiltin*, keccak_ptr: felt*}(
-    updates: OpChainInput*,
-    n_remaining: felt,
-    current_root: Uint256,
-    max_index: felt,
+    updates: OpChainInput*, n_remaining: felt, current_root: Uint256, max_index: felt
 ) -> (new_root: Uint256, max_index: felt) {
     alloc_locals;
 
@@ -65,7 +62,6 @@ func apply_updates{range_check_ptr, bitwise_ptr: BitwiseBuiltin*, keccak_ptr: fe
     );
 }
 
-
 func run{
     output_ptr: felt*,
     pedersen_ptr: HashBuiltin*,
@@ -78,9 +74,7 @@ func run{
     mul_mod_ptr: ModBuiltin*,
     sha256_ptr: felt*,
     pow2_array: felt*,
-}(prev: OpChainsOutput) -> (
-    output: OpChainsOutput
-) {
+}(prev: OpChainsOutput) -> (output: OpChainsOutput) {
     alloc_locals;
 
     local op_inputs: OpChainsInput;

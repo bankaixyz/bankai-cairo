@@ -44,8 +44,12 @@ func compute_block_hash{range_check_ptr, bitwise_ptr: BitwiseBuiltin*, keccak_pt
     let (block_number_u256) = felt_to_uint256(value=block.block_number);
 
     let (beacon_slot_number_u256) = felt_to_uint256(value=block.ethereum.beacon.slot_number);
-    let (beacon_justified_height_u256) = felt_to_uint256(value=block.ethereum.beacon.justified_height);
-    let (beacon_finalized_height_u256) = felt_to_uint256(value=block.ethereum.beacon.finalized_height);
+    let (beacon_justified_height_u256) = felt_to_uint256(
+        value=block.ethereum.beacon.justified_height
+    );
+    let (beacon_finalized_height_u256) = felt_to_uint256(
+        value=block.ethereum.beacon.finalized_height
+    );
     let (beacon_num_signers_u256) = felt_to_uint256(value=block.ethereum.beacon.num_signers);
     let (beacon_mmr_root_poseidon_u256) = felt_to_uint256(
         value=block.ethereum.beacon.mmr_root_poseidon
@@ -57,7 +61,9 @@ func compute_block_hash{range_check_ptr, bitwise_ptr: BitwiseBuiltin*, keccak_pt
         value=block.ethereum.beacon.next_validator_root
     );
 
-    let (execution_block_number_u256) = felt_to_uint256(value=block.ethereum.execution.block_number);
+    let (execution_block_number_u256) = felt_to_uint256(
+        value=block.ethereum.execution.block_number
+    );
     let (execution_justified_height_u256) = felt_to_uint256(
         value=block.ethereum.execution.justified_height
     );

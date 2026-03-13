@@ -7,7 +7,6 @@ from src.core.keccak import keccak_uint256s_bigend
 
 from cairo.src.light_clients.op_stack.types import OpClientOutput
 
-
 func felt_to_uint256{range_check_ptr}(value: felt) -> (res: Uint256) {
     let (high, low) = split_felt(value);
     return (res=Uint256(low=low, high=high));

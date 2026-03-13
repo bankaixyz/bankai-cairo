@@ -5,7 +5,6 @@ from src.core.keccak import keccak_uint256_pair_bigend
 
 from cairo.src.utils.utils import felt_divmod
 
-
 func hash_merkle_path{range_check_ptr, bitwise_ptr: BitwiseBuiltin*, keccak_ptr: felt*}(
     path: Uint256*, path_len: felt, leaf: Uint256, index: felt
 ) -> (root: Uint256) {
