@@ -1,6 +1,5 @@
 use bankai_hints::hints::ethereum::{
-    write_committee_update_inputs, write_consensus_inputs,
-    write_op_stack_inputs,
+    write_committee_update_inputs, write_consensus_inputs, write_op_stack_inputs,
     HINT_WRITE_COMMITTEE_UPDATE_INPUTS, HINT_WRITE_CONSENSUS_INPUTS, HINT_WRITE_OP_STACK_INPUTS,
 };
 use bankai_hints::hints::get_hints as get_bankai_hints;
