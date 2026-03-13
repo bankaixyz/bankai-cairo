@@ -5,12 +5,13 @@ ARG PYTHON_VERSION=3.10-slim
 FROM python:${PYTHON_VERSION} AS builder
 
 RUN apt-get update && apt-get install -y \
+    --no-install-recommends \
     pkg-config \
-    libssl3 \
     libssl-dev \
     curl \
     build-essential \
-    && ln -s /usr/bin/python3 /usr/bin/python
+    && ln -s /usr/bin/python3 /usr/bin/python \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install Rust.
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
@@ -45,39 +46,51 @@ RUN cargo chef prepare --recipe-path recipe.json
 RUN cargo chef cook --release --recipe-path recipe.json -p prover-service
 
 # Layer 3: Build binary.
-COPY . .
-RUN cargo build --release -p prover-service --bin prover-service
+COPY crates/ ./crates/
+COPY cairo/packages/garaga_zero/ ./cairo/packages/garaga_zero/
+RUN cargo build --release -p prover-service --bin prover-service && \
+    strip /app/target/release/prover-service
 
-# Stage 2: Runtime image.
+# Stage 2: Build Python runtime dependencies.
+FROM python:${PYTHON_VERSION} AS python-deps
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y \
+    --no-install-recommends \
+    pkg-config \
+    libssl-dev \
+    build-essential \
+    gcc \
+    libgmp-dev \
+    && python3 -m pip install --no-cache-dir --upgrade pip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install only the Python packages required at runtime.
+RUN python3 -m pip install --no-cache-dir --no-compile --target /opt/python \
+    garaga==0.18.2 \
+    cairo-lang==0.13.5 \
+    protobuf==3.20.3 \
+    py_ecc
+
+# Stage 3: Runtime image.
 FROM python:${PYTHON_VERSION}
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y \
-    pkg-config \
+    --no-install-recommends \
     libssl3 \
-    libssl-dev \
-    git \
-    build-essential \
-    gcc \
-    libgmp-dev \
-    curl \
+    libgmp10 \
     && ln -s /usr/bin/python3 /usr/bin/python \
-    && pip install --no-cache-dir --force-reinstall uv
-
-# Install Python dependencies used by garaga/cairo runtime.
-COPY cairo/packages/garaga_zero/pyproject.toml ./cairo/packages/garaga_zero/pyproject.toml
-RUN uv pip compile cairo/packages/garaga_zero/pyproject.toml --output-file requirements.txt -q
-RUN uv pip install --no-cache-dir --force-reinstall --system -r requirements.txt
-RUN pip install --no-cache-dir --force-reinstall py_ecc
+    && rm -rf /var/lib/apt/lists/*
 
 # Runtime files required by prover.
-COPY crates/ ./crates/
-COPY cairo/src/ ./cairo/src/
-COPY cairo/build/ ./cairo/build/
+RUN mkdir -p /app/cairo/build
+COPY --from=python-deps /opt/python /opt/python
+COPY cairo/build/main.json /app/cairo/build/main.json
 COPY cairo/packages/garaga_zero/ ./cairo/packages/garaga_zero/
 
 ENV PYO3_PYTHON=python3
-ENV PYTHONPATH=/usr/local/lib/python3.10:/app/cairo/packages/garaga_zero:/usr/local/lib/python3.10/site-packages
+ENV PYTHONPATH=/app/cairo/packages/garaga_zero:/opt/python
 
 COPY --from=builder /app/target/release/prover-service /app/bin/prover-service
 RUN chmod +x /app/bin/prover-service

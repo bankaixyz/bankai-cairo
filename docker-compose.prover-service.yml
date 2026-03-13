@@ -7,6 +7,8 @@ services:
         PYTHON_VERSION: "3.10-slim"
     image: bankai/prover-service:local
     container_name: bankai-prover-service
+    env_file:
+      - .env.prover-service
     ports:
       - "3031:3031"
     volumes:
